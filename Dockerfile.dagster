@@ -13,8 +13,9 @@ COPY pyproject.toml uv.lock ./
 # Install dependencies (including dagster-webserver)
 RUN uv sync --frozen --no-dev
 
-# Copy dagster configuration
-COPY dagster.yaml workspace.yaml ./
+# Copy dagster configuration (rename for Docker)
+COPY dagster-docker.yaml dagster.yaml
+COPY workspace.yaml ./
 
 # The entrypoint will be overridden by docker-compose
 CMD ["uv", "run", "dagster-webserver", "-h", "0.0.0.0", "-p", "3000", "-w", "workspace.yaml"]
