@@ -1,168 +1,144 @@
 """Low-level functions for creating engine-related RDF triples."""
 
-from rdflib import Graph, Literal, Namespace, URIRef
-from rdflib.namespace import RDF, RDFS, XSD
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import RDF, RDFS
 
-from twinship_harmonisation.constants import TWINSHIP, TWINSHIP_IND
-from twinship_harmonisation.utils import sanitize_id
-
-
-def create_engine_uri(engine_id: str, namespace: str | None = None) -> URIRef:
-    """Create a URI for an engine individual.
-
-    Args:
-        engine_id: Unique identifier for the engine.
-        namespace: Optional namespace suffix (e.g., 'stena-tanker').
-
-    Returns:
-        URIRef for the engine.
-    """
-    if namespace:
-        base = Namespace(f"{TWINSHIP_IND}{namespace}/")
-    else:
-        base = TWINSHIP_IND
-    return base[sanitize_id(engine_id)]
+from twinship_harmonisation.constants import TWINSHIP
+from twinship_harmonisation.low_level.vessel_functions import (
+    add_optional_double,
+    create_uri,
+    get_type_uri,
+)
 
 
 def create_main_engine(
-    engine_uri: URIRef,
-    vessel_uri: URIRef | None = None,
+    namespace: str,
+    engine_id: str,
+    vessel_uri: URIRef,
     label: str | None = None,
-    power_max_kw: float | None = None,
-    shaft_power_max_kw: float | None = None,
-    shaft_speed_max_rpm: float | None = None,
+    types: list[str] | None = None,
     shaft_torque_max_knm: float | None = None,
-    is_two_stroke: bool = False,
-    is_four_stroke: bool = False,
-) -> Graph:
+    shaft_speed_max_rpm: float | None = None,
+    shaft_power_max_kw: float | None = None,
+    flowrate_max_kg_per_hr: float | None = None,
+    fuel_flow_temp_max_c: float | None = None,
+    inlet_air_pressure_max_hpa: float | None = None,
+    inlet_air_temp_max_c: float | None = None,
+    me_cooling_water_temp_max_c: float | None = None,
+    lt_cooling_seawater_1_temp_max_c: float | None = None,
+    lt_cooling_seawater_2_temp_max_c: float | None = None,
+    scavenger_air_rec_temp_max_c: float | None = None,
+) -> tuple[URIRef, Graph]:
     """Create RDF triples for a main engine system.
 
-    Args:
-        engine_uri: URI for the engine individual.
-        vessel_uri: Optional URI of the vessel this engine belongs to.
-        label: Optional human-readable label.
-        power_max_kw: Maximum engine power in kW.
-        shaft_power_max_kw: Maximum shaft power in kW.
-        shaft_speed_max_rpm: Maximum shaft speed in RPM.
-        shaft_torque_max_knm: Maximum shaft torque in kNm.
-        is_two_stroke: Whether this is a two-stroke engine.
-        is_four_stroke: Whether this is a four-stroke engine.
-
     Returns:
-        Graph containing the engine triples.
+        Tuple of (engine_uri, graph).
     """
     g = Graph()
+    engine_uri = create_uri(engine_id, namespace)
 
     # Type assertions
     g.add((engine_uri, RDF.type, TWINSHIP.MainEngineSystem))
-    if is_two_stroke:
-        g.add((engine_uri, RDF.type, TWINSHIP.TwoStroke))
-    if is_four_stroke:
-        g.add((engine_uri, RDF.type, TWINSHIP.FourStroke))
+    if types:
+        for type_name in types:
+            type_uri = get_type_uri(type_name)
+            if type_uri:
+                g.add((engine_uri, RDF.type, type_uri))
 
     # Relationship to vessel
-    if vessel_uri:
-        g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
-        g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
+    g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
+    g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
 
     # Label
     if label:
         g.add((engine_uri, RDFS.label, Literal(label)))
 
     # Data properties
-    if power_max_kw is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twPowerMaxInKW,
-                Literal(power_max_kw, datatype=XSD.double),
-            )
-        )
+    add_optional_double(g, engine_uri, TWINSHIP.twShaftTorqueMaxInKnm, shaft_torque_max_knm)
+    add_optional_double(g, engine_uri, TWINSHIP.twShaftSpeedMaxInRevPerMin, shaft_speed_max_rpm)
+    add_optional_double(g, engine_uri, TWINSHIP.twShaftPowerMaxInKW, shaft_power_max_kw)
+    add_optional_double(g, engine_uri, TWINSHIP.twFlowrateMaxInKgPerHr, flowrate_max_kg_per_hr)
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twFuelFlowTemperatureMaxInDegC, fuel_flow_temp_max_c
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twInletAirPressureMaxInHPa, inlet_air_pressure_max_hpa
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twInletAirTemperatureMaxInDegC, inlet_air_temp_max_c
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twMeCoolingWaterTemperatureMaxInDegC, me_cooling_water_temp_max_c
+    )
+    add_optional_double(
+        g,
+        engine_uri,
+        TWINSHIP.twLtCoolingSeawater1TemperatureMaxInDegC,
+        lt_cooling_seawater_1_temp_max_c,
+    )
+    add_optional_double(
+        g,
+        engine_uri,
+        TWINSHIP.twLtCoolingSeawater2TemperatureMaxInDegC,
+        lt_cooling_seawater_2_temp_max_c,
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twScavengerAirRecTemperatureMaxInDegC, scavenger_air_rec_temp_max_c
+    )
 
-    if shaft_power_max_kw is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twShaftPowerMaxInKW,
-                Literal(shaft_power_max_kw, datatype=XSD.double),
-            )
-        )
-
-    if shaft_speed_max_rpm is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twShaftSpeedMaxInRevPerMin,
-                Literal(shaft_speed_max_rpm, datatype=XSD.double),
-            )
-        )
-
-    if shaft_torque_max_knm is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twShaftTorqueMaxInKnm,
-                Literal(shaft_torque_max_knm, datatype=XSD.double),
-            )
-        )
-
-    return g
+    return engine_uri, g
 
 
 def create_auxiliary_engine(
-    engine_uri: URIRef,
-    vessel_uri: URIRef | None = None,
+    namespace: str,
+    engine_id: str,
+    vessel_uri: URIRef,
     label: str | None = None,
-    power_max_kw: float | None = None,
-    speed_rpm: float | None = None,
-    is_diesel: bool = True,
-) -> Graph:
+    types: list[str] | None = None,
+    diesel_engine_power_max_kw: float | None = None,
+    diesel_engine_speed_rpm: float | None = None,
+    generator_power_max_kw: float | None = None,
+    generator_speed_rpm: float | None = None,
+    auxiliary_do_mode: str | None = None,
+    fuel_rate_mass_net_kg_per_hr: float | None = None,
+) -> tuple[URIRef, Graph]:
     """Create RDF triples for an auxiliary engine system.
 
-    Args:
-        engine_uri: URI for the engine individual.
-        vessel_uri: Optional URI of the vessel this engine belongs to.
-        label: Optional human-readable label.
-        power_max_kw: Maximum engine power in kW.
-        speed_rpm: Engine speed in RPM.
-        is_diesel: Whether this is a diesel engine (default True).
-
     Returns:
-        Graph containing the engine triples.
+        Tuple of (engine_uri, graph).
     """
     g = Graph()
+    engine_uri = create_uri(engine_id, namespace)
 
     # Type assertions
     g.add((engine_uri, RDF.type, TWINSHIP.AuxiliaryEngineSystem))
-    if is_diesel:
-        g.add((engine_uri, RDF.type, TWINSHIP.DieselEngine))
+    if types:
+        for type_name in types:
+            type_uri = get_type_uri(type_name)
+            if type_uri:
+                g.add((engine_uri, RDF.type, type_uri))
 
     # Relationship to vessel
-    if vessel_uri:
-        g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
-        g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
+    g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
+    g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
 
     # Label
     if label:
         g.add((engine_uri, RDFS.label, Literal(label)))
 
     # Data properties
-    if power_max_kw is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twDieselEnginePowerMaxInKW,
-                Literal(power_max_kw, datatype=XSD.double),
-            )
-        )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twDieselEnginePowerMaxInKW, diesel_engine_power_max_kw
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twDieselEngineSpeedInRevPerMin, diesel_engine_speed_rpm
+    )
+    add_optional_double(g, engine_uri, TWINSHIP.twGeneratorPowerMaxInKW, generator_power_max_kw)
+    add_optional_double(g, engine_uri, TWINSHIP.twGeneratorSpeedInRevPerMin, generator_speed_rpm)
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twAuxiliaryFuelRateMassNetKgPerHr, fuel_rate_mass_net_kg_per_hr
+    )
 
-    if speed_rpm is not None:
-        g.add(
-            (
-                engine_uri,
-                TWINSHIP.twDieselEngineSpeedInRevPerMin,
-                Literal(speed_rpm, datatype=XSD.double),
-            )
-        )
+    # DO mode is a complex value, skip for now if it's a string like "[0, 1]"
 
-    return g
+    return engine_uri, g

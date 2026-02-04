@@ -11,6 +11,7 @@ from twinship_harmonisation.high_level import harmonise_vessel_data
 from twinship_harmonisation.utils import bind_namespaces
 
 
+# This allows the data_path to be configurable in the UI when the asset is invoked instead of being hardcoded.
 class VesselDataConfig(Config):
     """Configuration for vessel data asset."""
 
