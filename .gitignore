@@ -1,0 +1,49 @@
+# Python-generated files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+build/
+dist/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Dagster
+.dagster/
+storage/
+schedules/
+history/
+
+# Output
+output/
+*.ttl
+!shacl/*.ttl
+
+# Environment
+.env
+.env.local
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+.docker/
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,56 @@
+[project]
+name = "twinship-data-pipeline"
+version = "0.1.0"
+description = "Data processing pipeline for TwinShip maritime digital twin ontology"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "dagster>=1.12.13",
+    "dagster-docker>=0.28.13",
+    "dagster-postgres>=0.28.13",
+    "dagster-webserver>=1.12.13",
+    "pandas>=3.0.0",
+    "pyshacl>=0.31.0",
+    "rdflib>=7.5.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+    "ruff>=0.15.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["twinship_harmonisation", "dagster_pipeline"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # Pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["twinship_harmonisation", "dagster_pipeline"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.dagster]
+module_name = "dagster_pipeline"
