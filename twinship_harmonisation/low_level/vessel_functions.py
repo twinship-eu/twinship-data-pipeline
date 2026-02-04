@@ -48,7 +48,16 @@ def get_type_uri(type_name: str) -> URIRef | None:
         "SingleSpeed": TWINSHIP.SingleSpeed,
         "TISO": TWINSHIP.TISO,
         "PTO": TWINSHIP.PTO,
-        # Other
+        # PMS
+        "Pms": TWINSHIP.Pms,
+        # Emergency equipment
+        "EmergencyEquipment": TWINSHIP.EmergencyEquipment,
+        # Thrusters / Maneuvering
+        "Maneuvering": TWINSHIP.Maneuvering,
+        # Shaft generators
+        "ShaftGeneratorSystem": TWINSHIP.ShaftGeneratorSystem,
+        "RGShaftGenerator": TWINSHIP.RGShaftGenerator,
+        # Boiler
         "Boiler": TWINSHIP.Boiler,
     }
     return type_map.get(type_name)

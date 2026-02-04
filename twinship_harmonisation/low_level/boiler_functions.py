@@ -3,7 +3,7 @@
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS
 
-from twinship_harmonisation.constants import TWINSHIP
+from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
     create_uri,
@@ -36,10 +36,9 @@ def create_boiler(
             if type_uri and type_uri != TWINSHIP.Boiler:  # Avoid duplicate
                 g.add((boiler_uri, RDF.type, type_uri))
 
-    # Relationship to vessel (if provided)
+    # Relationship to vessel (if provided, using IDO partOf)
     if vessel_uri:
-        g.add((boiler_uri, TWINSHIP.componentOf, vessel_uri))
-        g.add((vessel_uri, TWINSHIP.hasComponent, boiler_uri))
+        g.add((boiler_uri, IDO.partOf, vessel_uri))
 
     # Label
     if label:

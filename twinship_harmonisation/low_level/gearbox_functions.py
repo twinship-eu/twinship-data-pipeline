@@ -3,7 +3,7 @@
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
 
-from twinship_harmonisation.constants import TWINSHIP
+from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
     add_optional_string,
@@ -30,17 +30,15 @@ def create_gearbox(
     g = Graph()
     gearbox_uri = create_uri(gearbox_id, namespace)
 
-    # Type assertions
-    g.add((gearbox_uri, RDF.type, TWINSHIP.GearboxSystem))
+    # Type assertions - only use specific subtypes from spreadsheet
     if types:
         for type_name in types:
             type_uri = get_type_uri(type_name)
             if type_uri:
                 g.add((gearbox_uri, RDF.type, type_uri))
 
-    # Relationship to vessel
-    g.add((gearbox_uri, TWINSHIP.componentOf, vessel_uri))
-    g.add((vessel_uri, TWINSHIP.hasComponent, gearbox_uri))
+    # Relationship to vessel (using IDO partOf)
+    g.add((gearbox_uri, IDO.partOf, vessel_uri))
 
     # Label
     if label:
