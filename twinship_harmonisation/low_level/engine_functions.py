@@ -1,11 +1,12 @@
 """Low-level functions for creating engine-related RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import RDF, RDFS
+from rdflib.namespace import RDF, RDFS, XSD
 
-from twinship_harmonisation.constants import TWINSHIP
+from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
+    add_optional_integer,
     create_uri,
     get_type_uri,
 )
@@ -28,6 +29,10 @@ def create_main_engine(
     lt_cooling_seawater_1_temp_max_c: float | None = None,
     lt_cooling_seawater_2_temp_max_c: float | None = None,
     scavenger_air_rec_temp_max_c: float | None = None,
+    common_do_mode: int | None = None,
+    common_fuel_mode: int | None = None,
+    fuel_consumption_total_mt: float | None = None,
+    power_propulsion_total_kw: float | None = None,
 ) -> tuple[URIRef, Graph]:
     """Create RDF triples for a main engine system.
 
@@ -45,9 +50,8 @@ def create_main_engine(
             if type_uri:
                 g.add((engine_uri, RDF.type, type_uri))
 
-    # Relationship to vessel
-    g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
-    g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
+    # Relationship to vessel (using IDO partOf)
+    g.add((engine_uri, IDO.partOf, vessel_uri))
 
     # Label
     if label:
@@ -85,6 +89,24 @@ def create_main_engine(
     add_optional_double(
         g, engine_uri, TWINSHIP.twScavengerAirRecTemperatureMaxInDegC, scavenger_air_rec_temp_max_c
     )
+    # Common DO mode - try to parse as int, default to -1 if complex string like '[0,1]'
+    if common_do_mode is not None:
+        try:
+            do_mode_int = int(common_do_mode)
+        except (ValueError, TypeError):
+            do_mode_int = -1
+        g.add((engine_uri, TWINSHIP.twCommonDOMode, Literal(do_mode_int, datatype=XSD.integer)))
+
+    # Common fuel mode - try to parse as int, default to -1 if complex string
+    if common_fuel_mode is not None:
+        try:
+            fuel_mode_int = int(common_fuel_mode)
+        except (ValueError, TypeError):
+            fuel_mode_int = -1
+        g.add((engine_uri, TWINSHIP.twCommonFuelMode, Literal(fuel_mode_int, datatype=XSD.integer)))
+
+    add_optional_double(g, engine_uri, TWINSHIP.twFuelConsumptionTotalInMT, fuel_consumption_total_mt)
+    add_optional_double(g, engine_uri, TWINSHIP.twPowerPropulsionTotalInKw, power_propulsion_total_kw)
 
     return engine_uri, g
 
@@ -118,9 +140,8 @@ def create_auxiliary_engine(
             if type_uri:
                 g.add((engine_uri, RDF.type, type_uri))
 
-    # Relationship to vessel
-    g.add((engine_uri, TWINSHIP.componentOf, vessel_uri))
-    g.add((vessel_uri, TWINSHIP.hasComponent, engine_uri))
+    # Relationship to vessel (using IDO partOf)
+    g.add((engine_uri, IDO.partOf, vessel_uri))
 
     # Label
     if label:
@@ -139,6 +160,12 @@ def create_auxiliary_engine(
         g, engine_uri, TWINSHIP.twAuxiliaryFuelRateMassNetKgPerHr, fuel_rate_mass_net_kg_per_hr
     )
 
-    # DO mode is a complex value, skip for now if it's a string like "[0, 1]"
+    # Auxiliary DO mode - try to parse as int, default to -1 if complex string
+    if auxiliary_do_mode is not None:
+        try:
+            do_mode_int = int(auxiliary_do_mode)
+        except (ValueError, TypeError):
+            do_mode_int = -1
+        g.add((engine_uri, TWINSHIP.twAuxiliaryDOMode, Literal(do_mode_int, datatype=XSD.integer)))
 
     return engine_uri, g

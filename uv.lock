@@ -1916,6 +1916,7 @@ dependencies = [
     { name = "pandas" },
     { name = "pyshacl" },
     { name = "rdflib" },
+    { name = "requests" },
 ]
 
 [package.dev-dependencies]
@@ -1934,6 +1935,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=3.0.0" },
     { name = "pyshacl", specifier = ">=0.31.0" },
     { name = "rdflib", specifier = ">=7.5.0" },
+    { name = "requests", specifier = ">=2.32.5" },
 ]
 
 [package.metadata.requires-dev]
