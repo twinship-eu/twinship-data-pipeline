@@ -1,0 +1,46 @@
+{
+  "vessel_id": "IMO-9876543",
+  "namespace": "example-vessel",
+  "vessel_label": "MV Example Ship",
+  "vessel_type": "RoPax",
+  "main_engines": [
+    {
+      "id": "ME-1",
+      "label": "Main Engine 1",
+      "power_max_kw": 12000,
+      "shaft_power_max_kw": 11500,
+      "shaft_speed_max_rpm": 500,
+      "shaft_torque_max_knm": 220,
+      "is_four_stroke": true,
+      "fuels": ["HFO", "MGO"]
+    },
+    {
+      "id": "ME-2",
+      "label": "Main Engine 2",
+      "power_max_kw": 12000,
+      "shaft_power_max_kw": 11500,
+      "shaft_speed_max_rpm": 500,
+      "shaft_torque_max_knm": 220,
+      "is_four_stroke": true,
+      "fuels": ["HFO", "MGO"]
+    }
+  ],
+  "auxiliary_engines": [
+    {
+      "id": "AE-1",
+      "label": "Auxiliary Engine 1",
+      "power_max_kw": 2000,
+      "speed_rpm": 720,
+      "is_diesel": true,
+      "fuels": ["MGO", "MDO"]
+    },
+    {
+      "id": "AE-2",
+      "label": "Auxiliary Engine 2",
+      "power_max_kw": 2000,
+      "speed_rpm": 720,
+      "is_diesel": true,
+      "fuels": ["MGO", "MDO"]
+    }
+  ]
+}

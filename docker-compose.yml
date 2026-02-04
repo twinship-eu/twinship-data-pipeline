@@ -1,0 +1,106 @@
+services:
+  # PostgreSQL for Dagster storage
+  postgresql:
+    image: postgres:15
+    container_name: twinship_postgresql
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+    volumes:
+      - postgresql_data:/var/lib/postgresql/data
+    networks:
+      - twinship_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dagster"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # User code container (gRPC server)
+  user_code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: twinship_user_code
+    image: twinship_user_code:latest
+    restart: always
+    environment:
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+      DAGSTER_POSTGRES_HOST: postgresql
+      DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+    networks:
+      - twinship_network
+    depends_on:
+      postgresql:
+        condition: service_healthy
+
+  # Dagster webserver
+  webserver:
+    build:
+      context: .
+      dockerfile: Dockerfile.dagster
+    container_name: twinship_webserver
+    entrypoint:
+      - uv
+      - run
+      - dagster-webserver
+      - -h
+      - "0.0.0.0"
+      - -p
+      - "3000"
+      - -w
+      - workspace.yaml
+    ports:
+      - "3000:3000"
+    environment:
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+      DAGSTER_POSTGRES_HOST: postgresql
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./output:/app/output
+    networks:
+      - twinship_network
+    depends_on:
+      - postgresql
+      - user_code
+
+  # Dagster daemon (schedules, sensors, run queue)
+  daemon:
+    build:
+      context: .
+      dockerfile: Dockerfile.dagster
+    container_name: twinship_daemon
+    entrypoint:
+      - uv
+      - run
+      - dagster-daemon
+      - run
+    restart: on-failure
+    environment:
+      DAGSTER_POSTGRES_USER: dagster
+      DAGSTER_POSTGRES_PASSWORD: dagster
+      DAGSTER_POSTGRES_DB: dagster
+      DAGSTER_POSTGRES_HOST: postgresql
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./output:/app/output
+    networks:
+      - twinship_network
+    depends_on:
+      - postgresql
+      - user_code
+
+volumes:
+  postgresql_data:
+
+networks:
+  twinship_network:
+    driver: bridge
