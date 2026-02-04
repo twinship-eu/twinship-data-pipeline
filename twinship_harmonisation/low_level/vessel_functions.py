@@ -4,73 +4,126 @@ from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
 
 from twinship_harmonisation.constants import TWINSHIP, TWINSHIP_IND
-from twinship_harmonisation.utils import sanitize_id
 
 
-def create_vessel_uri(vessel_id: str, namespace: str | None = None) -> URIRef:
-    """Create a URI for a vessel individual.
+def create_uri(entity_id: str, namespace: str) -> URIRef:
+    """Create a URI for an entity individual.
 
     Args:
-        vessel_id: Unique identifier for the vessel (e.g., IMO number).
-        namespace: Optional namespace suffix (e.g., 'stena-tanker').
+        entity_id: Unique identifier for the entity.
+        namespace: Namespace suffix (e.g., 'stena-tanker').
 
     Returns:
-        URIRef for the vessel.
+        URIRef for the entity.
     """
-    if namespace:
-        base = Namespace(f"{TWINSHIP_IND}{namespace}/")
-    else:
-        base = TWINSHIP_IND
-    return base[sanitize_id(vessel_id)]
+    base = Namespace(f"{TWINSHIP_IND}{namespace}/")
+    return base[entity_id]
+
+
+def get_type_uri(type_name: str) -> URIRef | None:
+    """Map a type name to its ontology class URI.
+
+    Args:
+        type_name: Type name from JSON (e.g., 'TwoStroke', 'CPP').
+
+    Returns:
+        URIRef for the class, or None if not recognized.
+    """
+    type_map = {
+        # Vessel types
+        "RoRo": TWINSHIP.RoRo,
+        "RoPax": TWINSHIP.RoPax,
+        "Tanker": TWINSHIP.Tanker,
+        # Engine types
+        "TwoStroke": TWINSHIP.TwoStroke,
+        "FourStroke": TWINSHIP.FourStroke,
+        "DieselEngine": TWINSHIP.DieselEngine,
+        "MechanicalConfiguration": TWINSHIP.MechanicalConfiguration,
+        # Propeller types
+        "CPP": TWINSHIP.CPP,
+        "FPP": TWINSHIP.FPP,
+        # Gearbox types
+        "DirectDrive": TWINSHIP.DirectDrive,
+        "Reduction": TWINSHIP.Reduction,
+        "SingleSpeed": TWINSHIP.SingleSpeed,
+        "TISO": TWINSHIP.TISO,
+        "PTO": TWINSHIP.PTO,
+        # Other
+        "Boiler": TWINSHIP.Boiler,
+    }
+    return type_map.get(type_name)
+
+
+def add_optional_double(
+    g: Graph,
+    subject: URIRef,
+    predicate: URIRef,
+    value: float | int | None,
+) -> None:
+    """Add an optional double-valued triple if value is not None."""
+    if value is not None:
+        g.add((subject, predicate, Literal(float(value), datatype=XSD.double)))
+
+
+def add_optional_integer(
+    g: Graph,
+    subject: URIRef,
+    predicate: URIRef,
+    value: int | None,
+) -> None:
+    """Add an optional integer-valued triple if value is not None."""
+    if value is not None:
+        g.add((subject, predicate, Literal(int(value), datatype=XSD.integer)))
+
+
+def add_optional_string(
+    g: Graph,
+    subject: URIRef,
+    predicate: URIRef,
+    value: str | None,
+) -> None:
+    """Add an optional string-valued triple if value is not None."""
+    if value is not None and value.strip():
+        g.add((subject, predicate, Literal(value, datatype=XSD.string)))
 
 
 def create_vessel(
-    vessel_uri: URIRef,
-    vessel_type: URIRef | None = None,
+    namespace: str,
+    vessel_id: str,
     label: str | None = None,
+    vessel_type: str | None = None,
     displacement_max_mt: float | None = None,
-    power_propulsion_total_kw: float | None = None,
-) -> Graph:
+    draft_aft_max_m: float | None = None,
+    draft_for_max_m: float | None = None,
+    draft_mid_port_max_m: float | None = None,
+    draft_mid_stbd_max_m: float | None = None,
+    depth_of_water_max_m: float | None = None,
+) -> tuple[URIRef, Graph]:
     """Create RDF triples for a vessel.
 
-    Args:
-        vessel_uri: URI for the vessel individual.
-        vessel_type: Optional vessel type class (e.g., TWINSHIP.RoPax).
-        label: Optional human-readable label.
-        displacement_max_mt: Maximum displacement in metric tons.
-        power_propulsion_total_kw: Total propulsion power in kW.
-
     Returns:
-        Graph containing the vessel triples.
+        Tuple of (vessel_uri, graph).
     """
     g = Graph()
+    vessel_uri = create_uri(vessel_id, namespace)
 
     # Type assertions
     g.add((vessel_uri, RDF.type, TWINSHIP.VesselSystem))
     if vessel_type:
-        g.add((vessel_uri, RDF.type, vessel_type))
+        type_uri = get_type_uri(vessel_type)
+        if type_uri:
+            g.add((vessel_uri, RDF.type, type_uri))
 
     # Label
     if label:
         g.add((vessel_uri, RDFS.label, Literal(label)))
 
     # Data properties
-    if displacement_max_mt is not None:
-        g.add(
-            (
-                vessel_uri,
-                TWINSHIP.twDisplacementMaxInMT,
-                Literal(displacement_max_mt, datatype=XSD.double),
-            )
-        )
+    add_optional_double(g, vessel_uri, TWINSHIP.twDisplacementMaxInMT, displacement_max_mt)
+    add_optional_double(g, vessel_uri, TWINSHIP.twVesselDraftAftMaxInM, draft_aft_max_m)
+    add_optional_double(g, vessel_uri, TWINSHIP.twVesselDraftForMaxInM, draft_for_max_m)
+    add_optional_double(g, vessel_uri, TWINSHIP.twVesselDraftMidPortMaxInM, draft_mid_port_max_m)
+    add_optional_double(g, vessel_uri, TWINSHIP.twVesselDraftMidStbdMaxInM, draft_mid_stbd_max_m)
+    add_optional_double(g, vessel_uri, TWINSHIP.twVesselDepthOfWaterMaxInM, depth_of_water_max_m)
 
-    if power_propulsion_total_kw is not None:
-        g.add(
-            (
-                vessel_uri,
-                TWINSHIP.twPowerPropulsionTotalInKw,
-                Literal(power_propulsion_total_kw, datatype=XSD.double),
-            )
-        )
-
-    return g
+    return vessel_uri, g

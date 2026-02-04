@@ -27,24 +27,51 @@ uv sync --dev
 
 ### Python Library
 
-```python
-from twinship_harmonisation.high_level import harmonise_vessel_data
+Process a single vessel JSON file:
 
-g = harmonise_vessel_data(
-    vessel_id="IMO-1234567",
-    namespace="my-vessel",
-    vessel_label="MV Example",
-    vessel_type="RoPax",
-    main_engines=[
+```python
+from twinship_harmonisation import harmonise_vessel_file
+
+g = harmonise_vessel_file("data/grimaldi.json")
+print(g.serialize(format="turtle"))
+```
+
+Process all vessel files in a directory:
+
+```python
+from twinship_harmonisation import harmonise_all_vessels
+
+g = harmonise_all_vessels("data")
+g.serialize(destination="output/all_vessels.ttl", format="turtle")
+```
+
+Process vessel data from a dictionary:
+
+```python
+from twinship_harmonisation import harmonise_vessel_data
+
+data = {
+    "namespace": "test",
+    "operator": "Test Operator",
+    "vessel": {
+        "id": "IMO-1234567",
+        "label": "Test Vessel",
+        "type": "RoPax",
+    },
+    "main_engines": [
         {
             "id": "ME-1",
-            "label": "Main Engine 1",
-            "power_max_kw": 12000,
+            "name": "Main Engine 1",
+            "types": ["TwoStroke"],
             "fuels": ["HFO", "MGO"],
         }
     ],
-)
-
+    "auxiliary_engines": [],
+    "propellers": [],
+    "gearboxes": [],
+    "boilers": [],
+}
+g = harmonise_vessel_data(data)
 print(g.serialize(format="turtle"))
 ```
 
@@ -72,7 +99,6 @@ Access the Dagster webserver at http://localhost:3000.
 twinship-data-pipeline/
 ├── twinship_harmonisation/     # Python library
 │   ├── low_level/              # Primitive triple builders
-│   ├── mid_level/              # Ontology design patterns
 │   └── high_level/             # User-facing workflows
 ├── dagster_pipeline/           # Dagster assets and jobs
 │   ├── assets/                 # Data transformation assets
@@ -82,6 +108,30 @@ twinship-data-pipeline/
 ├── tests/                      # Unit tests
 └── docker-compose.yml          # Docker deployment
 ```
+
+## Data Format
+
+The harmonisation library expects JSON files with the following structure:
+
+```json
+{
+  "namespace": "grimaldi",
+  "operator": "Grimaldi",
+  "vessel": {
+    "id": "GRI-RR-1",
+    "label": "GRIMALDI EUROCARGO GENOVA RORO CARGO SHIP",
+    "type": "RoRo",
+    "displacement_max_mt": 25000
+  },
+  "main_engines": [...],
+  "auxiliary_engines": [...],
+  "propellers": [...],
+  "gearboxes": [...],
+  "boilers": [...]
+}
+```
+
+Use `scripts/extract_vessel_data.py` to extract data from the TwinShip Excel spreadsheet into this format.
 
 ## Testing
 

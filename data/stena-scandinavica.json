@@ -1,0 +1,275 @@
+{
+  "namespace": "stena-scandinavica",
+  "operator": "Stena Line",
+  "vessel": {
+    "id": "STL-RP-1",
+    "label": "STENA SCANDINAVICA PASSENGER AND RORO CARGO SHIP",
+    "type": "RoPax",
+    "displacement_max_mt": null,
+    "draft_aft_max_m": 7.21199989318847,
+    "draft_for_max_m": 7.2350001335144
+  },
+  "main_engines": [
+    {
+      "id": "STL-ME-1",
+      "name": "STENALINE ROPAX MAIN ENGINE 1",
+      "types": [
+        "FourStroke",
+        "MechanicalConfiguration"
+      ],
+      "shaft_torque_max_knm": null,
+      "shaft_speed_max_rpm": 550,
+      "shaft_power_max_kw": 6480,
+      "flowrate_max_kg_per_hr": 1186,
+      "fuel_flow_temp_max_c": null,
+      "inlet_air_pressure_max_hpa": 1000,
+      "inlet_air_temp_max_c": 45,
+      "me_cooling_water_temp_max_c": 32,
+      "lt_cooling_seawater_1_temp_max_c": null,
+      "lt_cooling_seawater_2_temp_max_c": null,
+      "scavenger_air_rec_temp_max_c": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-1"
+    },
+    {
+      "id": "STL-ME-2",
+      "name": "STENALINE ROPAX MAIN ENGINE 2",
+      "types": [
+        "FourStroke",
+        "MechanicalConfiguration"
+      ],
+      "shaft_torque_max_knm": null,
+      "shaft_speed_max_rpm": 550,
+      "shaft_power_max_kw": 6480,
+      "flowrate_max_kg_per_hr": 1186,
+      "fuel_flow_temp_max_c": null,
+      "inlet_air_pressure_max_hpa": 1000,
+      "inlet_air_temp_max_c": 45,
+      "me_cooling_water_temp_max_c": 32,
+      "lt_cooling_seawater_1_temp_max_c": null,
+      "lt_cooling_seawater_2_temp_max_c": null,
+      "scavenger_air_rec_temp_max_c": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-1"
+    },
+    {
+      "id": "STL-ME-3",
+      "name": "STENALINE ROPAX MAIN ENGINE 3",
+      "types": [
+        "FourStroke",
+        "MechanicalConfiguration"
+      ],
+      "shaft_torque_max_knm": null,
+      "shaft_speed_max_rpm": 550,
+      "shaft_power_max_kw": 6480,
+      "flowrate_max_kg_per_hr": 1186,
+      "fuel_flow_temp_max_c": null,
+      "inlet_air_pressure_max_hpa": 1000,
+      "inlet_air_temp_max_c": 45,
+      "me_cooling_water_temp_max_c": 32,
+      "lt_cooling_seawater_1_temp_max_c": null,
+      "lt_cooling_seawater_2_temp_max_c": null,
+      "scavenger_air_rec_temp_max_c": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-2"
+    },
+    {
+      "id": "STL-ME-4",
+      "name": "STENALINE ROPAX MAIN ENGINE 4",
+      "types": [
+        "FourStroke",
+        "MechanicalConfiguration"
+      ],
+      "shaft_torque_max_knm": null,
+      "shaft_speed_max_rpm": 550,
+      "shaft_power_max_kw": 6480,
+      "flowrate_max_kg_per_hr": 1186,
+      "fuel_flow_temp_max_c": null,
+      "inlet_air_pressure_max_hpa": 1000,
+      "inlet_air_temp_max_c": 45,
+      "me_cooling_water_temp_max_c": 32,
+      "lt_cooling_seawater_1_temp_max_c": null,
+      "lt_cooling_seawater_2_temp_max_c": null,
+      "scavenger_air_rec_temp_max_c": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-2"
+    }
+  ],
+  "auxiliary_engines": [
+    {
+      "id": "STL-AU-1",
+      "name": "STENALINE ROPAX AUXILIARY ENGINE 1",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": 1280,
+      "diesel_engine_speed_rpm": 900,
+      "generator_power_max_kw": 1200,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "pms_id": "PMS-STL-1"
+    },
+    {
+      "id": "STL-AU-2",
+      "name": "STENALINE ROPAX AUXILIARY ENGINE 2",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": 1280,
+      "diesel_engine_speed_rpm": 900,
+      "generator_power_max_kw": 1200,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "pms_id": "PMS-STL-1"
+    },
+    {
+      "id": "STL-AU-3",
+      "name": "STENALINE ROPAX AUXILIARY ENGINE 3",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": 1280,
+      "diesel_engine_speed_rpm": 900,
+      "generator_power_max_kw": 1200,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "pms_id": "PMS-STL-1"
+    },
+    {
+      "id": "STL-AU-4",
+      "name": "STENALINE ROPAX AUXILIARY ENGINE 4",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": 1280,
+      "diesel_engine_speed_rpm": 900,
+      "generator_power_max_kw": 1200,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "STL-RP-1",
+      "pms_id": "PMS-STL-1"
+    }
+  ],
+  "propellers": [
+    {
+      "id": "CPP-STL-1",
+      "name": "STENALINE ROPAX VARIABLE PITCH PROPELLER",
+      "types": [
+        "CPP"
+      ],
+      "diameter_mm": null,
+      "blades": 4,
+      "pitch_diameter_ratio": null,
+      "pitch_max_percentage": null,
+      "expanded_area_ratio_percentage": null,
+      "hub_ratio": null,
+      "skew_angle_degree": null,
+      "efficiency": null,
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-1"
+    },
+    {
+      "id": "CPP-STL-2",
+      "name": "STENALINE ROPAX VARIABLE PITCH PROPELLER",
+      "types": [
+        "CPP"
+      ],
+      "diameter_mm": null,
+      "blades": 4,
+      "pitch_diameter_ratio": null,
+      "pitch_max_percentage": null,
+      "expanded_area_ratio_percentage": null,
+      "hub_ratio": null,
+      "skew_angle_degree": null,
+      "efficiency": null,
+      "vessel_id": "STL-RP-1",
+      "gearbox_id": "RG-STL-2"
+    }
+  ],
+  "gearboxes": [
+    {
+      "id": "RG-STL-1",
+      "name": "STENALINE ROPAX MAIN ENGINES REDUCTION GEARBOX",
+      "types": [
+        "TISO",
+        "Reduction",
+        "SingleSpeed",
+        "PTO"
+      ],
+      "ratio": "3.57-6:1 (Approx)",
+      "efficiency": null,
+      "shaft_generator": "YES",
+      "vessel_id": "STL-RP-1",
+      "engine_id": "[STL-ME-1, STL-ME-2]",
+      "propeller_id": "CPP-STL-1"
+    },
+    {
+      "id": "RG-STL-2",
+      "name": "STENALINE ROPAX MAIN ENGINES REDUCTION GEARBOX",
+      "types": [
+        "TISO",
+        "Reduction",
+        "SingleSpeed",
+        "PTO"
+      ],
+      "ratio": "3.57-6:1 (Approx)",
+      "efficiency": null,
+      "shaft_generator": "YES",
+      "vessel_id": "STL-RP-1",
+      "engine_id": "[STL-ME-3, STL-ME-4]",
+      "propeller_id": "CPP-STL-2"
+    }
+  ],
+  "boilers": []
+}

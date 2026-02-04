@@ -1,0 +1,161 @@
+{
+  "namespace": "grimaldi",
+  "operator": "Grimaldi",
+  "vessel": {
+    "id": "GRI-RR-1",
+    "label": "GRIMALDI EUROCARGO GENOVA RORO CARGO SHIP",
+    "type": "RoRo",
+    "displacement_max_mt": 25000,
+    "draft_aft_max_m": 7.8,
+    "draft_for_max_m": 7.1
+  },
+  "main_engines": [
+    {
+      "id": "GRI-ME-1",
+      "name": "GARIMALDI RORO MAIN ENGINE 1",
+      "types": [
+        "TwoStroke",
+        "MechanicalConfiguration"
+      ],
+      "shaft_torque_max_knm": 1402.29,
+      "shaft_speed_max_rpm": 123,
+      "shaft_power_max_kw": 20070,
+      "flowrate_max_kg_per_hr": 3494.17,
+      "fuel_flow_temp_max_c": 91.2379441,
+      "inlet_air_pressure_max_hpa": null,
+      "inlet_air_temp_max_c": null,
+      "me_cooling_water_temp_max_c": null,
+      "lt_cooling_seawater_1_temp_max_c": null,
+      "lt_cooling_seawater_2_temp_max_c": null,
+      "scavenger_air_rec_temp_max_c": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "GRI-RR-1",
+      "gearbox_id": "DD-GRI-1"
+    }
+  ],
+  "auxiliary_engines": [
+    {
+      "id": "GRI-AU-1",
+      "name": "GARIMALDI RORO AUXILIARY ENGINE 1",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": null,
+      "diesel_engine_speed_rpm": null,
+      "generator_power_max_kw": 1630,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "GRI-RR-1",
+      "pms_id": "PMS-GRI-1"
+    },
+    {
+      "id": "GRI-AU-2",
+      "name": "GARIMALDI RORO AUXILIARY ENGINE 2",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": null,
+      "diesel_engine_speed_rpm": null,
+      "generator_power_max_kw": 1630,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "GRI-RR-1",
+      "pms_id": "PMS-GRI-1"
+    },
+    {
+      "id": "GRI-AU-3",
+      "name": "GARIMALDI RORO AUXILIARY ENGINE 3",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": null,
+      "diesel_engine_speed_rpm": null,
+      "generator_power_max_kw": 1630,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "GRI-RR-1",
+      "pms_id": "PMS-GRI-1"
+    },
+    {
+      "id": "GRI-AU-4",
+      "name": "GARIMALDI RORO AUXILIARY ENGINE 4",
+      "types": [
+        "FourStroke",
+        "DieselEngine"
+      ],
+      "diesel_engine_power_max_kw": null,
+      "diesel_engine_speed_rpm": null,
+      "generator_power_max_kw": 1630,
+      "generator_speed_rpm": 900,
+      "auxiliary_do_mode": null,
+      "fuel_rate_mass_net_kg_per_hr": null,
+      "fuels": [
+        "HFO",
+        "MGO",
+        "MDO"
+      ],
+      "vessel_id": "GRI-RR-1",
+      "pms_id": "PMS-GRI-1"
+    }
+  ],
+  "propellers": [
+    {
+      "id": "CPP-GRI-1",
+      "name": "GRIMALDI RORO VARIABLE PITCH PROPELLER",
+      "types": [
+        "CPP"
+      ],
+      "diameter_mm": 6100,
+      "blades": 4,
+      "pitch_diameter_ratio": null,
+      "pitch_max_percentage": 91.999625,
+      "expanded_area_ratio_percentage": null,
+      "hub_ratio": null,
+      "skew_angle_degree": null,
+      "efficiency": null,
+      "vessel_id": "GRI-RR-1",
+      "gearbox_id": "DD-GRI-1"
+    }
+  ],
+  "gearboxes": [
+    {
+      "id": "DD-GRI-1",
+      "name": "GRIMALDO RORO MAIN ENGINE DIRECT DRIVE",
+      "types": [
+        "DirectDrive"
+      ],
+      "ratio": "1:1 (No Gear)",
+      "efficiency": null,
+      "shaft_generator": "NO",
+      "vessel_id": "GRI-RR-1",
+      "engine_id": "GRI-ME-1",
+      "propeller_id": "CPP-GRI-1"
+    }
+  ],
+  "boilers": []
+}

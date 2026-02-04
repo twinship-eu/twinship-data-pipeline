@@ -9,6 +9,7 @@ dependencies = [
     "dagster-docker>=0.28.13",
     "dagster-postgres>=0.28.13",
     "dagster-webserver>=1.12.13",
+    "openpyxl>=3.1.5",
     "pandas>=3.0.0",
     "pyshacl>=0.31.0",
     "rdflib>=7.5.0",
