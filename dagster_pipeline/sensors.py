@@ -1,43 +1,40 @@
-"""Sensors for automatic operator discovery.
+"""Sensors for automatic vessel discovery.
 
-The operator_discovery_sensor monitors the spreadsheet_data asset and
-automatically registers new operators as dynamic partitions.
+The vessel_discovery_sensor monitors the spreadsheet_data asset and
+automatically registers new vessels as dynamic partitions.
 
 Workflow:
-1. Materialize spreadsheet_data (discovers operators from the Excel file)
-2. Sensor runs and registers discovered operators as partitions
-3. Partitioned assets can now be materialized for each operator
+1. Materialize spreadsheet_data (discovers vessels from the Excel file)
+2. Sensor runs and registers discovered vessels as partitions
+3. Partitioned assets can now be materialized for each vessel
 """
 
 from dagster import (
+    AssetKey,
     SensorEvaluationContext,
     SensorResult,
     SkipReason,
     sensor,
 )
 
-from dagster_pipeline.assets.harmonisation import operator_partitions_def
+from dagster_pipeline.assets.harmonisation import vessel_partitions_def
 
 
 @sensor(
     minimum_interval_seconds=30,
-    description="Discovers operators from spreadsheet_data and registers them as partitions",
+    description="Discovers vessels from spreadsheet_data and registers them as partitions",
 )
-def operator_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | SkipReason:
-    """Discover operators from the spreadsheet and register them as dynamic partitions.
+def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | SkipReason:
+    """Discover vessels from the spreadsheet and register them as dynamic partitions.
 
     This sensor checks the spreadsheet_data asset's latest materialization and
-    registers any new operators as dynamic partitions. This allows the partitioned
-    assets to run for each discovered operator.
+    registers any new vessels as dynamic partitions. This allows the partitioned
+    assets to run for each discovered vessel.
     """
     instance = context.instance
 
     # Get the latest materialization of spreadsheet_data
-    from dagster import AssetKey
-
     asset_key = AssetKey("spreadsheet_data")
-
-    # Get latest materialization event
     events = instance.get_latest_materialization_event(asset_key)
 
     if events is None:
@@ -46,42 +43,40 @@ def operator_discovery_sensor(context: SensorEvaluationContext) -> SensorResult 
     # Get the metadata from the materialization
     metadata = events.asset_materialization.metadata if events.asset_materialization else {}
 
-    # Look for operators in metadata
-    operators_meta = metadata.get("operators")
-    if operators_meta is None:
-        return SkipReason("No operators metadata found in spreadsheet_data")
+    # Look for vessels in metadata
+    vessels_meta = metadata.get("vessels")
+    if vessels_meta is None:
+        return SkipReason("No vessels metadata found in spreadsheet_data")
 
-    # Parse operators from metadata
+    # Parse vessels from metadata
     try:
-        # The metadata value should contain the operator namespaces
-        operators_text = operators_meta.text if hasattr(operators_meta, "text") else str(operators_meta)
-        # Parse comma-separated list
-        discovered_operators = [op.strip() for op in operators_text.split(",") if op.strip()]
+        vessels_text = vessels_meta.text if hasattr(vessels_meta, "text") else str(vessels_meta)
+        discovered_vessels = [v.strip() for v in vessels_text.split(",") if v.strip()]
     except Exception as e:
-        return SkipReason(f"Could not parse operators metadata: {e}")
+        return SkipReason(f"Could not parse vessels metadata: {e}")
 
-    if not discovered_operators:
-        return SkipReason("No operators discovered from spreadsheet")
+    if not discovered_vessels:
+        return SkipReason("No vessels discovered from spreadsheet")
 
     # Get existing partitions
     existing_partitions = set(
-        instance.get_dynamic_partitions(operator_partitions_def.name)
+        instance.get_dynamic_partitions(vessel_partitions_def.name)
     )
 
-    # Find new operators to register
-    new_operators = [op for op in discovered_operators if op not in existing_partitions]
+    # Find new vessels to register
+    new_vessels = [v for v in discovered_vessels if v not in existing_partitions]
 
-    if not new_operators:
+    if not new_vessels:
         return SkipReason(
-            f"All {len(discovered_operators)} operators already registered: {discovered_operators}"
+            f"All {len(discovered_vessels)} vessels already registered: {discovered_vessels}"
         )
 
     # Register new partitions
-    context.log.info(f"Registering {len(new_operators)} new operators: {new_operators}")
+    context.log.info(f"Registering {len(new_vessels)} new vessels: {new_vessels}")
 
     return SensorResult(
         dynamic_partitions_requests=[
-            operator_partitions_def.build_add_request(new_operators)
+            vessel_partitions_def.build_add_request(new_vessels)
         ],
         run_requests=[],  # Don't auto-trigger runs, let user decide
     )

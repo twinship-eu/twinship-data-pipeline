@@ -144,11 +144,11 @@ def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
     return sheets
 
 
-def discover_operators_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, dict]:
-    """Discover all operator prefixes from entity IDs in the spreadsheet.
+def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, dict]:
+    """Discover all vessels from entity IDs in the spreadsheet.
 
     Only uses Vessel and Main_Engine IDs for discovery since they have
-    consistent format (operator-type-number like "GRI-RR-1", "STL-ME-1").
+    consistent format (prefix-type-number like "GRI-RR-1", "STL-ME-1").
 
     Returns a dict mapping namespace to {prefix, name}.
     """
