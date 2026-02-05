@@ -3,15 +3,15 @@
 Pipeline structure:
     spreadsheet_data (non-partitioned)
            │
-           ├─► sensor discovers operators and registers partitions
+           ├─► sensor discovers vessels and registers partitions
            ▼
-    extracted_vessel_json (partitioned by operator)
+    extracted_vessel_json (partitioned by vessel)
            │
            ▼
-    vessel_rdf_graph (partitioned by operator)
+    vessel_rdf_graph (partitioned by vessel)
            │
            ▼
-    validated_vessel_ttl (partitioned by operator)
+    validated_vessel_ttl (partitioned by vessel)
            │
            ▼
     combined_vessel_graph (non-partitioned)
@@ -21,8 +21,8 @@ Pipeline structure:
 
 Workflow:
 1. Materialize spreadsheet_data first
-2. Enable the operator_discovery_sensor (Automation → Sensors)
-3. The sensor registers discovered operators as partitions
+2. Enable the vessel_discovery_sensor (Automation → Sensors)
+3. The sensor registers discovered vessels as partitions
 4. Run the partitioned assets via backfill
 """
 
@@ -37,7 +37,7 @@ from dagster_pipeline.assets.harmonisation import (
     vessel_rdf_graph,
 )
 from dagster_pipeline.resources import shacl_validator
-from dagster_pipeline.sensors import operator_discovery_sensor
+from dagster_pipeline.sensors import vessel_discovery_sensor
 
 # Job to run the full pipeline
 full_pipeline_job = define_asset_job(
@@ -81,6 +81,6 @@ defs = Definitions(
         graphdb_upload,
     ],
     jobs=[full_pipeline_job, extraction_job, harmonisation_job, output_job],
-    sensors=[operator_discovery_sensor],
+    sensors=[vessel_discovery_sensor],
     resources={"shacl_validator": shacl_validator},
 )

@@ -21,7 +21,7 @@ from dagster import (
 from rdflib import Graph
 
 from dagster_pipeline.extraction import (
-    discover_operators_from_sheets,
+    discover_vessels_from_sheets,
     extract_vessel_for_operator,
     load_spreadsheet_sheets,
 )
@@ -33,7 +33,7 @@ from twinship_harmonisation.utils import bind_namespaces
 # Partitions Definition
 # =============================================================================
 
-operator_partitions_def = DynamicPartitionsDefinition(name="operators")
+vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 
 
 # =============================================================================
@@ -68,10 +68,10 @@ class CombinedGraphConfig(Config):
 
 @asset(
     group_name="extraction",
-    description="Load the TwinShip Excel spreadsheet and discover operators",
+    description="Load the TwinShip Excel spreadsheet and discover vessels",
 )
 def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) -> dict:
-    """Load all sheets from the TwinShip spreadsheet and discover operators."""
+    """Load all sheets from the TwinShip spreadsheet and discover vessels."""
     spreadsheet_path = Path(config.spreadsheet_path)
     if not spreadsheet_path.exists():
         raise FileNotFoundError(f"Spreadsheet not found: {spreadsheet_path}")
@@ -80,39 +80,39 @@ def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) 
     for name, df in sheets.items():
         context.log.info(f"Loaded {name}: {len(df)} rows")
 
-    operators = discover_operators_from_sheets(sheets)
-    context.log.info(f"Discovered {len(operators)} operators: {list(operators.keys())}")
+    vessels = discover_vessels_from_sheets(sheets)
+    context.log.info(f"Discovered {len(vessels)} vessels: {list(vessels.keys())}")
 
     context.add_output_metadata({
-        "operators": MetadataValue.text(", ".join(operators.keys())),
-        "operator_count": MetadataValue.int(len(operators)),
+        "vessels": MetadataValue.text(", ".join(vessels.keys())),
+        "vessel_count": MetadataValue.int(len(vessels)),
         "sheet_count": MetadataValue.int(len(sheets)),
     })
 
-    return {"sheets": sheets, "operators": operators}
+    return {"sheets": sheets, "vessels": vessels}
 
 
 @asset(
     group_name="extraction",
-    partitions_def=operator_partitions_def,
-    description="Extract vessel JSON for a specific operator from spreadsheet",
+    partitions_def=vessel_partitions_def,
+    description="Extract vessel JSON for a specific vessel from spreadsheet",
 )
 def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict) -> dict:
-    """Extract vessel data for the current operator partition."""
+    """Extract vessel data for the current vessel partition."""
     namespace = context.partition_key
     sheets = spreadsheet_data["sheets"]
-    operators = spreadsheet_data["operators"]
+    vessels = spreadsheet_data["vessels"]
 
-    if namespace not in operators:
-        context.log.error(f"Unknown operator namespace: {namespace}")
+    if namespace not in vessels:
+        context.log.error(f"Unknown vessel namespace: {namespace}")
         return {}
 
-    operator_info = operators[namespace]
+    vessel_info = vessels[namespace]
     data = extract_vessel_for_operator(
         sheets,
-        operator_info["prefix"],
+        vessel_info["prefix"],
         namespace,
-        operator_info["name"],
+        vessel_info["name"],
     )
 
     vessel_id = data.get("vessel", {}).get("id", "unknown")
@@ -135,8 +135,8 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
 
 @asset(
     group_name="harmonisation",
-    partitions_def=operator_partitions_def,
-    description="Harmonise vessel JSON to RDF graph for a specific operator",
+    partitions_def=vessel_partitions_def,
+    description="Harmonise vessel JSON to RDF graph for a specific vessel",
 )
 def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict) -> Graph:
     """Convert extracted vessel data to RDF triples."""
@@ -158,8 +158,8 @@ def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict
 
 @asset(
     group_name="validation",
-    partitions_def=operator_partitions_def,
-    description="Validate RDF graph and write TTL file for a specific operator",
+    partitions_def=vessel_partitions_def,
+    description="Validate RDF graph and write TTL file for a specific vessel",
 )
 def validated_vessel_ttl(
     context: AssetExecutionContext,
