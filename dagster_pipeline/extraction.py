@@ -159,6 +159,7 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
         "Main_Engine": "TWINSHIP-MAIN-ENGINE-ID",
     }
 
+    # Look through specified sheets and columns to find all unique operator prefixes
     for sheet_name, id_col in id_columns.items():
         if sheet_name in sheets and id_col in sheets[sheet_name].columns:
             for entity_id in sheets[sheet_name][id_col]:
@@ -166,6 +167,7 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
                 if prefix:
                     prefixes.add(prefix)
 
+    # Convert prefixes to namespaces and display names
     return {
         prefix_to_namespace(prefix): {"prefix": prefix, "name": prefix_to_name(prefix)}
         for prefix in sorted(prefixes)
