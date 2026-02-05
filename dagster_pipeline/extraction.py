@@ -44,22 +44,28 @@ def clean_value(val):
     return val
 
 
-def extract_operator_prefix(entity_id: str, position: int = 0) -> str | None:
+def extract_operator_prefix(entity_id: str) -> str | None:
     """Extract the operator prefix from an entity ID.
 
-    Entity IDs follow different patterns:
-    - position=0: PREFIX-TYPE-NUMBER (e.g., "GRI-VV-1" -> "GRI")
-    - position=1: TYPE-PREFIX-NUMBER (e.g., "CPP-GRI-1" -> "GRI")
+    Searches for a known operator prefix (GRI, STL, STT) in the ID segments.
+    This handles various ID formats like:
+    - GRI-ME-1 (operator first)
+    - CPP-GRI-1 (operator second)
+    - CMP-BLR-STT-1 (operator third)
 
     Args:
         entity_id: The entity ID string
-        position: Which segment contains the operator prefix (0=first, 1=second)
+
+    Returns:
+        The operator prefix if found, None otherwise.
     """
     if pd.isna(entity_id):
         return None
     parts = str(entity_id).split("-")
-    if len(parts) >= 2 and position < len(parts):
-        return parts[position].upper()
+    # Search for a known operator prefix in any segment
+    for part in parts:
+        if part.upper() in KNOWN_OPERATORS:
+            return part.upper()
     return None
 
 
@@ -96,9 +102,9 @@ def prefix_to_name(prefix: str) -> str:
     return prefix.title()
 
 
-def entity_belongs_to_operator(entity_id: str, operator_prefix: str, position: int = 0) -> bool:
+def entity_belongs_to_operator(entity_id: str, operator_prefix: str) -> bool:
     """Check if an entity ID belongs to a specific operator."""
-    return extract_operator_prefix(entity_id, position) == operator_prefix
+    return extract_operator_prefix(entity_id) == operator_prefix
 
 
 # =============================================================================
@@ -229,7 +235,7 @@ def _extract_vessel(sheets: dict, operator_prefix: str, result: dict) -> None:
 
     for _, row in sheets["Vessel"].iterrows():
         vessel_id = row.get("TWINSHIP-VESSEL-ID")
-        if entity_belongs_to_operator(vessel_id, operator_prefix, position=0):
+        if entity_belongs_to_operator(vessel_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-VESSEL-TYPE"))
             result["vessel"] = {
                 "id": clean_value(vessel_id),
@@ -252,7 +258,7 @@ def _extract_main_engines(sheets: dict, operator_prefix: str, result: dict) -> N
 
     for _, row in sheets["Main_Engine"].iterrows():
         engine_id = row.get("TWINSHIP-MAIN-ENGINE-ID")
-        if entity_belongs_to_operator(engine_id, operator_prefix, position=0):
+        if entity_belongs_to_operator(engine_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-MAIN-ENGINE-TYPE"))
             result["main_engines"].append({
                 "id": clean_value(engine_id),
@@ -286,7 +292,7 @@ def _extract_auxiliary_engines(sheets: dict, operator_prefix: str, result: dict)
 
     for _, row in sheets["Auxiliary_Engine"].iterrows():
         engine_id = row.get("TWINSHIP-AUXILIARY-ENGINE-ID")
-        if entity_belongs_to_operator(engine_id, operator_prefix, position=0):
+        if entity_belongs_to_operator(engine_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-AUXILIARY-ENGINE-TYPE"))
             result["auxiliary_engines"].append({
                 "id": clean_value(engine_id),
@@ -312,7 +318,7 @@ def _extract_gearboxes(sheets: dict, operator_prefix: str, result: dict) -> None
     for _, row in sheets["Gearbox"].iterrows():
         gearbox_id = row.get("TWINSHIP-GEARBOX-ID")
         # Gearbox IDs have operator in position 1 (e.g., "DD-GRI-1")
-        if entity_belongs_to_operator(gearbox_id, operator_prefix, position=1):
+        if entity_belongs_to_operator(gearbox_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-GEARBOX-TYPE"))
             result["gearboxes"].append({
                 "id": clean_value(gearbox_id),
@@ -335,7 +341,7 @@ def _extract_propellers(sheets: dict, operator_prefix: str, result: dict) -> Non
     for _, row in sheets["Propeller"].iterrows():
         propeller_id = row.get("TWINSHIP-PROPELLER-ID")
         # Propeller IDs have operator in position 1 (e.g., "CPP-GRI-1")
-        if entity_belongs_to_operator(propeller_id, operator_prefix, position=1):
+        if entity_belongs_to_operator(propeller_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-PROPELLER-TYPE"))
             result["propellers"].append({
                 "id": clean_value(propeller_id),
@@ -363,7 +369,7 @@ def _extract_pms(sheets: dict, operator_prefix: str, result: dict) -> None:
     for _, row in sheets["PMS"].iterrows():
         pms_id = row.get("TWINSHIP-PMS-ID")
         # PMS IDs have operator in position 1 (e.g., "PMS-GRI-1")
-        if entity_belongs_to_operator(pms_id, operator_prefix, position=1):
+        if entity_belongs_to_operator(pms_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-PMS-TYPE"))
             result["pms"].append({
                 "id": clean_value(pms_id),
@@ -385,7 +391,7 @@ def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> 
             continue
 
         # OTHER Systems IDs have operator in position 1 (e.g., "EG-GRI-1")
-        if not entity_belongs_to_operator(component_id, operator_prefix, position=1):
+        if not entity_belongs_to_operator(component_id, operator_prefix):
             continue
 
         types = parse_types(row.get("TWINSHIP-COMPONENT-TYPE"))
