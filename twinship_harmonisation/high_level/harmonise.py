@@ -162,8 +162,6 @@ def harmonise_twinship_vessel_file(json_path: str | Path) -> Graph:
     with open(json_path) as f:
         data = json.load(f)
 
-    # Remove fields not used by harmonisation before unpacking
-    data.pop("operator", None)
     return harmonise_twinship_vessel(**data)
 
 

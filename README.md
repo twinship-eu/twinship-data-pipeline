@@ -30,29 +30,28 @@ uv sync --dev
 Process a single vessel JSON file:
 
 ```python
-from twinship_harmonisation import harmonise_vessel_file
+from twinship_harmonisation import harmonise_twinship_vessel_file
 
-g = harmonise_vessel_file("data/grimaldi.json")
+g = harmonise_twinship_vessel_file("data/grimaldi.json")
 print(g.serialize(format="turtle"))
 ```
 
 Process all vessel files in a directory:
 
 ```python
-from twinship_harmonisation import harmonise_all_vessels
+from twinship_harmonisation import harmonise_all_twinship_vessels
 
-g = harmonise_all_vessels("data")
+g = harmonise_all_twinship_vessels("data")
 g.serialize(destination="output/all_vessels.ttl", format="turtle")
 ```
 
 Process vessel data from a dictionary:
 
 ```python
-from twinship_harmonisation import harmonise_vessel_data
+from twinship_harmonisation import harmonise_twinship_vessel
 
 data = {
     "namespace": "test",
-    "operator": "Test Operator",
     "vessel": {
         "id": "IMO-1234567",
         "label": "Test Vessel",
@@ -71,7 +70,7 @@ data = {
     "gearboxes": [],
     "boilers": [],
 }
-g = harmonise_vessel_data(data)
+g = harmonise_twinship_vessel(**data)
 print(g.serialize(format="turtle"))
 ```
 
@@ -116,7 +115,6 @@ The harmonisation library expects JSON files with the following structure:
 ```json
 {
   "namespace": "grimaldi",
-  "operator": "Grimaldi",
   "vessel": {
     "id": "GRI-RR-1",
     "label": "GRIMALDI EUROCARGO GENOVA RORO CARGO SHIP",

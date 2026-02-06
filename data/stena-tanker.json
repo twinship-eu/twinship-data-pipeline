@@ -1,6 +1,5 @@
 {
   "namespace": "stena-tanker",
-  "operator": "Stena Tanker",
   "vessel": {
     "id": "STT-TK-1",
     "label": "STENA IMAGINATION CHEMICAL TANKER",

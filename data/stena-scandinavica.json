@@ -1,6 +1,5 @@
 {
   "namespace": "stena-scandinavica",
-  "operator": "Stena Line",
   "vessel": {
     "id": "STL-RP-1",
     "label": "STENA SCANDINAVICA PASSENGER AND RORO CARGO SHIP",
