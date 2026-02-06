@@ -1,4 +1,4 @@
-"""Low-level functions for creating engine-related RDF triples."""
+"""Low-level functions for creating engine-related TwinShip RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
@@ -7,12 +7,12 @@ from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
     add_optional_integer,
-    create_uri,
-    get_type_uri,
+    create_twinship_uri,
+    get_twinship_type_uri,
 )
 
 
-def create_main_engine(
+def create_twinship_main_engine(
     namespace: str,
     engine_id: str,
     vessel_uri: URIRef,
@@ -34,19 +34,19 @@ def create_main_engine(
     fuel_consumption_total_mt: float | None = None,
     power_propulsion_total_kw: float | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for a main engine system.
+    """Create TwinShip RDF triples for a main engine system.
 
     Returns:
         Tuple of (engine_uri, graph).
     """
     g = Graph()
-    engine_uri = create_uri(engine_id, namespace)
+    engine_uri = create_twinship_uri(engine_id, namespace)
 
     # Type assertions
     g.add((engine_uri, RDF.type, TWINSHIP.MainEngineSystem))
     if types:
         for type_name in types:
-            type_uri = get_type_uri(type_name)
+            type_uri = get_twinship_type_uri(type_name)
             if type_uri:
                 g.add((engine_uri, RDF.type, type_uri))
 
@@ -111,7 +111,7 @@ def create_main_engine(
     return engine_uri, g
 
 
-def create_auxiliary_engine(
+def create_twinship_auxiliary_engine(
     namespace: str,
     engine_id: str,
     vessel_uri: URIRef,
@@ -124,19 +124,19 @@ def create_auxiliary_engine(
     auxiliary_do_mode: str | None = None,
     fuel_rate_mass_net_kg_per_hr: float | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for an auxiliary engine system.
+    """Create TwinShip RDF triples for an auxiliary engine system.
 
     Returns:
         Tuple of (engine_uri, graph).
     """
     g = Graph()
-    engine_uri = create_uri(engine_id, namespace)
+    engine_uri = create_twinship_uri(engine_id, namespace)
 
     # Type assertions
     g.add((engine_uri, RDF.type, TWINSHIP.AuxiliaryEngineSystem))
     if types:
         for type_name in types:
-            type_uri = get_type_uri(type_name)
+            type_uri = get_twinship_type_uri(type_name)
             if type_uri:
                 g.add((engine_uri, RDF.type, type_uri))
 

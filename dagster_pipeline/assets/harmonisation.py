@@ -167,7 +167,9 @@ def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict
         return Graph()
 
     # Harmonise the extracted vessel data into RDF triples
-    g = harmonise_twinship_vessel(extracted_vessel_json)
+    vessel_data = {**extracted_vessel_json}
+    vessel_data.pop("operator", None)
+    g = harmonise_twinship_vessel(**vessel_data)
 
     # Log the number of triples generated
     vessel_id = extracted_vessel_json.get("vessel", {}).get("id", "unknown")

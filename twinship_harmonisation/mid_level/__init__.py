@@ -5,18 +5,30 @@ specific to the TwinShip ontology. They handle component creation
 and relationship building.
 """
 
-from twinship_harmonisation.mid_level.connections import connect_twinship_components
-from twinship_harmonisation.mid_level.electrical import create_twinship_electrical_system
-from twinship_harmonisation.mid_level.engines import (
-    create_twinship_auxiliary_engines,
-    create_twinship_main_engines,
+from twinship_harmonisation.mid_level.electrical import (
+    add_twinship_boiler,
+    add_twinship_emergency_generator,
+    add_twinship_pms,
+    add_twinship_shaft_generator,
+    add_twinship_thruster,
 )
-from twinship_harmonisation.mid_level.propulsion import create_twinship_propulsion_system
+from twinship_harmonisation.mid_level.engines import (
+    add_twinship_auxiliary_engine,
+    add_twinship_main_engine,
+)
+from twinship_harmonisation.mid_level.propulsion import (
+    add_twinship_gearbox,
+    add_twinship_propeller,
+)
 
 __all__ = [
-    "create_twinship_main_engines",
-    "create_twinship_auxiliary_engines",
-    "create_twinship_propulsion_system",
-    "create_twinship_electrical_system",
-    "connect_twinship_components",
+    "add_twinship_main_engine",
+    "add_twinship_auxiliary_engine",
+    "add_twinship_gearbox",
+    "add_twinship_propeller",
+    "add_twinship_pms",
+    "add_twinship_emergency_generator",
+    "add_twinship_thruster",
+    "add_twinship_shaft_generator",
+    "add_twinship_boiler",
 ]
