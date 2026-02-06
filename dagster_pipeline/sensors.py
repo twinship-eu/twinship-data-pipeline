@@ -5,12 +5,14 @@ automatically registers new vessels as dynamic partitions.
 
 Workflow:
 1. Materialize spreadsheet_data (discovers vessels from the Excel file)
-2. Sensor runs and registers discovered vessels as partitions
-3. Partitioned assets can now be materialized for each vessel
+2. Sensor runs automatically, registers discovered vessels as partitions,
+   and triggers the full pipeline for each new vessel
 """
 
 from dagster import (
     AssetKey,
+    DefaultSensorStatus,
+    RunRequest,
     SensorEvaluationContext,
     SensorResult,
     SkipReason,
@@ -18,18 +20,21 @@ from dagster import (
 )
 
 from dagster_pipeline.assets.harmonisation import vessel_partitions_def
+from dagster_pipeline.jobs import full_pipeline_job
 
 
 @sensor(
     minimum_interval_seconds=30,
+    default_status=DefaultSensorStatus.RUNNING,
+    job=full_pipeline_job,
     description="Discovers vessels from spreadsheet_data and registers them as partitions",
 )
 def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | SkipReason:
     """Discover vessels from the spreadsheet and register them as dynamic partitions.
 
-    This sensor checks the spreadsheet_data asset's latest materialization and
-    registers any new vessels as dynamic partitions. This allows the partitioned
-    assets to run for each discovered vessel.
+    This sensor checks the spreadsheet_data asset's latest materialization,
+    registers any new vessels as dynamic partitions, and triggers the full
+    pipeline for each newly discovered vessel.
     """
     instance = context.instance
 
@@ -71,12 +76,20 @@ def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | 
             f"All {len(discovered_vessels)} vessels already registered: {discovered_vessels}"
         )
 
-    # Register new partitions
+    # Register new partitions and trigger runs for each new vessel
     context.log.info(f"Registering {len(new_vessels)} new vessels: {new_vessels}")
+
+    run_requests = [
+        RunRequest(
+            run_key=f"vessel-{vessel}",
+            partition_key=vessel,
+        )
+        for vessel in new_vessels
+    ]
 
     return SensorResult(
         dynamic_partitions_requests=[
             vessel_partitions_def.build_add_request(new_vessels)
         ],
-        run_requests=[],  # Don't auto-trigger runs, let user decide
+        run_requests=run_requests,
     )

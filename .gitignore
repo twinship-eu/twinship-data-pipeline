@@ -27,6 +27,8 @@ ENV/
 storage/
 schedules/
 history/
+runs/
+logs/
 
 # Output
 output/

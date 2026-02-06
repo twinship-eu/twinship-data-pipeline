@@ -25,6 +25,27 @@ uv sync --dev
 
 ## Usage
 
+### Local Development
+
+```bash
+uv run dagster dev
+```
+
+Open http://localhost:3000 and follow these steps:
+
+1. Materialize the **`spreadsheet_data`** asset (loads the Excel file).
+2. The **`vessel_discovery_sensor`** runs automatically, discovers vessels,
+   registers them as partitions, and triggers the full pipeline for each vessel.
+
+### Docker Deployment
+
+```bash
+docker-compose up -d
+```
+
+Open http://localhost:3000 and follow the same workflow described above. The
+Docker setup uses PostgreSQL for storage (configured in `dagster-docker.yaml`).
+
 ### Python Library
 
 Process a single vessel JSON file:
@@ -74,24 +95,6 @@ g = harmonise_twinship_vessel(**data)
 print(g.serialize(format="turtle"))
 ```
 
-### Dagster Pipeline
-
-Run locally:
-
-```bash
-uv run dagster dev
-```
-
-Open http://localhost:3000 to access the Dagster UI.
-
-### Docker Deployment
-
-```bash
-docker-compose up -d
-```
-
-Access the Dagster webserver at http://localhost:3000.
-
 ## Project Structure
 
 ```
@@ -105,6 +108,8 @@ twinship-data-pipeline/
 ├── shacl/                      # SHACL shape files
 ├── data/                       # Input data (JSON)
 ├── tests/                      # Unit tests
+├── dagster.yaml                # Local dev config (SQLite)
+├── dagster-docker.yaml         # Docker config (PostgreSQL)
 └── docker-compose.yml          # Docker deployment
 ```
 
@@ -128,8 +133,6 @@ The harmonisation library expects JSON files with the following structure:
   "boilers": [...]
 }
 ```
-
-Use `scripts/extract_vessel_data.py` to extract data from the TwinShip Excel spreadsheet into this format.
 
 ## Testing
 
