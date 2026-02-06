@@ -23,6 +23,7 @@ ENV/
 
 # Dagster
 .dagster/
+.tmp_dagster_home_*/
 storage/
 schedules/
 history/
@@ -35,6 +36,9 @@ output/
 # Environment
 .env
 .env.local
+
+# Linting
+.ruff_cache/
 
 # Testing
 .pytest_cache/
