@@ -1,7 +1,31 @@
 """TwinShip spreadsheet extraction utilities.
 
 This module handles parsing the TwinShip Excel spreadsheet and extracting
-vessel data for each operator.
+vessel data for each operator. The spreadsheet contains data for multiple
+vessels from different operators, and this module extracts data for one
+vessel at a time based on the operator prefix in entity IDs.
+
+Spreadsheet Structure:
+    The Excel file has multiple sheets, each containing data for a specific
+    component type (vessels, engines, propellers, etc.). Each row represents
+    one component instance.
+
+Entity ID Formats:
+    Components are identified by IDs that contain an operator prefix (GRI, STL, STT).
+    The prefix position varies by component type:
+    - Vessels/Engines: PREFIX-TYPE-NUM (e.g., GRI-ME-1, STL-AU-2)
+    - Propellers/Gearboxes/Other: TYPE-PREFIX-NUM (e.g., CPP-GRI-1, DD-STL-1)
+    - Some IDs have multiple type segments: CMP-BLR-STT-1
+
+    The extraction logic searches for known operator prefixes anywhere in the ID
+    to handle all these formats.
+
+Usage:
+    sheets = load_spreadsheet_sheets("path/to/spreadsheet.xlsx")
+    vessels = discover_vessels_from_sheets(sheets)
+    for namespace, info in vessels.items():
+        data = extract_vessel_for_operator(sheets, info["prefix"], namespace, info["name"])
+        # data is now ready for harmonisation to RDF
 """
 
 import pandas as pd
@@ -10,15 +34,18 @@ import pandas as pd
 # Operator Configuration
 # =============================================================================
 
-# Known operator mappings (prefix -> namespace, display name)
-# Add new operators here for better names, or they'll default to lowercase prefix
+# Known operator mappings: prefix -> (namespace, display_name)
+# The namespace is used for RDF URI generation (e.g., "grimaldi" -> grimaldi:vessel-1)
+# The display name is used for human-readable labels
+# Add new operators here when onboarding new vessel data
 KNOWN_OPERATORS = {
     "GRI": ("grimaldi", "Grimaldi"),
     "STL": ("stena-scandinavica", "Stena Line"),
     "STT": ("stena-tanker", "Stena Tanker"),
 }
 
-# Mapping of internal sheet names to actual Excel sheet names
+# Mapping of internal sheet names (used in code) to actual Excel sheet names
+# This allows us to use simple names like "Vessel" instead of "VESSEL System"
 SHEET_MAPPING = {
     "Vessel": "VESSEL System",
     "Main_Engine": "MAIN ENGINE System",
@@ -26,7 +53,7 @@ SHEET_MAPPING = {
     "Propeller": "PROPELLER System",
     "Gearbox": "GEARBOX System",
     "PMS": "PMS System",
-    "Other": "OTHER Systems",
+    "Other": "OTHER Systems",  # Contains emergency generators, thrusters, shaft generators, boilers
 }
 
 
@@ -36,10 +63,14 @@ SHEET_MAPPING = {
 
 
 def clean_value(val):
-    """Clean a value for JSON serialization."""
+    """Clean a value for JSON serialization.
+
+    Excel cells can contain various "empty" values (NaN, None, empty strings)
+    that need to be normalized to None for consistent JSON output.
+    """
     if pd.isna(val):
         return None
-    if isinstance(val, float) and val != val:  # NaN check
+    if isinstance(val, float) and val != val:  # NaN check (NaN != NaN is True)
         return None
     return val
 
@@ -72,15 +103,23 @@ def extract_operator_prefix(entity_id: str) -> str | None:
 def parse_types(type_string: str | None) -> list[str]:
     """Parse types from spreadsheet format like '[tws:FourStroke, tws:DieselEngine]'.
 
+    The spreadsheet stores component types as comma-separated lists with a 'tws:' prefix.
+    This function extracts just the type names for use in RDF class assignment.
+
+    Example:
+        "[tws:FourStroke, tws:DieselEngine]" -> ["FourStroke", "DieselEngine"]
+
     Returns a list of type names without the 'tws:' prefix.
     """
     if not type_string or pd.isna(type_string):
         return []
 
     types = []
+    # Remove brackets and split by comma
     cleaned = str(type_string).replace("[", "").replace("]", "")
     for part in cleaned.split(","):
         part = part.strip()
+        # Strip the 'tws:' namespace prefix if present
         if part.startswith("tws:"):
             types.append(part[4:].strip())
         elif part:
@@ -115,11 +154,17 @@ def entity_belongs_to_operator(entity_id: str, operator_prefix: str) -> bool:
 def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
     """Load all relevant sheets from the TwinShip spreadsheet.
 
+    The spreadsheet has a specific structure:
+    - Row 0: Human-readable headers (skipped)
+    - Row 1: Machine-readable column names like "TWINSHIP-VESSEL-ID" (used as header)
+    - Row 2: Data type annotations (skipped)
+    - Row 3+: Actual data rows
+
     Args:
         spreadsheet_path: Path to the Excel file.
 
     Returns:
-        Dict mapping internal sheet names to DataFrames.
+        Dict mapping internal sheet names (e.g., "Vessel") to DataFrames.
     """
     sheets = {}
 
@@ -131,7 +176,8 @@ def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
                 header=1,  # Row with "TWINSHIP-*" column names
                 skiprows=[2],  # Skip the data type row
             )
-            # Handle duplicate column names
+            # Handle duplicate column names by appending "_rel" suffix
+            # Some sheets have the same column appearing twice (e.g., for relationships)
             cols = df.columns.tolist()
             seen: dict[str, int] = {}
             new_cols = []
@@ -145,7 +191,7 @@ def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
             df.columns = new_cols
             sheets[internal_name] = df
         except Exception:
-            pass  # Sheet not found or error reading
+            pass  # Sheet not found or error reading - skip silently
 
     return sheets
 
@@ -184,6 +230,11 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
 # Vessel Data Extraction
 # =============================================================================
 
+# The functions below extract data from each sheet and filter by operator prefix.
+# Each _extract_* function handles one sheet and populates the corresponding
+# list in the result dictionary. The result dictionary structure matches what
+# the harmonisation library expects.
+
 
 def extract_vessel_for_operator(
     sheets: dict[str, pd.DataFrame],
@@ -193,15 +244,21 @@ def extract_vessel_for_operator(
 ) -> dict:
     """Extract vessel data for a specific operator.
 
+    This is the main entry point for extraction. It iterates through all sheets
+    and extracts only the rows that belong to the specified operator.
+
     Args:
-        sheets: Dict of sheet name to DataFrame.
-        operator_prefix: The operator prefix (e.g., "GRI").
-        namespace: The namespace for URIs (e.g., "grimaldi").
-        operator_name: Display name (e.g., "Grimaldi").
+        sheets: Dict of sheet name to DataFrame (from load_spreadsheet_sheets).
+        operator_prefix: The operator prefix to filter by (e.g., "GRI").
+        namespace: The namespace for RDF URIs (e.g., "grimaldi").
+        operator_name: Human-readable display name (e.g., "Grimaldi").
 
     Returns:
-        Dict with vessel data ready for harmonisation.
+        Dict with vessel data ready for the harmonisation library.
+        Structure matches what harmonise_twinship_vessel() expects.
     """
+    # Initialize result structure with all component types
+    # Each list will be populated by the corresponding _extract_* function
     result = {
         "namespace": namespace,
         "operator": operator_name,
@@ -217,6 +274,7 @@ def extract_vessel_for_operator(
         "shaft_generators": [],
     }
 
+    # Extract data from each sheet, filtering by operator prefix
     _extract_vessel(sheets, operator_prefix, result)
     _extract_main_engines(sheets, operator_prefix, result)
     _extract_auxiliary_engines(sheets, operator_prefix, result)
@@ -229,7 +287,11 @@ def extract_vessel_for_operator(
 
 
 def _extract_vessel(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract vessel data."""
+    """Extract vessel data.
+
+    Each operator has exactly one vessel in the spreadsheet.
+    Vessel IDs use OPERATOR-TYPE-NUM format (e.g., GRI-RR-1 for Grimaldi RoRo vessel).
+    """
     if "Vessel" not in sheets:
         return
 
@@ -237,6 +299,7 @@ def _extract_vessel(sheets: dict, operator_prefix: str, result: dict) -> None:
         vessel_id = row.get("TWINSHIP-VESSEL-ID")
         if entity_belongs_to_operator(vessel_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-VESSEL-TYPE"))
+            # Only one vessel per operator, so we assign directly (not append)
             result["vessel"] = {
                 "id": clean_value(vessel_id),
                 "label": clean_value(row.get("TWINSHIP-VESSEL-NAME")),
@@ -252,7 +315,12 @@ def _extract_vessel(sheets: dict, operator_prefix: str, result: dict) -> None:
 
 
 def _extract_main_engines(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract main engine data."""
+    """Extract main engine data.
+
+    Main engines are the primary propulsion engines connected to the propeller(s).
+    Engine IDs use OPERATOR-TYPE-NUM format (e.g., GRI-ME-1, STL-ME-1).
+    A vessel can have multiple main engines (e.g., STL has 4).
+    """
     if "Main_Engine" not in sheets:
         return
 
@@ -286,7 +354,12 @@ def _extract_main_engines(sheets: dict, operator_prefix: str, result: dict) -> N
 
 
 def _extract_auxiliary_engines(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract auxiliary engine data."""
+    """Extract auxiliary engine data.
+
+    Auxiliary engines (gensets) provide electrical power for the vessel.
+    They are managed by the Power Management System (PMS).
+    Engine IDs use OPERATOR-TYPE-NUM format (e.g., GRI-AU-1, STL-AU-2).
+    """
     if "Auxiliary_Engine" not in sheets:
         return
 
@@ -311,13 +384,16 @@ def _extract_auxiliary_engines(sheets: dict, operator_prefix: str, result: dict)
 
 
 def _extract_gearboxes(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract gearbox data."""
+    """Extract gearbox data.
+
+    Gearbox IDs use TYPE-OPERATOR-NUM format (e.g., DD-GRI-1, RG-STL-1).
+    The type prefix indicates the gearbox type (DD=Direct Drive, RG=Reduction Gear).
+    """
     if "Gearbox" not in sheets:
         return
 
     for _, row in sheets["Gearbox"].iterrows():
         gearbox_id = row.get("TWINSHIP-GEARBOX-ID")
-        # Gearbox IDs have operator in position 1 (e.g., "DD-GRI-1")
         if entity_belongs_to_operator(gearbox_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-GEARBOX-TYPE"))
             result["gearboxes"].append({
@@ -334,13 +410,16 @@ def _extract_gearboxes(sheets: dict, operator_prefix: str, result: dict) -> None
 
 
 def _extract_propellers(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract propeller data."""
+    """Extract propeller data.
+
+    Propeller IDs use TYPE-OPERATOR-NUM format (e.g., CPP-GRI-1, FPP-STT-1).
+    The type prefix indicates the propeller type (CPP=Controllable Pitch, FPP=Fixed Pitch).
+    """
     if "Propeller" not in sheets:
         return
 
     for _, row in sheets["Propeller"].iterrows():
         propeller_id = row.get("TWINSHIP-PROPELLER-ID")
-        # Propeller IDs have operator in position 1 (e.g., "CPP-GRI-1")
         if entity_belongs_to_operator(propeller_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-PROPELLER-TYPE"))
             result["propellers"].append({
@@ -362,13 +441,16 @@ def _extract_propellers(sheets: dict, operator_prefix: str, result: dict) -> Non
 
 
 def _extract_pms(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract PMS data."""
+    """Extract Power Management System (PMS) data.
+
+    PMS coordinates auxiliary engines and power distribution on the vessel.
+    PMS IDs use PMS-OPERATOR-NUM format (e.g., PMS-GRI-1).
+    """
     if "PMS" not in sheets:
         return
 
     for _, row in sheets["PMS"].iterrows():
         pms_id = row.get("TWINSHIP-PMS-ID")
-        # PMS IDs have operator in position 1 (e.g., "PMS-GRI-1")
         if entity_belongs_to_operator(pms_id, operator_prefix):
             types = parse_types(row.get("TWINSHIP-PMS-TYPE"))
             result["pms"].append({
@@ -381,7 +463,16 @@ def _extract_pms(sheets: dict, operator_prefix: str, result: dict) -> None:
 
 
 def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> None:
-    """Extract emergency generators, thrusters, shaft generators, and boilers."""
+    """Extract emergency generators, thrusters, shaft generators, and boilers.
+
+    The "OTHER Systems" sheet contains multiple component types mixed together.
+    We identify the component type by the first segment of the ID:
+    - EG: Emergency Generator (e.g., EG-GRI-1)
+    - TH: Thruster (e.g., TH-GRI-1)
+    - SG: Shaft Generator (e.g., SG-STL-1)
+    - BLR: Boiler (e.g., BLR-STT-1)
+    - CMP: Composite Boiler (e.g., CMP-BLR-STT-1) - treated as a boiler
+    """
     if "Other" not in sheets:
         return
 
@@ -390,18 +481,21 @@ def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> 
         if not component_id or pd.isna(component_id):
             continue
 
-        # OTHER Systems IDs have operator in position 1 (e.g., "EG-GRI-1")
+        # Filter to only include components belonging to this operator
         if not entity_belongs_to_operator(component_id, operator_prefix):
             continue
 
+        # Extract common fields shared by all component types
         types = parse_types(row.get("TWINSHIP-COMPONENT-TYPE"))
         component_name = clean_value(row.get("TWINSHIP-COMPONENT-NAME"))
         power_max_kw = clean_value(row.get("TWINSHIP-COMPONENT-POWER-MAX-IN-kW"))
         speed_max_rpm = clean_value(row.get("TWINSHIP-COMPONENT-SPEED-MAX-IN-REV-PER-MIN"))
 
+        # Route to the appropriate list based on the ID prefix
         id_prefix = str(component_id).split("-")[0].upper()
 
         if id_prefix == "EG":
+            # Emergency Generator
             result["emergency_generators"].append({
                 "id": clean_value(component_id),
                 "name": component_name,
@@ -411,6 +505,7 @@ def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> 
                 "do_mode": clean_value(row.get("TWINSHIP-COMPONENT-EMERG-DO-MODE")),
             })
         elif id_prefix == "TH":
+            # Thruster - determine if bow or stern based on name
             is_bow = "BOW" in str(component_name).upper()
             result["thrusters"].append({
                 "id": clean_value(component_id),
@@ -421,6 +516,7 @@ def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> 
                 "is_bow": is_bow,
             })
         elif id_prefix == "SG":
+            # Shaft Generator
             result["shaft_generators"].append({
                 "id": clean_value(component_id),
                 "name": component_name,
@@ -429,6 +525,7 @@ def _extract_other_systems(sheets: dict, operator_prefix: str, result: dict) -> 
                 "speed_max_rpm": speed_max_rpm,
             })
         elif id_prefix in ("BLR", "CMP"):
+            # Boiler or Composite Boiler
             result["boilers"].append({
                 "id": clean_value(component_id),
                 "name": component_name,
