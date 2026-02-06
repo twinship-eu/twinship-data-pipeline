@@ -1,6 +1,7 @@
 """Low-level functions for creating fuel-related TwinShip RDF triples."""
 
-from rdflib import Graph, URIRef
+from rdflib import Graph, Literal, URIRef
+from rdflib.namespace import RDF, RDFS
 
 from twinship_harmonisation.constants import TWINSHIP
 
@@ -41,4 +42,6 @@ def add_twinship_fuel_consumption(
     for fuel_type in fuels:
         fuel_uri = get_twinship_fuel_uri(fuel_type)
         if fuel_uri:
+            g.add((fuel_uri, RDF.type, TWINSHIP.Fuel))
+            g.add((fuel_uri, RDFS.label, Literal(fuel_type)))
             g.add((subject_uri, TWINSHIP.consume, fuel_uri))

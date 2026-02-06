@@ -1,0 +1,5 @@
+# Local development configuration (SQLite storage).
+# For Docker/production, see dagster-docker.yaml (PostgreSQL).
+run_launcher:
+  module: dagster.core.launcher
+  class: DefaultRunLauncher

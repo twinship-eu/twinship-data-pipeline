@@ -303,7 +303,12 @@ def extract_propellers(sheets: dict, operator_prefix: str) -> list[dict]:
 
 
 def extract_pms(sheets: dict, operator_prefix: str) -> list[dict]:
-    """Extract Power Management System data."""
+    """Extract Power Management System data.
+
+    Note: auxiliary_engine_id is intentionally excluded from the field map.
+    The harmonisation layer computes auxiliary_engine_ids from the full
+    auxiliary_engines list instead.
+    """
     return extract_rows(
         sheets,
         "PMS",
@@ -312,7 +317,6 @@ def extract_pms(sheets: dict, operator_prefix: str) -> list[dict]:
         field_map={
             "id": "TWINSHIP-PMS-ID",
             "name": "TWINSHIP-PMS-NAME",
-            "auxiliary_engine_id": "TWINSHIP-AUXILIARY-ENGINE-ID",
             "vessel_id": "TWINSHIP-VESSEL-ID",
         },
         type_column="TWINSHIP-PMS-TYPE",

@@ -21,9 +21,8 @@ Pipeline structure:
 
 Workflow:
 1. Materialize spreadsheet_data first
-2. Enable the vessel_discovery_sensor (Automation → Sensors)
-3. The sensor registers discovered vessels as partitions
-4. Run the partitioned assets via backfill
+2. The vessel_discovery_sensor runs automatically, registers discovered vessels
+   as partitions, and triggers the full pipeline for each new vessel
 """
 
 from dagster import Definitions

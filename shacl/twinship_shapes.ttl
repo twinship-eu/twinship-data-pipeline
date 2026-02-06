@@ -1,6 +1,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix tws: <https://twin-ship.eu/> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
 # Shape for VesselSystem
@@ -18,60 +19,55 @@ tws:VesselSystemShape a sh:NodeShape ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:message "Displacement must be a non-negative number" ;
+        sh:message "Displacement must be a number" ;
     ] ;
     sh:property [
         sh:path tws:twPowerPropulsionTotalInKw ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:message "Propulsion power must be a non-negative number" ;
+        sh:message "Propulsion power must be a number" ;
     ] .
 
 # Shape for MainEngineSystem
 tws:MainEngineSystemShape a sh:NodeShape ;
     sh:targetClass tws:MainEngineSystem ;
     sh:property [
-        sh:path tws:componentOf ;
+        sh:path ido:partOf ;
         sh:minCount 1 ;
         sh:class tws:VesselSystem ;
-        sh:message "Main engine must be a component of a vessel" ;
+        sh:message "Main engine must be part of a vessel" ;
     ] ;
     sh:property [
         sh:path tws:twShaftPowerMaxInKW ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:message "Shaft power must be a non-negative number" ;
+        sh:message "Shaft power must be a number" ;
     ] ;
     sh:property [
         sh:path tws:twShaftSpeedMaxInRevPerMin ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:message "Shaft speed must be a non-negative number" ;
+        sh:message "Shaft speed must be a number" ;
     ] .
 
 # Shape for AuxiliaryEngineSystem
 tws:AuxiliaryEngineSystemShape a sh:NodeShape ;
     sh:targetClass tws:AuxiliaryEngineSystem ;
     sh:property [
-        sh:path tws:componentOf ;
+        sh:path ido:partOf ;
         sh:minCount 1 ;
         sh:class tws:VesselSystem ;
-        sh:message "Auxiliary engine must be a component of a vessel" ;
+        sh:message "Auxiliary engine must be part of a vessel" ;
     ] ;
     sh:property [
         sh:path tws:twDieselEnginePowerMaxInKW ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:message "Engine power must be a non-negative number" ;
+        sh:message "Engine power must be a number" ;
     ] .
 
 # Shape for fuel consumption relationships
