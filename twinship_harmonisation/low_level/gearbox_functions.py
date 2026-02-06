@@ -1,4 +1,4 @@
-"""Low-level functions for creating gearbox-related RDF triples."""
+"""Low-level functions for creating gearbox-related TwinShip RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
@@ -7,12 +7,12 @@ from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
     add_optional_string,
-    create_uri,
-    get_type_uri,
+    create_twinship_uri,
+    get_twinship_type_uri,
 )
 
 
-def create_gearbox(
+def create_twinship_gearbox(
     namespace: str,
     gearbox_id: str,
     vessel_uri: URIRef,
@@ -22,18 +22,18 @@ def create_gearbox(
     efficiency: float | None = None,
     shaft_generator: str | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for a gearbox system.
+    """Create TwinShip RDF triples for a gearbox system.
 
     Returns:
         Tuple of (gearbox_uri, graph).
     """
     g = Graph()
-    gearbox_uri = create_uri(gearbox_id, namespace)
+    gearbox_uri = create_twinship_uri(gearbox_id, namespace)
 
     # Type assertions - only use specific subtypes from spreadsheet
     if types:
         for type_name in types:
-            type_uri = get_type_uri(type_name)
+            type_uri = get_twinship_type_uri(type_name)
             if type_uri:
                 g.add((gearbox_uri, RDF.type, type_uri))
 

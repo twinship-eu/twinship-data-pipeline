@@ -6,8 +6,8 @@ from rdflib.namespace import RDF, RDFS, XSD
 from twinship_harmonisation.constants import TWINSHIP, TWINSHIP_IND
 
 
-def create_uri(entity_id: str, namespace: str) -> URIRef:
-    """Create a URI for an entity individual.
+def create_twinship_uri(entity_id: str, namespace: str) -> URIRef:
+    """Create a TwinShip URI for an entity individual.
 
     Args:
         entity_id: Unique identifier for the entity.
@@ -20,8 +20,8 @@ def create_uri(entity_id: str, namespace: str) -> URIRef:
     return base[entity_id]
 
 
-def get_type_uri(type_name: str) -> URIRef | None:
-    """Map a type name to its ontology class URI.
+def get_twinship_type_uri(type_name: str) -> URIRef | None:
+    """Map a type name to its TwinShip ontology class URI.
 
     Args:
         type_name: Type name from JSON (e.g., 'TwoStroke', 'CPP').
@@ -96,7 +96,7 @@ def add_optional_string(
         g.add((subject, predicate, Literal(value, datatype=XSD.string)))
 
 
-def create_vessel(
+def create_twinship_vessel(
     namespace: str,
     vessel_id: str,
     label: str | None = None,
@@ -108,18 +108,18 @@ def create_vessel(
     draft_mid_stbd_max_m: float | None = None,
     depth_of_water_max_m: float | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for a vessel.
+    """Create TwinShip RDF triples for a vessel.
 
     Returns:
         Tuple of (vessel_uri, graph).
     """
     g = Graph()
-    vessel_uri = create_uri(vessel_id, namespace)
+    vessel_uri = create_twinship_uri(vessel_id, namespace)
 
     # Type assertions
     g.add((vessel_uri, RDF.type, TWINSHIP.VesselSystem))
     if vessel_type:
-        type_uri = get_type_uri(vessel_type)
+        type_uri = get_twinship_type_uri(vessel_type)
         if type_uri:
             g.add((vessel_uri, RDF.type, type_uri))
 

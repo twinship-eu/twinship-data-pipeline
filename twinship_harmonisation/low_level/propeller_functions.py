@@ -1,4 +1,4 @@
-"""Low-level functions for creating propeller-related RDF triples."""
+"""Low-level functions for creating propeller-related TwinShip RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS
@@ -7,12 +7,12 @@ from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
     add_optional_integer,
-    create_uri,
-    get_type_uri,
+    create_twinship_uri,
+    get_twinship_type_uri,
 )
 
 
-def create_propeller(
+def create_twinship_propeller(
     namespace: str,
     propeller_id: str,
     vessel_uri: URIRef,
@@ -28,18 +28,18 @@ def create_propeller(
     efficiency: float | None = None,
     rudder_angle_degree: float | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for a propeller system.
+    """Create TwinShip RDF triples for a propeller system.
 
     Returns:
         Tuple of (propeller_uri, graph).
     """
     g = Graph()
-    propeller_uri = create_uri(propeller_id, namespace)
+    propeller_uri = create_twinship_uri(propeller_id, namespace)
 
     # Type assertions - only use specific subtypes from spreadsheet
     if types:
         for type_name in types:
-            type_uri = get_type_uri(type_name)
+            type_uri = get_twinship_type_uri(type_name)
             if type_uri:
                 g.add((propeller_uri, RDF.type, type_uri))
 

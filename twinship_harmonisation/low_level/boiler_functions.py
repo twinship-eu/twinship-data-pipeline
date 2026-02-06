@@ -1,4 +1,4 @@
-"""Low-level functions for creating boiler-related RDF triples."""
+"""Low-level functions for creating boiler-related TwinShip RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
 from rdflib.namespace import RDF, RDFS
@@ -6,12 +6,12 @@ from rdflib.namespace import RDF, RDFS
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
-    create_uri,
-    get_type_uri,
+    create_twinship_uri,
+    get_twinship_type_uri,
 )
 
 
-def create_boiler(
+def create_twinship_boiler(
     namespace: str,
     boiler_id: str,
     vessel_uri: URIRef | None = None,
@@ -20,19 +20,19 @@ def create_boiler(
     power_max_kw: float | None = None,
     speed_max_rpm: float | None = None,
 ) -> tuple[URIRef, Graph]:
-    """Create RDF triples for a boiler system.
+    """Create TwinShip RDF triples for a boiler system.
 
     Returns:
         Tuple of (boiler_uri, graph).
     """
     g = Graph()
-    boiler_uri = create_uri(boiler_id, namespace)
+    boiler_uri = create_twinship_uri(boiler_id, namespace)
 
     # Type assertions
     g.add((boiler_uri, RDF.type, TWINSHIP.Boiler))
     if types:
         for type_name in types:
-            type_uri = get_type_uri(type_name)
+            type_uri = get_twinship_type_uri(type_name)
             if type_uri and type_uri != TWINSHIP.Boiler:  # Avoid duplicate
                 g.add((boiler_uri, RDF.type, type_uri))
 
