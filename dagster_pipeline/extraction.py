@@ -19,6 +19,7 @@ import pandas as pd
 from dagster_pipeline.utils import (
     clean_value,
     extract_operator_prefix,
+    parse_bracket_list,
     parse_types,
     prefix_to_name,
     prefix_to_namespace,
@@ -53,7 +54,9 @@ def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
     sheets = {}
     for internal_name, actual_name in SHEET_MAPPING.items():
         try:
-            df = pd.read_excel(spreadsheet_path, sheet_name=actual_name, header=1, skiprows=[2])
+            df = pd.read_excel(
+                spreadsheet_path, sheet_name=actual_name, header=1, skiprows=[2]
+            )
             # Handle duplicate columns by appending "_rel" suffix
             seen: dict[str, int] = {}
             new_cols = []
@@ -77,7 +80,10 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
     Returns dict mapping namespace to {prefix, name}.
     """
     prefixes: set[str] = set()
-    id_columns = {"Vessel": "TWINSHIP-VESSEL-ID", "Main_Engine": "TWINSHIP-MAIN-ENGINE-ID"}
+    id_columns = {
+        "Vessel": "TWINSHIP-VESSEL-ID",
+        "Main_Engine": "TWINSHIP-MAIN-ENGINE-ID",
+    }
 
     for sheet_name, id_col in id_columns.items():
         if sheet_name in sheets and id_col in sheets[sheet_name].columns:
@@ -174,7 +180,10 @@ def extract_vessel_for_operator(
 def extract_vessel(sheets: dict, operator_prefix: str) -> dict:
     """Extract vessel data (one per operator)."""
     rows = extract_rows(
-        sheets, "Vessel", "TWINSHIP-VESSEL-ID", operator_prefix,
+        sheets,
+        "Vessel",
+        "TWINSHIP-VESSEL-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-VESSEL-ID",
             "label": "TWINSHIP-VESSEL-NAME",
@@ -185,7 +194,9 @@ def extract_vessel(sheets: dict, operator_prefix: str) -> dict:
             "draft_mid_stbd_max_m": "TWINSHIP-VESSEL-DRAFT-MID-STBD-MAX-IN-M",
             "depth_of_water_max_m": "TWINSHIP-VESSEL-DEPTH-OF-WATER-MAX-IN-M",
         },
-        extra=lambda row: {"type": (parse_types(row.get("TWINSHIP-VESSEL-TYPE")) or [None])[0]},
+        extra=lambda row: {
+            "type": (parse_types(row.get("TWINSHIP-VESSEL-TYPE")) or [None])[0]
+        },
     )
     return rows[0] if rows else {}
 
@@ -193,7 +204,10 @@ def extract_vessel(sheets: dict, operator_prefix: str) -> dict:
 def extract_main_engines(sheets: dict, operator_prefix: str) -> list[dict]:
     """Extract main engine data."""
     return extract_rows(
-        sheets, "Main_Engine", "TWINSHIP-MAIN-ENGINE-ID", operator_prefix,
+        sheets,
+        "Main_Engine",
+        "TWINSHIP-MAIN-ENGINE-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-MAIN-ENGINE-ID",
             "name": "TWINSHIP-MAIN-ENGINE-NAME",
@@ -216,14 +230,17 @@ def extract_main_engines(sheets: dict, operator_prefix: str) -> list[dict]:
             "gearbox_id": "TWINSHIP-GEARBOX-ID",
         },
         type_column="TWINSHIP-MAIN-ENGINE-TYPE",
-        extra=lambda _: {"fuels": ["HFO", "MDO", "MGO"]},
+        extra=lambda row: {"fuels": parse_bracket_list(row.get("TWINSHIP-FUEL-ID"))},
     )
 
 
 def extract_auxiliary_engines(sheets: dict, operator_prefix: str) -> list[dict]:
     """Extract auxiliary engine (genset) data."""
     return extract_rows(
-        sheets, "Auxiliary_Engine", "TWINSHIP-AUXILIARY-ENGINE-ID", operator_prefix,
+        sheets,
+        "Auxiliary_Engine",
+        "TWINSHIP-AUXILIARY-ENGINE-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-AUXILIARY-ENGINE-ID",
             "name": "TWINSHIP-AUXILIARY-ENGINE-NAME",
@@ -237,14 +254,17 @@ def extract_auxiliary_engines(sheets: dict, operator_prefix: str) -> list[dict]:
             "vessel_id": "TWINSHIP-VESSEL-ID",
         },
         type_column="TWINSHIP-AUXILIARY-ENGINE-TYPE",
-        extra=lambda _: {"fuels": ["HFO", "MDO", "MGO"]},
+        extra=lambda row: {"fuels": parse_bracket_list(row.get("TWINSHIP-FUEL-ID"))},
     )
 
 
 def extract_gearboxes(sheets: dict, operator_prefix: str) -> list[dict]:
     """Extract gearbox data (DD=Direct Drive, RG=Reduction Gear)."""
     return extract_rows(
-        sheets, "Gearbox", "TWINSHIP-GEARBOX-ID", operator_prefix,
+        sheets,
+        "Gearbox",
+        "TWINSHIP-GEARBOX-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-GEARBOX-ID",
             "name": "TWINSHIP-GEARBOX-NAME",
@@ -262,7 +282,10 @@ def extract_gearboxes(sheets: dict, operator_prefix: str) -> list[dict]:
 def extract_propellers(sheets: dict, operator_prefix: str) -> list[dict]:
     """Extract propeller data (CPP=Controllable Pitch, FPP=Fixed Pitch)."""
     return extract_rows(
-        sheets, "Propeller", "TWINSHIP-PROPELLER-ID", operator_prefix,
+        sheets,
+        "Propeller",
+        "TWINSHIP-PROPELLER-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-PROPELLER-ID",
             "name": "TWINSHIP-PROPEELER-NAME",  # Typo in spreadsheet
@@ -285,7 +308,10 @@ def extract_propellers(sheets: dict, operator_prefix: str) -> list[dict]:
 def extract_pms(sheets: dict, operator_prefix: str) -> list[dict]:
     """Extract Power Management System data."""
     return extract_rows(
-        sheets, "PMS", "TWINSHIP-PMS-ID", operator_prefix,
+        sheets,
+        "PMS",
+        "TWINSHIP-PMS-ID",
+        operator_prefix,
         field_map={
             "id": "TWINSHIP-PMS-ID",
             "name": "TWINSHIP-PMS-NAME",
@@ -314,7 +340,10 @@ def extract_other_systems(sheets: dict, operator_prefix: str) -> dict[str, list[
 
     for _, row in sheets["Other"].iterrows():
         component_id = row.get("TWINSHIP-COMPONENT-ID")
-        if pd.isna(component_id) or extract_operator_prefix(component_id) != operator_prefix:
+        if (
+            pd.isna(component_id)
+            or extract_operator_prefix(component_id) != operator_prefix
+        ):
             continue
 
         base = {
@@ -322,7 +351,9 @@ def extract_other_systems(sheets: dict, operator_prefix: str) -> dict[str, list[
             "name": clean_value(row.get("TWINSHIP-COMPONENT-NAME")),
             "types": parse_types(row.get("TWINSHIP-COMPONENT-TYPE")),
             "power_max_kw": clean_value(row.get("TWINSHIP-COMPONENT-POWER-MAX-IN-kW")),
-            "speed_max_rpm": clean_value(row.get("TWINSHIP-COMPONENT-SPEED-MAX-IN-REV-PER-MIN")),
+            "speed_max_rpm": clean_value(
+                row.get("TWINSHIP-COMPONENT-SPEED-MAX-IN-REV-PER-MIN")
+            ),
         }
 
         id_prefix = str(component_id).split("-")[0].upper()
