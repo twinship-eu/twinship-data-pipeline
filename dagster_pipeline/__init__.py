@@ -16,6 +16,7 @@ Pipeline structure:
            ▼
     combined_vessel_graph (non-partitioned)
            │
+           ├─► sparql_summary (SPARQL data tables)
            ▼
     graphdb_upload (non-partitioned)
 
@@ -31,6 +32,7 @@ from dagster_pipeline.assets.harmonisation import (
     combined_vessel_graph,
     extracted_vessel_json,
     graphdb_upload,
+    sparql_summary,
     spreadsheet_data,
     validated_vessel_ttl,
     vessel_rdf_graph,
@@ -55,6 +57,7 @@ defs = Definitions(
         validated_vessel_ttl,
         # Output
         combined_vessel_graph,
+        sparql_summary,
         graphdb_upload,
     ],
     jobs=[full_pipeline_job, extraction_job, harmonisation_job, output_job],

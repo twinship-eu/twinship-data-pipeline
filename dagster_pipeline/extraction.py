@@ -12,7 +12,7 @@ Usage:
         # data is now ready for harmonisation to RDF
 """
 
-from typing import Callable
+from collections.abc import Callable
 
 import pandas as pd
 

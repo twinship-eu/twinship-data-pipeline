@@ -9,8 +9,8 @@ from rdflib import Graph, URIRef
 from twinship_harmonisation.low_level import (
     add_twinship_direct_connection,
     add_twinship_fuel_consumption,
-    create_twinship_main_engine,
     create_twinship_auxiliary_engine,
+    create_twinship_main_engine,
     create_twinship_uri,
 )
 

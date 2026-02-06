@@ -1,7 +1,8 @@
-"""Sensors for automatic vessel discovery.
+"""Sensor for automatic vessel discovery.
 
 The vessel_discovery_sensor monitors the spreadsheet_data asset and
-automatically registers new vessels as dynamic partitions.
+automatically registers new vessels as dynamic partitions, then triggers
+the full pipeline for each new vessel.
 
 Workflow:
 1. Materialize spreadsheet_data (discovers vessels from the Excel file)
@@ -29,7 +30,9 @@ from dagster_pipeline.jobs import full_pipeline_job
     job=full_pipeline_job,
     description="Discovers vessels from spreadsheet_data and registers them as partitions",
 )
-def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | SkipReason:
+def vessel_discovery_sensor(
+    context: SensorEvaluationContext,
+) -> SensorResult | SkipReason:
     """Discover vessels from the spreadsheet and register them as dynamic partitions.
 
     This sensor checks the spreadsheet_data asset's latest materialization,
@@ -43,10 +46,14 @@ def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | 
     events = instance.get_latest_materialization_event(asset_key)
 
     if events is None:
-        return SkipReason("spreadsheet_data has not been materialized yet. Materialize it first.")
+        return SkipReason(
+            "spreadsheet_data has not been materialized yet. Materialize it first."
+        )
 
     # Get the metadata from the materialization
-    metadata = events.asset_materialization.metadata if events.asset_materialization else {}
+    metadata = (
+        events.asset_materialization.metadata if events.asset_materialization else {}
+    )
 
     # Look for vessels in metadata
     vessels_meta = metadata.get("vessels")
@@ -55,7 +62,9 @@ def vessel_discovery_sensor(context: SensorEvaluationContext) -> SensorResult | 
 
     # Parse vessels from metadata
     try:
-        vessels_text = vessels_meta.text if hasattr(vessels_meta, "text") else str(vessels_meta)
+        vessels_text = (
+            vessels_meta.text if hasattr(vessels_meta, "text") else str(vessels_meta)
+        )
         discovered_vessels = [v.strip() for v in vessels_text.split(",") if v.strip()]
     except Exception as e:
         return SkipReason(f"Could not parse vessels metadata: {e}")

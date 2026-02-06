@@ -9,7 +9,6 @@ from rdflib.namespace import RDF, RDFS, XSD
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
     add_optional_double,
-    add_optional_integer,
     create_twinship_uri,
     get_twinship_type_uri,
 )
