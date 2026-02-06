@@ -183,9 +183,3 @@ def harmonise_all_twinship_vessels(data_dir: str | Path) -> Graph:
         g += harmonise_twinship_vessel_file(json_file)
 
     return bind_namespaces(g)
-
-
-# Backwards compatibility aliases
-harmonise_vessel_data = harmonise_twinship_vessel
-harmonise_vessel_file = harmonise_twinship_vessel_file
-harmonise_all_vessels = harmonise_all_twinship_vessels

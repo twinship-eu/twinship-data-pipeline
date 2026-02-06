@@ -3,7 +3,7 @@
 from rdflib import RDF, RDFS, Literal
 
 from twinship_harmonisation.constants import IDO, TWINSHIP
-from twinship_harmonisation.high_level import harmonise_vessel_data
+from twinship_harmonisation.high_level import harmonise_twinship_vessel
 from twinship_harmonisation.low_level import (
     add_twinship_fuel_consumption,
     create_twinship_auxiliary_engine,
@@ -92,7 +92,7 @@ def test_add_fuel_consumption():
     assert (engine_uri, TWINSHIP.consume, TWINSHIP.MGO) in g
 
 
-def test_harmonise_vessel_data():
+def test_harmonise_twinship_vessel():
     """Test high-level harmonisation function."""
     data = {
         "namespace": "test",
@@ -124,7 +124,7 @@ def test_harmonise_vessel_data():
         "gearboxes": [],
         "boilers": [],
     }
-    g = harmonise_vessel_data(**data)
+    g = harmonise_twinship_vessel(**data)
 
     # Should have vessel, main engine, auxiliary engine, and fuel relationships
     assert len(g) > 10
@@ -183,7 +183,7 @@ def test_connections():
         ],
         "boilers": [],
     }
-    g = harmonise_vessel_data(**data)
+    g = harmonise_twinship_vessel(**data)
 
     main_engine_uri = create_twinship_uri("ME-1", "test")
     gearbox_uri = create_twinship_uri("GB-1", "test")
