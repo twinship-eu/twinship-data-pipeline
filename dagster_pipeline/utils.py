@@ -34,15 +34,19 @@ def extract_operator_prefix(entity_id: str) -> str | None:
     return None
 
 
+def parse_bracket_list(value: str | None) -> list[str]:
+    """Parse '[HFO, MGO, MDO]' -> ['HFO', 'MGO', 'MDO']."""
+    if not value or pd.isna(value):
+        return []
+    cleaned = str(value).replace("[", "").replace("]", "")
+    return [part.strip() for part in cleaned.split(",") if part.strip()]
+
+
 def parse_types(type_string: str | None) -> list[str]:
     """Parse '[tws:FourStroke, tws:DieselEngine]' -> ['FourStroke', 'DieselEngine']."""
-    if not type_string or pd.isna(type_string):
-        return []
-    cleaned = str(type_string).replace("[", "").replace("]", "")
     return [
-        part.strip()[4:] if part.strip().startswith("tws:") else part.strip()
-        for part in cleaned.split(",")
-        if part.strip()
+        t[4:] if t.startswith("tws:") else t
+        for t in parse_bracket_list(type_string)
     ]
 
 

@@ -2,7 +2,7 @@
 
 from rdflib import RDF, RDFS, Literal
 
-from twinship_harmonisation.constants import TWINSHIP
+from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.high_level import harmonise_vessel_data
 from twinship_harmonisation.low_level import (
     add_fuel_consumption,
@@ -51,8 +51,7 @@ def test_create_main_engine():
 
     assert (engine_uri, RDF.type, TWINSHIP.MainEngineSystem) in g
     assert (engine_uri, RDF.type, TWINSHIP.TwoStroke) in g
-    assert (engine_uri, TWINSHIP.componentOf, vessel_uri) in g
-    assert (vessel_uri, TWINSHIP.hasComponent, engine_uri) in g
+    assert (engine_uri, IDO.partOf, vessel_uri) in g
 
 
 def test_create_auxiliary_engine():
