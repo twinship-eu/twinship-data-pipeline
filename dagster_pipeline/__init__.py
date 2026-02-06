@@ -26,7 +26,7 @@ Workflow:
 4. Run the partitioned assets via backfill
 """
 
-from dagster import AssetSelection, Definitions, define_asset_job
+from dagster import Definitions
 
 from dagster_pipeline.assets.harmonisation import (
     combined_vessel_graph,
@@ -36,36 +36,14 @@ from dagster_pipeline.assets.harmonisation import (
     validated_vessel_ttl,
     vessel_rdf_graph,
 )
+from dagster_pipeline.jobs import (
+    extraction_job,
+    full_pipeline_job,
+    harmonisation_job,
+    output_job,
+)
 from dagster_pipeline.resources import shacl_validator
 from dagster_pipeline.sensors import vessel_discovery_sensor
-
-# Job to run the full pipeline
-full_pipeline_job = define_asset_job(
-    name="full_pipeline",
-    selection=AssetSelection.all(),
-    description="Run the complete pipeline: extract → harmonise → validate → upload",
-)
-
-# Job for just extraction
-extraction_job = define_asset_job(
-    name="extraction_pipeline",
-    selection=AssetSelection.groups("extraction"),
-    description="Extract vessel data from spreadsheet to JSON",
-)
-
-# Job for harmonisation and validation
-harmonisation_job = define_asset_job(
-    name="harmonisation_pipeline",
-    selection=AssetSelection.groups("harmonisation", "validation"),
-    description="Harmonise JSON to RDF and validate",
-)
-
-# Job for output (combine and upload)
-output_job = define_asset_job(
-    name="output_pipeline",
-    selection=AssetSelection.groups("output"),
-    description="Combine TTL files and upload to GraphDB",
-)
 
 defs = Definitions(
     assets=[
