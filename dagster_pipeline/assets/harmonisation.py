@@ -6,7 +6,8 @@ Pipeline structure:
 3. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
 4. validated_vessel_ttl - Validate and write TTL files (partitioned)
 5. combined_vessel_graph - Combine all RDF graphs
-6. graphdb_upload - Upload to GraphDB (placeholder)
+6. sparql_summary - SPARQL data tables for the Dagster UI
+7. graphdb_upload - Upload to GraphDB (placeholder)
 """
 
 from pathlib import Path
@@ -28,7 +29,6 @@ from dagster_pipeline.extraction import (
 from dagster_pipeline.resources import ShaclValidator
 from twinship_harmonisation import harmonise_twinship_vessel
 from twinship_harmonisation.utils import bind_namespaces
-
 
 # =============================================================================
 # Partitions Definition
@@ -278,6 +278,124 @@ def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphC
     })
 
     return g
+
+
+@asset(
+    group_name="output",
+    description="Run SPARQL queries against the combined graph and display results",
+    kinds={"python", "SPARQL"},
+)
+def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph) -> None:
+    """Run SPARQL queries and attach results as metadata tables in the Dagster UI."""
+    g = combined_vessel_graph
+
+    # --- Vessel overview: component counts per vessel ---
+    vessel_overview = g.query("""
+        PREFIX tws: <https://twin-ship.eu/>
+        PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?vessel ?label
+               (COUNT(DISTINCT ?me) AS ?main_engines)
+               (COUNT(DISTINCT ?ae) AS ?aux_engines)
+               (COUNT(DISTINCT ?prop) AS ?propellers)
+               (COUNT(DISTINCT ?gb) AS ?gearboxes)
+        WHERE {
+            ?vessel a tws:VesselSystem .
+            OPTIONAL { ?vessel rdfs:label ?label }
+            OPTIONAL { ?me a tws:MainEngineSystem ; ido:partOf ?vessel }
+            OPTIONAL { ?ae a tws:AuxiliaryEngineSystem ; ido:partOf ?vessel }
+            OPTIONAL { ?prop ido:partOf ?vessel . ?prop a ?pt .
+                       FILTER(?pt IN (tws:CPP, tws:FPP)) }
+            OPTIONAL { ?gb ido:partOf ?vessel . ?gb a ?gt .
+                       FILTER(?gt IN (tws:DirectDrive, tws:Reduction,
+                                      tws:SingleSpeed, tws:TISO, tws:PTO)) }
+        }
+        GROUP BY ?vessel ?label
+        ORDER BY ?vessel
+    """)
+
+    vessel_rows = []
+    for row in vessel_overview:
+        vessel_id = str(row.vessel).rsplit("/", 1)[-1]
+        vessel_rows.append(
+            f"| {vessel_id} | {row.label or ''} | {row.main_engines} "
+            f"| {row.aux_engines} | {row.propellers} | {row.gearboxes} |"
+        )
+
+    vessel_table = (
+        "| Vessel | Label | Main Engines | Aux Engines | Propellers | Gearboxes |\n"
+        "| --- | --- | --- | --- | --- | --- |\n"
+        + "\n".join(vessel_rows)
+    )
+
+    # --- Engine details ---
+    engine_details = g.query("""
+        PREFIX tws: <https://twin-ship.eu/>
+        PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?engine ?label ?power ?fuels
+        WHERE {
+            ?engine a tws:MainEngineSystem .
+            OPTIONAL { ?engine rdfs:label ?label }
+            OPTIONAL { ?engine tws:twShaftPowerMaxInKW ?power }
+            OPTIONAL {
+                SELECT ?engine (GROUP_CONCAT(?flabel; separator=", ") AS ?fuels)
+                WHERE {
+                    ?engine tws:consume ?fuel .
+                    ?fuel rdfs:label ?flabel .
+                }
+                GROUP BY ?engine
+            }
+        }
+        ORDER BY ?engine
+    """)
+
+    engine_rows = []
+    for row in engine_details:
+        engine_id = str(row.engine).rsplit("/", 1)[-1]
+        power = f"{float(row.power):.0f}" if row.power is not None else ""
+        engine_rows.append(
+            f"| {engine_id} | {row.label or ''} | {power} | {row.fuels or ''} |"
+        )
+
+    engine_table = (
+        "| Engine | Label | Power (kW) | Fuels |\n"
+        "| --- | --- | --- | --- |\n"
+        + "\n".join(engine_rows)
+    )
+
+    # --- Fuel usage across all components ---
+    fuel_usage = g.query("""
+        PREFIX tws: <https://twin-ship.eu/>
+        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+        SELECT ?fuel_label (COUNT(DISTINCT ?consumer) AS ?consumers)
+        WHERE {
+            ?consumer tws:consume ?fuel .
+            ?fuel rdfs:label ?fuel_label .
+        }
+        GROUP BY ?fuel_label
+        ORDER BY ?fuel_label
+    """)
+
+    fuel_rows = []
+    for row in fuel_usage:
+        fuel_rows.append(f"| {row.fuel_label} | {row.consumers} |")
+
+    fuel_table = (
+        "| Fuel | Consumers |\n"
+        "| --- | --- |\n"
+        + "\n".join(fuel_rows)
+    )
+
+    context.add_output_metadata({
+        "vessel_overview": MetadataValue.md(vessel_table),
+        "engine_details": MetadataValue.md(engine_table),
+        "fuel_usage": MetadataValue.md(fuel_table),
+        "total_triples": MetadataValue.int(len(g)),
+    })
 
 
 @asset(
