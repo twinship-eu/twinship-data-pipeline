@@ -14,17 +14,14 @@ import pandas as pd
 OPERATORS = {
     "GRI": {
         "namespace": "grimaldi",
-        "label": "Grimaldi",
         "vessel_type": "RoRo",
     },
     "STL": {
         "namespace": "stena-scandinavica",
-        "label": "Stena Line",
         "vessel_type": "RoPax",
     },
     "STT": {
         "namespace": "stena-tanker",
-        "label": "Stena Tanker",
         "vessel_type": "Tanker",
     },
 }
@@ -362,7 +359,6 @@ def build_operator_json(
 
     return {
         "namespace": operator_info["namespace"],
-        "operator": operator_info["label"],
         "vessel": {
             "id": vessel.get("id"),
             "label": vessel.get("name"),

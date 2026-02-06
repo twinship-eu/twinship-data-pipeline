@@ -4,12 +4,12 @@ from typing import Any
 
 import pandas as pd
 
-# Known operator mappings: prefix -> (namespace, display_name)
+# Known operator mappings: prefix -> namespace
 # Should ideally be updated when new operators are added to the dataset.
 KNOWN_OPERATORS = {
-    "GRI": ("grimaldi", "Grimaldi"),
-    "STL": ("stena-scandinavica", "Stena Line"),
-    "STT": ("stena-tanker", "Stena Tanker"),
+    "GRI": "grimaldi",
+    "STL": "stena-scandinavica",
+    "STT": "stena-tanker",
 }
 
 
@@ -52,9 +52,4 @@ def parse_types(type_string: str | None) -> list[str]:
 
 def prefix_to_namespace(prefix: str) -> str:
     """Convert operator prefix to namespace (GRI -> grimaldi)."""
-    return KNOWN_OPERATORS.get(prefix.upper(), (prefix.lower(),))[0]
-
-
-def prefix_to_name(prefix: str) -> str:
-    """Convert operator prefix to display name (GRI -> Grimaldi)."""
-    return KNOWN_OPERATORS.get(prefix.upper(), (None, prefix.title()))[1]
+    return KNOWN_OPERATORS.get(prefix.upper(), prefix.lower())

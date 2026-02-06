@@ -8,7 +8,7 @@ Usage:
     vessels = discover_vessels_from_sheets(sheets)
 
     for namespace, info in vessels.items():
-        data = extract_vessel_for_operator(sheets, info["prefix"], namespace, info["name"])
+        data = extract_vessel_for_operator(sheets, info["prefix"], namespace)
         # data is now ready for harmonisation to RDF
 """
 
@@ -21,7 +21,6 @@ from dagster_pipeline.utils import (
     extract_operator_prefix,
     parse_bracket_list,
     parse_types,
-    prefix_to_name,
     prefix_to_namespace,
 )
 
@@ -92,7 +91,7 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
                     prefixes.add(prefix)
 
     return {
-        prefix_to_namespace(p): {"prefix": p, "name": prefix_to_name(p)}
+        prefix_to_namespace(p): {"prefix": p}
         for p in sorted(prefixes)
     }
 
@@ -153,7 +152,6 @@ def extract_vessel_for_operator(
     sheets: dict[str, pd.DataFrame],
     operator_prefix: str,
     namespace: str,
-    operator_name: str,
 ) -> dict:
     """Extract all vessel data for a specific operator.
 
@@ -163,7 +161,6 @@ def extract_vessel_for_operator(
 
     return {
         "namespace": namespace,
-        "operator": operator_name,
         "vessel": extract_vessel(sheets, operator_prefix),
         "main_engines": extract_main_engines(sheets, operator_prefix),
         "auxiliary_engines": extract_auxiliary_engines(sheets, operator_prefix),
