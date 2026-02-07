@@ -1,0 +1,22 @@
+PREFIX tws: <https://twin-ship.eu/>
+PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (REPLACE(STR(?vessel), "^.*/", "") AS ?vessel_id) ?label
+       (COUNT(DISTINCT ?me) AS ?main_engines)
+       (COUNT(DISTINCT ?ae) AS ?aux_engines)
+       (COUNT(DISTINCT ?prop) AS ?propellers)
+       (COUNT(DISTINCT ?gb) AS ?gearboxes)
+WHERE {
+    ?vessel a tws:VesselSystem .
+    OPTIONAL { ?vessel rdfs:label ?label }
+    OPTIONAL { ?me a tws:MainEngineSystem ; ido:partOf ?vessel }
+    OPTIONAL { ?ae a tws:AuxiliaryEngineSystem ; ido:partOf ?vessel }
+    OPTIONAL { ?prop ido:partOf ?vessel . ?prop a ?pt .
+               FILTER(?pt IN (tws:CPP, tws:FPP)) }
+    OPTIONAL { ?gb ido:partOf ?vessel . ?gb a ?gt .
+               FILTER(?gt IN (tws:DirectDrive, tws:Reduction,
+                              tws:SingleSpeed, tws:TISO, tws:PTO)) }
+}
+GROUP BY ?vessel ?label
+ORDER BY ?vessel
