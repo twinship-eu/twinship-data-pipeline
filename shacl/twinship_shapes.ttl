@@ -1,6 +1,6 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix tws: <https://twin-ship.eu/> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
 @prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 

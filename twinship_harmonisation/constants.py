@@ -3,7 +3,7 @@
 from rdflib import Namespace
 
 # TwinShip ontology namespaces
-TWINSHIP = Namespace("https://twin-ship.eu/")
+TWINSHIP = Namespace("https://twin-ship.eu/twinship#")
 TWINSHIP_IND = Namespace("https://twin-ship.eu/individuals/")
 
 # IDO - Industrial Data Ontology
