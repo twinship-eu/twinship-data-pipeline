@@ -5,19 +5,22 @@ from rdflib import Graph, URIRef
 from twinship_harmonisation.constants import IDO
 
 
-def add_twinship_direct_connection(
-    g: Graph,
+def build_twinship_direct_connection(
     subject_uri: URIRef,
     object_uri: URIRef,
-) -> None:
-    """Add a directlyConnectedTo relationship between two components.
+) -> Graph:
+    """Build a graph with a directlyConnectedTo relationship between two components.
 
     This is a symmetric relationship, so both directions are added.
 
     Args:
-        g: Graph to add triples to.
         subject_uri: First component URI.
         object_uri: Second component URI.
+
+    Returns:
+        Graph containing bidirectional connection triples.
     """
+    g = Graph()
     g.add((subject_uri, IDO.directlyConnectedTo, object_uri))
     g.add((object_uri, IDO.directlyConnectedTo, subject_uri))
+    return g

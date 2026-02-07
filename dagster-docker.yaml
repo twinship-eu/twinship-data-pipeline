@@ -15,17 +15,22 @@ run_launcher:
   module: dagster_docker
   class: DockerRunLauncher
   config:
+    image:
+      env: DAGSTER_CURRENT_IMAGE
     env_vars:
       - DAGSTER_POSTGRES_USER
       - DAGSTER_POSTGRES_PASSWORD
       - DAGSTER_POSTGRES_DB
       - DAGSTER_POSTGRES_HOST
-    network: twinship_network
+      - DAGSTER_HOME
+    network: twinship-data-pipeline_twinship_network
     container_kwargs:
       volumes:
-        - /var/run/docker.sock:/var/run/docker.sock
-        - twinship-data-pipeline_postgresql_data:/var/lib/postgresql/data
+        - twinship-data-pipeline_dagster_storage:/app/storage
+        - twinship-data-pipeline_pipeline_output:/app/output
 
 run_coordinator:
   module: dagster.core.run_coordinator
   class: QueuedRunCoordinator
+  config:
+    max_concurrent_runs: 2

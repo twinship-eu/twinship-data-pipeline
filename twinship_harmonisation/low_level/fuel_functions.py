@@ -24,20 +24,22 @@ def get_twinship_fuel_uri(fuel_type: str) -> URIRef | None:
     return fuel_map.get(fuel_type)
 
 
-def add_twinship_fuel_consumption(
-    g: Graph,
+def build_twinship_fuel_consumption(
     subject_uri: URIRef,
     fuels: list[str] | None,
-) -> None:
-    """Add TwinShip fuel consumption relationships to a graph.
+) -> Graph:
+    """Build a graph of TwinShip fuel consumption relationships.
 
     Args:
-        g: Graph to add triples to.
         subject_uri: URI of the entity consuming fuel.
         fuels: List of fuel type codes.
+
+    Returns:
+        Graph containing fuel consumption triples.
     """
+    g = Graph()
     if not fuels:
-        return
+        return g
 
     for fuel_type in fuels:
         fuel_uri = get_twinship_fuel_uri(fuel_type)
@@ -45,3 +47,5 @@ def add_twinship_fuel_consumption(
             g.add((fuel_uri, RDF.type, TWINSHIP.Fuel))
             g.add((fuel_uri, RDFS.label, Literal(fuel_type)))
             g.add((subject_uri, TWINSHIP.consume, fuel_uri))
+
+    return g

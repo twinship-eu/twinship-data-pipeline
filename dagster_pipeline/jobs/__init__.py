@@ -9,6 +9,13 @@ full_pipeline_job = define_asset_job(
     description="Run the complete pipeline: extract → harmonise → validate → upload",
 )
 
+# Job for just the spreadsheet (non-partitioned, used by sensor on first tick)
+spreadsheet_job = define_asset_job(
+    name="spreadsheet_pipeline",
+    selection=AssetSelection.assets("spreadsheet_data"),
+    description="Load the spreadsheet so the sensor can discover vessels",
+)
+
 # Job for just extraction
 extraction_job = define_asset_job(
     name="extraction_pipeline",

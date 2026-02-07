@@ -1,22 +1,20 @@
 """Mid-level functions for creating TwinShip propulsion systems.
 
-Each function handles a single propulsion component and adds it to the
-graph in place. Parameter names match JSON keys so callers can unpack
-with **gearbox or **propeller.
+Each function builds a graph for propulsion components and returns it.
+Parameter names match JSON keys so callers can unpack with **kwargs.
 """
 
 from rdflib import Graph, URIRef
 
 from twinship_harmonisation.low_level import (
-    add_twinship_direct_connection,
+    build_twinship_direct_connection,
     create_twinship_gearbox,
     create_twinship_propeller,
     create_twinship_uri,
 )
 
 
-def add_twinship_gearbox(
-    g: Graph,
+def build_twinship_gearbox(
     *,
     namespace: str,
     vessel_uri: URIRef,
@@ -29,13 +27,12 @@ def add_twinship_gearbox(
     propeller_id: str | None = None,
     vessel_id: str | None = None,
     engine_id: str | None = None,
-) -> None:
-    """Create a single gearbox and add it to the graph.
+) -> Graph:
+    """Build a graph for a single gearbox.
 
-    Also adds gearbox -> propeller connection when propeller_id is present.
+    Also includes gearbox -> propeller connection when propeller_id is present.
 
     Args:
-        g: Graph to add triples to (modified in place).
         namespace: Namespace for URI generation.
         vessel_uri: URI of the parent vessel.
         id: Gearbox identifier (maps to gearbox_id in low-level function).
@@ -44,9 +41,12 @@ def add_twinship_gearbox(
         propeller_id: If set, creates gearbox -> propeller connection.
         vessel_id: Accepted from JSON for **kwargs compatibility, unused.
         engine_id: Accepted from JSON for **kwargs compatibility, unused.
+
+    Returns:
+        Graph containing all triples for this gearbox.
     """
     # Create the gearbox triples (type assertions, data properties, partOf)
-    gearbox_uri, gearbox_graph = create_twinship_gearbox(
+    gearbox_uri, g = create_twinship_gearbox(
         namespace=namespace,
         gearbox_id=id,
         vessel_uri=vessel_uri,
@@ -56,62 +56,41 @@ def add_twinship_gearbox(
         efficiency=efficiency,
         shaft_generator=shaft_generator,
     )
-    g += gearbox_graph
 
     # Connect gearbox to its propeller if specified
     if propeller_id:
-        add_twinship_direct_connection(
-            g, gearbox_uri, create_twinship_uri(propeller_id, namespace)
+        g += build_twinship_direct_connection(
+            gearbox_uri, create_twinship_uri(propeller_id, namespace)
         )
 
+    return g
 
-def add_twinship_propeller(
-    g: Graph,
-    *,
+
+def twinship_propellers_graph(
     namespace: str,
     vessel_uri: URIRef,
-    id: str,
-    name: str | None = None,
-    types: list[str] | None = None,
-    diameter_mm: float | None = None,
-    blades: int | None = None,
-    pitch_diameter_ratio: float | None = None,
-    pitch_max_percentage: float | None = None,
-    expanded_area_ratio_percentage: float | None = None,
-    hub_ratio: float | None = None,
-    skew_angle_degree: float | None = None,
-    efficiency: float | None = None,
-    rudder_angle_degree: float | None = None,
-    vessel_id: str | None = None,
-    gearbox_id: str | None = None,
-) -> None:
-    """Create a single propeller and add it to the graph.
-
-    Args:
-        g: Graph to add triples to (modified in place).
-        namespace: Namespace for URI generation.
-        vessel_uri: URI of the parent vessel.
-        id: Propeller identifier (maps to propeller_id in low-level function).
-        name: Human-readable label.
-        types: RDF type names to add (e.g. ["CPP"]).
-        vessel_id: Accepted from JSON for **kwargs compatibility, unused.
-        gearbox_id: Accepted from JSON for **kwargs compatibility, unused.
-    """
-    # Create the propeller triples (type assertions, data properties, partOf)
-    _propeller_uri, propeller_graph = create_twinship_propeller(
-        namespace=namespace,
-        propeller_id=id,
-        vessel_uri=vessel_uri,
-        label=name,
-        types=types,
-        diameter_mm=diameter_mm,
-        blades=blades,
-        pitch_diameter_ratio=pitch_diameter_ratio,
-        pitch_max_percentage=pitch_max_percentage,
-        expanded_area_ratio_percentage=expanded_area_ratio_percentage,
-        hub_ratio=hub_ratio,
-        skew_angle_degree=skew_angle_degree,
-        efficiency=efficiency,
-        rudder_angle_degree=rudder_angle_degree,
-    )
-    g += propeller_graph
+    propellers: list[dict] | None,
+) -> Graph:
+    """Build a combined graph for all propellers."""
+    g = Graph()
+    for propeller in propellers or []:
+        _uri, propeller_graph = create_twinship_propeller(
+            namespace=namespace,
+            propeller_id=propeller["id"],
+            vessel_uri=vessel_uri,
+            label=propeller.get("name"),
+            types=propeller.get("types"),
+            diameter_mm=propeller.get("diameter_mm"),
+            blades=propeller.get("blades"),
+            pitch_diameter_ratio=propeller.get("pitch_diameter_ratio"),
+            pitch_max_percentage=propeller.get("pitch_max_percentage"),
+            expanded_area_ratio_percentage=propeller.get(
+                "expanded_area_ratio_percentage"
+            ),
+            hub_ratio=propeller.get("hub_ratio"),
+            skew_angle_degree=propeller.get("skew_angle_degree"),
+            efficiency=propeller.get("efficiency"),
+            rudder_angle_degree=propeller.get("rudder_angle_degree"),
+        )
+        g += propeller_graph
+    return g

@@ -2,4 +2,4 @@ load_from:
   - grpc_server:
       host: user_code
       port: 4000
-      location_name: "twinship_pipeline"
+      location_name: "dagster_pipeline"

@@ -5,9 +5,9 @@ automatically registers new vessels as dynamic partitions, then triggers
 the full pipeline for each new vessel.
 
 Workflow:
-1. Materialize spreadsheet_data (discovers vessels from the Excel file)
-2. Sensor runs automatically, registers discovered vessels as partitions,
-   and triggers the full pipeline for each new vessel
+1. On startup, the sensor triggers spreadsheet_data materialization
+2. Once spreadsheet_data is materialized, the sensor discovers vessels,
+   registers them as dynamic partitions, and triggers the full pipeline
 """
 
 from dagster import (
@@ -21,13 +21,13 @@ from dagster import (
 )
 
 from dagster_pipeline.assets.harmonisation import vessel_partitions_def
-from dagster_pipeline.jobs import full_pipeline_job
+from dagster_pipeline.jobs import full_pipeline_job, spreadsheet_job
 
 
 @sensor(
     minimum_interval_seconds=30,
     default_status=DefaultSensorStatus.RUNNING,
-    job=full_pipeline_job,
+    jobs=[spreadsheet_job, full_pipeline_job],
     description="Discovers vessels from spreadsheet_data and registers them as partitions",
 )
 def vessel_discovery_sensor(
@@ -35,9 +35,9 @@ def vessel_discovery_sensor(
 ) -> SensorResult | SkipReason:
     """Discover vessels from the spreadsheet and register them as dynamic partitions.
 
-    This sensor checks the spreadsheet_data asset's latest materialization,
-    registers any new vessels as dynamic partitions, and triggers the full
-    pipeline for each newly discovered vessel.
+    On first run, triggers spreadsheet_data materialization via the extraction job.
+    Once spreadsheet_data is materialized, registers any new vessels as dynamic
+    partitions and triggers the full pipeline for each newly discovered vessel.
     """
     instance = context.instance
 
@@ -46,8 +46,14 @@ def vessel_discovery_sensor(
     events = instance.get_latest_materialization_event(asset_key)
 
     if events is None:
-        return SkipReason(
-            "spreadsheet_data has not been materialized yet. Materialize it first."
+        context.log.info("spreadsheet_data not materialized — triggering extraction")
+        return SensorResult(
+            run_requests=[
+                RunRequest(
+                    run_key="spreadsheet-initial",
+                    job_name="spreadsheet_pipeline",
+                )
+            ],
         )
 
     # Get the metadata from the materialization
@@ -92,6 +98,7 @@ def vessel_discovery_sensor(
         RunRequest(
             run_key=f"vessel-{vessel}",
             partition_key=vessel,
+            job_name="full_pipeline",
         )
         for vessel in new_vessels
     ]
