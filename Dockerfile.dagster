@@ -8,10 +8,14 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 WORKDIR /app
 
 # Copy dependency files
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock README.md ./
 
 # Install dependencies (including dagster-webserver)
 RUN uv sync --frozen --no-dev
+
+# Copy application code (needed for module resolution)
+COPY twinship_harmonisation/ ./twinship_harmonisation/
+COPY dagster_pipeline/ ./dagster_pipeline/
 
 # Copy dagster configuration (rename for Docker)
 COPY dagster-docker.yaml dagster.yaml

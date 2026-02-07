@@ -31,9 +31,11 @@ services:
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
+      DAGSTER_HOME: /app
     volumes:
       - ./data:/app/data
-      - ./output:/app/output
+      - pipeline_output:/app/output
+      - dagster_storage:/app/storage
     networks:
       - twinship_network
     depends_on:
@@ -59,13 +61,16 @@ services:
     ports:
       - "3000:3000"
     environment:
+      DAGSTER_HOME: /app
       DAGSTER_POSTGRES_USER: dagster
       DAGSTER_POSTGRES_PASSWORD: dagster
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
+      DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./output:/app/output
+      - pipeline_output:/app/output
+      - dagster_storage:/app/storage
     networks:
       - twinship_network
     depends_on:
@@ -85,13 +90,16 @@ services:
       - run
     restart: on-failure
     environment:
+      DAGSTER_HOME: /app
       DAGSTER_POSTGRES_USER: dagster
       DAGSTER_POSTGRES_PASSWORD: dagster
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
+      DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./output:/app/output
+      - pipeline_output:/app/output
+      - dagster_storage:/app/storage
     networks:
       - twinship_network
     depends_on:
@@ -100,6 +108,8 @@ services:
 
 volumes:
   postgresql_data:
+  dagster_storage:
+  pipeline_output:
 
 networks:
   twinship_network:

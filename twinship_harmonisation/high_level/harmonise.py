@@ -10,17 +10,19 @@ from pathlib import Path
 
 from rdflib import Graph
 
+from twinship_harmonisation.high_level.components import (
+    twinship_auxiliary_engines_graph,
+    twinship_boilers_graph,
+    twinship_gearboxes_graph,
+    twinship_main_engines_graph,
+    twinship_pms_graph,
+)
 from twinship_harmonisation.low_level import create_twinship_vessel
 from twinship_harmonisation.mid_level import (
-    add_twinship_auxiliary_engine,
-    add_twinship_boiler,
-    add_twinship_emergency_generator,
-    add_twinship_gearbox,
-    add_twinship_main_engine,
-    add_twinship_pms,
-    add_twinship_propeller,
-    add_twinship_shaft_generator,
-    add_twinship_thruster,
+    twinship_emergency_generators_graph,
+    twinship_propellers_graph,
+    twinship_shaft_generators_graph,
+    twinship_thrusters_graph,
 )
 from twinship_harmonisation.utils import bind_namespaces
 
@@ -61,10 +63,7 @@ def harmonise_twinship_vessel(
     Returns:
         RDFLib Graph with all vessel data and namespace bindings.
     """
-    g = Graph()
-
-    # --- Vessel ---
-    vessel_uri, vessel_graph = create_twinship_vessel(
+    vessel_uri, g = create_twinship_vessel(
         namespace=namespace,
         vessel_id=vessel["id"],
         label=vessel.get("label"),
@@ -76,76 +75,27 @@ def harmonise_twinship_vessel(
         draft_mid_stbd_max_m=vessel.get("draft_mid_stbd_max_m"),
         depth_of_water_max_m=vessel.get("depth_of_water_max_m"),
     )
-    g += vessel_graph
 
-    # --- Engines ---
-    for engine in main_engines or []:
-        add_twinship_main_engine(
-            g, namespace=namespace, vessel_uri=vessel_uri, **engine
-        )
-
-    for engine in auxiliary_engines or []:
-        add_twinship_auxiliary_engine(
-            g, namespace=namespace, vessel_uri=vessel_uri, **engine
-        )
-
-    # --- Propulsion ---
-    for gearbox in gearboxes or []:
-        add_twinship_gearbox(
-            g, namespace=namespace, vessel_uri=vessel_uri, **gearbox
-        )
-
-    for propeller in propellers or []:
-        add_twinship_propeller(
-            g, namespace=namespace, vessel_uri=vessel_uri, **propeller
-        )
-
-    # --- Power Management System ---
-    # Collect component IDs so each PMS can establish connections to them
-    auxiliary_engine_ids = [
-        auxiliary_engine["id"] for auxiliary_engine in auxiliary_engines or []
-    ]
-    emergency_generator_ids = [
-        emergency_generator["id"]
-        for emergency_generator in emergency_generators or []
-    ]
-    thruster_ids = [thruster["id"] for thruster in thrusters or []]
-    shaft_generator_ids = [
-        shaft_generator["id"] for shaft_generator in shaft_generators or []
-    ]
-
-    for power_management_system in pms or []:
-        add_twinship_pms(
-            g,
-            namespace=namespace,
-            vessel_uri=vessel_uri,
-            auxiliary_engine_ids=auxiliary_engine_ids,
-            emergency_generator_ids=emergency_generator_ids,
-            thruster_ids=thruster_ids,
-            shaft_generator_ids=shaft_generator_ids,
-            **power_management_system,
-        )
-
-    # --- Other electrical components ---
-    for emergency_generator in emergency_generators or []:
-        add_twinship_emergency_generator(
-            g, namespace=namespace, vessel_uri=vessel_uri, **emergency_generator
-        )
-
-    for thruster in thrusters or []:
-        add_twinship_thruster(
-            g, namespace=namespace, vessel_uri=vessel_uri, **thruster
-        )
-
-    for shaft_generator in shaft_generators or []:
-        add_twinship_shaft_generator(
-            g, namespace=namespace, vessel_uri=vessel_uri, **shaft_generator
-        )
-
-    for boiler in boilers or []:
-        add_twinship_boiler(
-            g, namespace=namespace, vessel_uri=vessel_uri, **boiler
-        )
+    # Build graphs for each component type and combine
+    g += twinship_main_engines_graph(namespace, vessel_uri, main_engines)
+    g += twinship_auxiliary_engines_graph(namespace, vessel_uri, auxiliary_engines)
+    g += twinship_gearboxes_graph(namespace, vessel_uri, gearboxes)
+    g += twinship_propellers_graph(namespace, vessel_uri, propellers)
+    g += twinship_thrusters_graph(namespace, vessel_uri, thrusters)
+    g += twinship_shaft_generators_graph(namespace, vessel_uri, shaft_generators)
+    g += twinship_boilers_graph(namespace, vessel_uri, boilers)
+    g += twinship_emergency_generators_graph(
+        namespace, vessel_uri, emergency_generators
+    )
+    g += twinship_pms_graph(
+        namespace,
+        vessel_uri,
+        pms,
+        auxiliary_engine_ids=[e["id"] for e in auxiliary_engines or []],
+        emergency_generator_ids=[e["id"] for e in emergency_generators or []],
+        thruster_ids=[t["id"] for t in thrusters or []],
+        shaft_generator_ids=[s["id"] for s in shaft_generators or []],
+    )
 
     return bind_namespaces(g)
 

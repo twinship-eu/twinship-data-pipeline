@@ -1,22 +1,21 @@
 """Mid-level functions for creating TwinShip engine systems.
 
-Each function handles a single engine and adds it to the graph in place.
+Each function builds a graph for a single engine and returns it.
 Parameter names match JSON keys so callers can unpack with **engine.
 """
 
 from rdflib import Graph, URIRef
 
 from twinship_harmonisation.low_level import (
-    add_twinship_direct_connection,
-    add_twinship_fuel_consumption,
+    build_twinship_direct_connection,
+    build_twinship_fuel_consumption,
     create_twinship_auxiliary_engine,
     create_twinship_main_engine,
     create_twinship_uri,
 )
 
 
-def add_twinship_main_engine(
-    g: Graph,
+def build_twinship_main_engine(
     *,
     namespace: str,
     vessel_uri: URIRef,
@@ -41,14 +40,13 @@ def add_twinship_main_engine(
     fuels: list[str] | None = None,
     gearbox_id: str | None = None,
     vessel_id: str | None = None,
-) -> None:
-    """Create a single main engine and add it to the graph.
+) -> Graph:
+    """Build a graph for a single main engine.
 
-    Also adds fuel consumption triples and an engine -> gearbox connection
+    Also includes fuel consumption triples and an engine -> gearbox connection
     when gearbox_id is present.
 
     Args:
-        g: Graph to add triples to (modified in place).
         namespace: Namespace for URI generation.
         vessel_uri: URI of the parent vessel.
         id: Engine identifier (maps to engine_id in low-level function).
@@ -57,9 +55,12 @@ def add_twinship_main_engine(
         fuels: Fuel type names for consumption triples (e.g. ["HFO", "MGO"]).
         gearbox_id: If set, creates engine -> gearbox connection.
         vessel_id: Accepted from JSON for **kwargs compatibility, unused.
+
+    Returns:
+        Graph containing all triples for this main engine.
     """
     # Create the main engine triples (type assertions, data properties, partOf)
-    engine_uri, engine_graph = create_twinship_main_engine(
+    engine_uri, g = create_twinship_main_engine(
         namespace=namespace,
         engine_id=id,
         vessel_uri=vessel_uri,
@@ -81,20 +82,20 @@ def add_twinship_main_engine(
         fuel_consumption_total_mt=fuel_consumption_total_mt,
         power_propulsion_total_kw=power_propulsion_total_kw,
     )
-    g += engine_graph
 
     # Add fuel consumption relationships (e.g. engine twinship:consume twinship:HFO)
-    add_twinship_fuel_consumption(g, engine_uri, fuels)
+    g += build_twinship_fuel_consumption(engine_uri, fuels)
 
     # Connect engine to its gearbox if specified
     if gearbox_id:
-        add_twinship_direct_connection(
-            g, engine_uri, create_twinship_uri(gearbox_id, namespace)
+        g += build_twinship_direct_connection(
+            engine_uri, create_twinship_uri(gearbox_id, namespace)
         )
 
+    return g
 
-def add_twinship_auxiliary_engine(
-    g: Graph,
+
+def build_twinship_auxiliary_engine(
     *,
     namespace: str,
     vessel_uri: URIRef,
@@ -110,13 +111,12 @@ def add_twinship_auxiliary_engine(
     fuels: list[str] | None = None,
     vessel_id: str | None = None,
     pms_id: str | None = None,
-) -> None:
-    """Create a single auxiliary engine and add it to the graph.
+) -> Graph:
+    """Build a graph for a single auxiliary engine.
 
-    Also adds fuel consumption triples.
+    Also includes fuel consumption triples.
 
     Args:
-        g: Graph to add triples to (modified in place).
         namespace: Namespace for URI generation.
         vessel_uri: URI of the parent vessel.
         id: Engine identifier (maps to engine_id in low-level function).
@@ -125,9 +125,12 @@ def add_twinship_auxiliary_engine(
         fuels: Fuel type names for consumption triples.
         vessel_id: Accepted from JSON for **kwargs compatibility, unused.
         pms_id: Accepted from JSON for **kwargs compatibility, unused.
+
+    Returns:
+        Graph containing all triples for this auxiliary engine.
     """
     # Create the auxiliary engine triples
-    engine_uri, engine_graph = create_twinship_auxiliary_engine(
+    engine_uri, g = create_twinship_auxiliary_engine(
         namespace=namespace,
         engine_id=id,
         vessel_uri=vessel_uri,
@@ -140,7 +143,8 @@ def add_twinship_auxiliary_engine(
         auxiliary_do_mode=auxiliary_do_mode,
         fuel_rate_mass_net_kg_per_hr=fuel_rate_mass_net_kg_per_hr,
     )
-    g += engine_graph
 
     # Add fuel consumption relationships
-    add_twinship_fuel_consumption(g, engine_uri, fuels)
+    g += build_twinship_fuel_consumption(engine_uri, fuels)
+
+    return g

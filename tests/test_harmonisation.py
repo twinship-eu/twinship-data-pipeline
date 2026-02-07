@@ -5,7 +5,7 @@ from rdflib import RDF, RDFS, Literal
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.high_level import harmonise_twinship_vessel
 from twinship_harmonisation.low_level import (
-    add_twinship_fuel_consumption,
+    build_twinship_fuel_consumption,
     create_twinship_auxiliary_engine,
     create_twinship_main_engine,
     create_twinship_uri,
@@ -80,13 +80,10 @@ def test_get_fuel_uri():
     assert get_twinship_fuel_uri("unknown") is None
 
 
-def test_add_fuel_consumption():
+def test_build_fuel_consumption():
     """Test fuel consumption triple creation."""
-    from rdflib import Graph
-
-    g = Graph()
     engine_uri = create_twinship_uri("ME-1", "test")
-    add_twinship_fuel_consumption(g, engine_uri, ["HFO", "MGO"])
+    g = build_twinship_fuel_consumption(engine_uri, ["HFO", "MGO"])
 
     assert (engine_uri, TWINSHIP.consume, TWINSHIP.HFO) in g
     assert (engine_uri, TWINSHIP.consume, TWINSHIP.MGO) in g
