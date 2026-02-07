@@ -2,151 +2,121 @@
 
 A data processing pipeline for converting maritime vessel data into RDF triples that conform to the [TwinShip ontology](https://github.com/SINTEF/twinship-ontology-demo).
 
-## Features
+**Pipeline:** Excel spreadsheet → JSON extraction → RDF harmonisation → SHACL validation → TTL output → GraphDB upload
 
-- **Python harmonisation library** - Convert vessel data to RDF using composable functions
-- **Dagster pipeline** - Orchestrated data processing with validation
-- **SHACL validation** - Ensure data conforms to ontology constraints
-- **Docker deployment** - Containerized pipeline with PostgreSQL storage
+## Prerequisites
 
-## Installation
+- **Python 3.11+**
+- **[uv](https://docs.astral.sh/uv/getting-started/installation/)** — fast Python package manager (replaces pip/venv)
+- **Docker** and **Docker Compose** — only needed for containerised deployment
 
-### Using uv (recommended)
+Install uv if you don't have it:
 
 ```bash
+# macOS / Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+## Quick Start (Local)
+
+```bash
+# Install dependencies (creates .venv automatically)
 uv sync
-```
 
-### Development dependencies
-
-```bash
-uv sync --dev
-```
-
-## Usage
-
-### Local Development
-
-```bash
+# Start Dagster dev server
 uv run dagster dev
 ```
 
-Open http://localhost:3000 and follow these steps:
+Open http://localhost:3000. The **vessel_discovery_sensor** starts automatically and:
 
-1. Materialize the **`spreadsheet_data`** asset (loads the Excel file).
-2. The **`vessel_discovery_sensor`** runs automatically, discovers vessels,
-   registers them as partitions, and triggers the full pipeline for each vessel.
+1. Materialises `spreadsheet_data` (loads the Excel file)
+2. Discovers vessels, registers them as dynamic partitions
+3. Triggers the full pipeline for each vessel
 
-### Docker Deployment
+You can also manually materialise assets from the UI.
+
+## Quick Start (Docker Compose)
 
 ```bash
-docker-compose up -d
+docker compose up -d --build
 ```
 
-Open http://localhost:3000 and follow the same workflow described above. The
-Docker setup uses PostgreSQL for storage (configured in `dagster-docker.yaml`).
+Open http://localhost:3000. The same sensor-driven workflow runs automatically.
 
-### Python Library
+To reset all state (database, storage, outputs) and start fresh:
 
-Process a single vessel JSON file:
-
-```python
-from twinship_harmonisation import harmonise_twinship_vessel_file
-
-g = harmonise_twinship_vessel_file("data/grimaldi.json")
-print(g.serialize(format="turtle"))
-```
-
-Process all vessel files in a directory:
-
-```python
-from twinship_harmonisation import harmonise_all_twinship_vessels
-
-g = harmonise_all_twinship_vessels("data")
-g.serialize(destination="output/all_vessels.ttl", format="turtle")
-```
-
-Process vessel data from a dictionary:
-
-```python
-from twinship_harmonisation import harmonise_twinship_vessel
-
-data = {
-    "namespace": "test",
-    "vessel": {
-        "id": "IMO-1234567",
-        "label": "Test Vessel",
-        "type": "RoPax",
-    },
-    "main_engines": [
-        {
-            "id": "ME-1",
-            "name": "Main Engine 1",
-            "types": ["TwoStroke"],
-            "fuels": ["HFO", "MGO"],
-        }
-    ],
-    "auxiliary_engines": [],
-    "propellers": [],
-    "gearboxes": [],
-    "boilers": [],
-}
-g = harmonise_twinship_vessel(**data)
-print(g.serialize(format="turtle"))
+```bash
+docker compose down -v
+docker compose up -d --build
 ```
 
 ## Project Structure
 
 ```
 twinship-data-pipeline/
-├── twinship_harmonisation/     # Python library
-│   ├── low_level/              # Primitive triple builders
-│   └── high_level/             # User-facing workflows
-├── dagster_pipeline/           # Dagster assets and jobs
-│   ├── assets/                 # Data transformation assets
-│   └── resources/              # SHACL validator, etc.
-├── shacl/                      # SHACL shape files
-├── data/                       # Input data (JSON)
-├── tests/                      # Unit tests
-├── dagster.yaml                # Local dev config (SQLite)
-├── dagster-docker.yaml         # Docker config (PostgreSQL)
-└── docker-compose.yml          # Docker deployment
+├── twinship_harmonisation/    # Pure functional RDF harmonisation library
+│   ├── low_level/             # Primitive triple builders (create_*, build_*)
+│   ├── mid_level/             # Component builders (build_*, *_graph)
+│   └── high_level/            # Top-level harmonise_twinship_vessel()
+├── dagster_pipeline/          # Dagster orchestration
+│   ├── assets/                # Pipeline assets (extraction → harmonisation → validation → output)
+│   ├── jobs/                  # Job definitions
+│   ├── queries/               # SPARQL queries (.rq files)
+│   ├── resources/             # SHACL validator resource
+│   └── sensors.py             # Vessel discovery sensor
+├── shacl/                     # SHACL shape files for validation
+├── data/                      # Input spreadsheet
+├── tests/                     # Unit tests
+├── dagster.yaml               # Local dev config (SQLite)
+├── dagster-docker.yaml        # Docker config (PostgreSQL + DockerRunLauncher)
+├── docker-compose.yml         # Docker Compose services
+└── workspace.yaml             # Dagster code location (Docker only)
 ```
 
-## Data Format
+## Using the Harmonisation Library Directly
 
-The harmonisation library expects JSON files with the following structure:
+```python
+from twinship_harmonisation import harmonise_twinship_vessel
 
-```json
-{
-  "namespace": "grimaldi",
-  "vessel": {
-    "id": "GRI-RR-1",
-    "label": "GRIMALDI EUROCARGO GENOVA RORO CARGO SHIP",
-    "type": "RoRo",
-    "displacement_max_mt": 25000
-  },
-  "main_engines": [...],
-  "auxiliary_engines": [...],
-  "propellers": [...],
-  "gearboxes": [...],
-  "boilers": [...]
-}
+g = harmonise_twinship_vessel(
+    namespace="test",
+    vessel={"id": "IMO-1234567", "label": "Test Vessel", "type": "RoPax"},
+    main_engines=[{"id": "ME-1", "name": "Main Engine 1", "types": ["TwoStroke"], "fuels": ["HFO", "MGO"]}],
+    auxiliary_engines=[],
+    propellers=[],
+    gearboxes=[],
+    boilers=[],
+)
+print(g.serialize(format="turtle"))
 ```
 
-## Testing
+## Development
+
+### Tests
 
 ```bash
 uv run pytest
 ```
 
-## Linting
+### Linting and formatting
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. It runs through uv, no separate install needed:
 
 ```bash
-uv run ruff check .
-uv run ruff format .
+uv run ruff check .     # lint
+uv run ruff format .    # format
+```
+
+### Adding dependencies
+
+```bash
+uv add <package>        # runtime dependency
+uv add --dev <package>  # dev-only dependency
 ```
 
 ## License
 
-MIT
+[CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
