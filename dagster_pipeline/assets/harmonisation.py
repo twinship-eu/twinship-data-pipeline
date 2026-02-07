@@ -12,6 +12,7 @@ Pipeline structure:
 
 from pathlib import Path
 
+import pandas as pd
 from dagster import (
     AssetExecutionContext,
     Config,
@@ -90,11 +91,13 @@ def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) 
     context.log.info(f"Discovered {len(vessels)} vessels: {list(vessels.keys())}")
 
     # Add metadata to context so it appears in Dagster UI
-    context.add_output_metadata({
-        "vessels": MetadataValue.text(", ".join(vessels.keys())),
-        "vessel_count": MetadataValue.int(len(vessels)),
-        "sheet_count": MetadataValue.int(len(sheets)),
-    })
+    context.add_output_metadata(
+        {
+            "vessels": MetadataValue.text(", ".join(vessels.keys())),
+            "vessel_count": MetadataValue.int(len(vessels)),
+            "sheet_count": MetadataValue.int(len(sheets)),
+        }
+    )
 
     return {"sheets": sheets, "vessels": vessels}
 
@@ -105,7 +108,9 @@ def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) 
     description="Extract vessel JSON for a specific vessel from spreadsheet",
     kinds={"json"},
 )
-def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict) -> dict:
+def extracted_vessel_json(
+    context: AssetExecutionContext, spreadsheet_data: dict
+) -> dict:
     """Extract vessel data for the current vessel partition."""
     # Get the current vessel namespace from the partition key (e.g., "grimaldi", "stena-tanker")
     namespace = context.partition_key
@@ -136,11 +141,13 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     )
 
     # Add metadata about the extracted vessel to the context for Dagster UI
-    context.add_output_metadata({
-        "vessel_id": MetadataValue.text(vessel_id),
-        "main_engine_count": MetadataValue.int(len(data["main_engines"])),
-        "auxiliary_engine_count": MetadataValue.int(len(data["auxiliary_engines"])),
-    })
+    context.add_output_metadata(
+        {
+            "vessel_id": MetadataValue.text(vessel_id),
+            "main_engine_count": MetadataValue.int(len(data["main_engines"])),
+            "auxiliary_engine_count": MetadataValue.int(len(data["auxiliary_engines"])),
+        }
+    )
 
     return data
 
@@ -156,7 +163,9 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     description="Harmonise vessel JSON to RDF graph for a specific vessel",
     kinds={"RDF", "python"},
 )
-def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict) -> Graph:
+def vessel_rdf_graph(
+    context: AssetExecutionContext, extracted_vessel_json: dict
+) -> Graph:
     """Convert extracted vessel data to RDF triples."""
     namespace = context.partition_key
 
@@ -215,7 +224,9 @@ def validated_vessel_ttl(
             if config.fail_on_validation_error:
                 raise ValueError(f"SHACL validation failed for {namespace}:\n{report}")
             else:
-                context.log.warning(f"SHACL validation issues for {namespace}:\n{report}")
+                context.log.warning(
+                    f"SHACL validation issues for {namespace}:\n{report}"
+                )
 
     # Serialize the RDF graph to TTL format
     output_path = output_dir / f"{namespace}.ttl"
@@ -223,10 +234,12 @@ def validated_vessel_ttl(
     context.log.info(f"Wrote {len(vessel_rdf_graph)} triples to {output_path}")
 
     # Add metadata about the output file to the context for Dagster UI
-    context.add_output_metadata({
-        "output_path": MetadataValue.path(str(output_path)),
-        "triple_count": MetadataValue.int(len(vessel_rdf_graph)),
-    })
+    context.add_output_metadata(
+        {
+            "output_path": MetadataValue.path(str(output_path)),
+            "triple_count": MetadataValue.int(len(vessel_rdf_graph)),
+        }
+    )
 
     return str(output_path)
 
@@ -242,7 +255,9 @@ def validated_vessel_ttl(
     description="Combine all validated RDF graphs into one",
     kinds={"python", "RDF"},
 )
-def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphConfig) -> Graph:
+def combined_vessel_graph(
+    context: AssetExecutionContext, config: CombinedGraphConfig
+) -> Graph:
     """Combine all vessel TTL files into a single graph."""
     g = Graph()
     output_dir = Path(config.output_dir)
@@ -271,11 +286,13 @@ def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphC
     context.log.info(f"Combined graph: {len(g)} triples written to {combined_output}")
 
     # Add metadata about the combined graph to the context for Dagster UI
-    context.add_output_metadata({
-        "output_path": MetadataValue.path(str(combined_output)),
-        "triple_count": MetadataValue.int(len(g)),
-        "source_files": MetadataValue.int(len(ttl_files) - 1),
-    })
+    context.add_output_metadata(
+        {
+            "output_path": MetadataValue.path(str(combined_output)),
+            "triple_count": MetadataValue.int(len(g)),
+            "source_files": MetadataValue.int(len(ttl_files) - 1),
+        }
+    )
 
     return g
 
@@ -285,117 +302,40 @@ def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphC
     description="Run SPARQL queries against the combined graph and display results",
     kinds={"python", "SPARQL"},
 )
-def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph) -> None:
+def sparql_summary(
+    context: AssetExecutionContext, combined_vessel_graph: Graph
+) -> None:
     """Run SPARQL queries and attach results as metadata tables in the Dagster UI."""
     g = combined_vessel_graph
+    queries_dir = Path(__file__).parent.parent / "queries"
 
-    # --- Vessel overview: component counts per vessel ---
-    vessel_overview = g.query("""
-        PREFIX tws: <https://twin-ship.eu/>
-        PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    # Run SPARQL query to get vessel overview
+    vessel_df = pd.DataFrame(g.query((queries_dir / "vessel_overview.rq").read_text()))
+    vessel_df.columns = [
+        "Vessel",
+        "Label",
+        "Main Engines",
+        "Aux Engines",
+        "Propellers",
+        "Gearboxes",
+    ]
 
-        SELECT ?vessel ?label
-               (COUNT(DISTINCT ?me) AS ?main_engines)
-               (COUNT(DISTINCT ?ae) AS ?aux_engines)
-               (COUNT(DISTINCT ?prop) AS ?propellers)
-               (COUNT(DISTINCT ?gb) AS ?gearboxes)
-        WHERE {
-            ?vessel a tws:VesselSystem .
-            OPTIONAL { ?vessel rdfs:label ?label }
-            OPTIONAL { ?me a tws:MainEngineSystem ; ido:partOf ?vessel }
-            OPTIONAL { ?ae a tws:AuxiliaryEngineSystem ; ido:partOf ?vessel }
-            OPTIONAL { ?prop ido:partOf ?vessel . ?prop a ?pt .
-                       FILTER(?pt IN (tws:CPP, tws:FPP)) }
-            OPTIONAL { ?gb ido:partOf ?vessel . ?gb a ?gt .
-                       FILTER(?gt IN (tws:DirectDrive, tws:Reduction,
-                                      tws:SingleSpeed, tws:TISO, tws:PTO)) }
+    # Run SPARQL query to get engine details
+    engine_df = pd.DataFrame(g.query((queries_dir / "engine_details.rq").read_text()))
+    engine_df.columns = ["Engine", "Label", "Power (kW)", "Fuels"]
+
+    # Run SPARQL query to get fuel usage summary
+    fuel_df = pd.DataFrame(g.query((queries_dir / "fuel_usage.rq").read_text()))
+    fuel_df.columns = ["Fuel", "Consumers"]
+
+    context.add_output_metadata(
+        {
+            "vessel_overview": MetadataValue.md(vessel_df.to_markdown(index=False)),
+            "engine_details": MetadataValue.md(engine_df.to_markdown(index=False)),
+            "fuel_usage": MetadataValue.md(fuel_df.to_markdown(index=False)),
+            "total_triples": MetadataValue.int(len(g)),
         }
-        GROUP BY ?vessel ?label
-        ORDER BY ?vessel
-    """)
-
-    vessel_rows = []
-    for row in vessel_overview:
-        vessel_id = str(row.vessel).rsplit("/", 1)[-1]
-        vessel_rows.append(
-            f"| {vessel_id} | {row.label or ''} | {row.main_engines} "
-            f"| {row.aux_engines} | {row.propellers} | {row.gearboxes} |"
-        )
-
-    vessel_table = (
-        "| Vessel | Label | Main Engines | Aux Engines | Propellers | Gearboxes |\n"
-        "| --- | --- | --- | --- | --- | --- |\n"
-        + "\n".join(vessel_rows)
     )
-
-    # --- Engine details ---
-    engine_details = g.query("""
-        PREFIX tws: <https://twin-ship.eu/>
-        PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-        SELECT ?engine ?label ?power ?fuels
-        WHERE {
-            ?engine a tws:MainEngineSystem .
-            OPTIONAL { ?engine rdfs:label ?label }
-            OPTIONAL { ?engine tws:twShaftPowerMaxInKW ?power }
-            OPTIONAL {
-                SELECT ?engine (GROUP_CONCAT(?flabel; separator=", ") AS ?fuels)
-                WHERE {
-                    ?engine tws:consume ?fuel .
-                    ?fuel rdfs:label ?flabel .
-                }
-                GROUP BY ?engine
-            }
-        }
-        ORDER BY ?engine
-    """)
-
-    engine_rows = []
-    for row in engine_details:
-        engine_id = str(row.engine).rsplit("/", 1)[-1]
-        power = f"{float(row.power):.0f}" if row.power is not None else ""
-        engine_rows.append(
-            f"| {engine_id} | {row.label or ''} | {power} | {row.fuels or ''} |"
-        )
-
-    engine_table = (
-        "| Engine | Label | Power (kW) | Fuels |\n"
-        "| --- | --- | --- | --- |\n"
-        + "\n".join(engine_rows)
-    )
-
-    # --- Fuel usage across all components ---
-    fuel_usage = g.query("""
-        PREFIX tws: <https://twin-ship.eu/>
-        PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-        SELECT ?fuel_label (COUNT(DISTINCT ?consumer) AS ?consumers)
-        WHERE {
-            ?consumer tws:consume ?fuel .
-            ?fuel rdfs:label ?fuel_label .
-        }
-        GROUP BY ?fuel_label
-        ORDER BY ?fuel_label
-    """)
-
-    fuel_rows = []
-    for row in fuel_usage:
-        fuel_rows.append(f"| {row.fuel_label} | {row.consumers} |")
-
-    fuel_table = (
-        "| Fuel | Consumers |\n"
-        "| --- | --- |\n"
-        + "\n".join(fuel_rows)
-    )
-
-    context.add_output_metadata({
-        "vessel_overview": MetadataValue.md(vessel_table),
-        "engine_details": MetadataValue.md(engine_table),
-        "fuel_usage": MetadataValue.md(fuel_table),
-        "total_triples": MetadataValue.int(len(g)),
-    })
 
 
 @asset(

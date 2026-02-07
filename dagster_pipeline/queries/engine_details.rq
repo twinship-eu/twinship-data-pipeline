@@ -1,0 +1,19 @@
+PREFIX tws: <https://twin-ship.eu/>
+PREFIX ido: <http://rds.posccaesar.org/ontology/lis14/rdl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT (REPLACE(STR(?engine), "^.*/", "") AS ?engine_id) ?label ?power ?fuels
+WHERE {
+    ?engine a tws:MainEngineSystem .
+    OPTIONAL { ?engine rdfs:label ?label }
+    OPTIONAL { ?engine tws:twShaftPowerMaxInKW ?power }
+    OPTIONAL {
+        SELECT ?engine (GROUP_CONCAT(?flabel; separator=", ") AS ?fuels)
+        WHERE {
+            ?engine tws:consume ?fuel .
+            ?fuel rdfs:label ?flabel .
+        }
+        GROUP BY ?engine
+    }
+}
+ORDER BY ?engine
