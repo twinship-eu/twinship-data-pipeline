@@ -1,6 +1,6 @@
 # TwinShip Data Pipeline
 
-A data processing pipeline for converting maritime vessel data into RDF triples that conform to the [TwinShip ontology](https://github.com/SINTEF/twinship-ontology-demo).
+A data processing pipeline for converting maritime vessel data into RDF triples that conform to the [TwinShip ontology](https://github.com/twinship-eu/twinship-ontology).
 
 **Pipeline:** Excel spreadsheet → JSON extraction → RDF harmonisation → SHACL validation → TTL output → GraphDB upload
 
