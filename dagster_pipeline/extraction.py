@@ -1,7 +1,7 @@
 """TwinShip spreadsheet extraction utilities.
 
 This module handles parsing the TwinShip Excel spreadsheet and extracting
-vessel data for each operator (e.g., GRI (grimaldi), STL (stena line), STT (stena tanker)). 
+vessel data for each operator (e.g., GRI (grimaldi), STL (stena line), STT (stena tanker)).
 
 Usage:
     sheets = load_spreadsheet_sheets("path/to/spreadsheet.xlsx")
@@ -53,9 +53,7 @@ def load_spreadsheet_sheets(spreadsheet_path: str) -> dict[str, pd.DataFrame]:
     sheets = {}
     for internal_name, actual_name in SHEET_MAPPING.items():
         try:
-            df = pd.read_excel(
-                spreadsheet_path, sheet_name=actual_name, header=1, skiprows=[2]
-            )
+            df = pd.read_excel(spreadsheet_path, sheet_name=actual_name, header=1, skiprows=[2])
             # Handle duplicate columns by appending "_rel" suffix
             seen: dict[str, int] = {}
             new_cols = []
@@ -90,10 +88,7 @@ def discover_vessels_from_sheets(sheets: dict[str, pd.DataFrame]) -> dict[str, d
                 if prefix := extract_operator_prefix(entity_id):
                     prefixes.add(prefix)
 
-    return {
-        prefix_to_namespace(p): {"prefix": p}
-        for p in sorted(prefixes)
-    }
+    return {prefix_to_namespace(p): {"prefix": p} for p in sorted(prefixes)}
 
 
 # =============================================================================
@@ -191,9 +186,7 @@ def extract_vessel(sheets: dict, operator_prefix: str) -> dict:
             "draft_mid_stbd_max_m": "TWINSHIP-VESSEL-DRAFT-MID-STBD-MAX-IN-M",
             "depth_of_water_max_m": "TWINSHIP-VESSEL-DEPTH-OF-WATER-MAX-IN-M",
         },
-        extra=lambda row: {
-            "type": (parse_types(row.get("TWINSHIP-VESSEL-TYPE")) or [None])[0]
-        },
+        extra=lambda row: {"type": (parse_types(row.get("TWINSHIP-VESSEL-TYPE")) or [None])[0]},
     )
     return rows[0] if rows else {}
 
@@ -341,10 +334,7 @@ def extract_other_systems(sheets: dict, operator_prefix: str) -> dict[str, list[
 
     for _, row in sheets["Other"].iterrows():
         component_id = row.get("TWINSHIP-COMPONENT-ID")
-        if (
-            pd.isna(component_id)
-            or extract_operator_prefix(component_id) != operator_prefix
-        ):
+        if pd.isna(component_id) or extract_operator_prefix(component_id) != operator_prefix:
             continue
 
         base = {
@@ -352,9 +342,7 @@ def extract_other_systems(sheets: dict, operator_prefix: str) -> dict[str, list[
             "name": clean_value(row.get("TWINSHIP-COMPONENT-NAME")),
             "types": parse_types(row.get("TWINSHIP-COMPONENT-TYPE")),
             "power_max_kw": clean_value(row.get("TWINSHIP-COMPONENT-POWER-MAX-IN-kW")),
-            "speed_max_rpm": clean_value(
-                row.get("TWINSHIP-COMPONENT-SPEED-MAX-IN-REV-PER-MIN")
-            ),
+            "speed_max_rpm": clean_value(row.get("TWINSHIP-COMPONENT-SPEED-MAX-IN-REV-PER-MIN")),
         }
 
         id_prefix = str(component_id).split("-")[0].upper()

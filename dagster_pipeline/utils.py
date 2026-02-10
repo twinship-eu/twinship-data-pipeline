@@ -44,10 +44,7 @@ def parse_bracket_list(value: str | None) -> list[str]:
 
 def parse_types(type_string: str | None) -> list[str]:
     """Parse '[tws:FourStroke, tws:DieselEngine]' -> ['FourStroke', 'DieselEngine']."""
-    return [
-        t[4:] if t.startswith("tws:") else t
-        for t in parse_bracket_list(type_string)
-    ]
+    return [t[4:] if t.startswith("tws:") else t for t in parse_bracket_list(type_string)]
 
 
 def prefix_to_namespace(prefix: str) -> str:
