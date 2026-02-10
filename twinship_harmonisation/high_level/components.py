@@ -23,9 +23,7 @@ def twinship_main_engines_graph(
     """Build a combined graph for all main engines."""
     g = Graph()
     for engine in main_engines or []:
-        g += build_twinship_main_engine(
-            namespace=namespace, vessel_uri=vessel_uri, **engine
-        )
+        g += build_twinship_main_engine(namespace=namespace, vessel_uri=vessel_uri, **engine)
     return g
 
 
@@ -37,9 +35,7 @@ def twinship_auxiliary_engines_graph(
     """Build a combined graph for all auxiliary engines."""
     g = Graph()
     for engine in auxiliary_engines or []:
-        g += build_twinship_auxiliary_engine(
-            namespace=namespace, vessel_uri=vessel_uri, **engine
-        )
+        g += build_twinship_auxiliary_engine(namespace=namespace, vessel_uri=vessel_uri, **engine)
     return g
 
 
@@ -51,9 +47,7 @@ def twinship_gearboxes_graph(
     """Build a combined graph for all gearboxes."""
     g = Graph()
     for gearbox in gearboxes or []:
-        g += build_twinship_gearbox(
-            namespace=namespace, vessel_uri=vessel_uri, **gearbox
-        )
+        g += build_twinship_gearbox(namespace=namespace, vessel_uri=vessel_uri, **gearbox)
     return g
 
 
