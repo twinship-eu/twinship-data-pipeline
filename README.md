@@ -95,6 +95,13 @@ print(g.serialize(format="turtle"))
 
 ## Development
 
+### Setup
+
+```bash
+uv sync                        # install all dependencies
+uv run pre-commit install      # set up git hooks (auto-formats code on commit)
+```
+
 ### Tests
 
 ```bash
@@ -103,7 +110,7 @@ uv run pytest
 
 ### Linting and formatting
 
-This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. It runs through uv, no separate install needed:
+This project uses [ruff](https://docs.astral.sh/ruff/) for linting and formatting. If you set up the pre-commit hook above, formatting happens automatically on every commit. You can also run it manually:
 
 ```bash
 uv run ruff check .     # lint

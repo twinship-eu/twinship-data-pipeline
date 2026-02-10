@@ -104,8 +104,12 @@ def create_twinship_main_engine(
             fuel_mode_int = -1
         g.add((engine_uri, TWINSHIP.twCommonFuelMode, Literal(fuel_mode_int, datatype=XSD.integer)))
 
-    add_optional_double(g, engine_uri, TWINSHIP.twFuelConsumptionTotalInMT, fuel_consumption_total_mt)
-    add_optional_double(g, engine_uri, TWINSHIP.twPowerPropulsionTotalInKw, power_propulsion_total_kw)
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twFuelConsumptionTotalInMT, fuel_consumption_total_mt
+    )
+    add_optional_double(
+        g, engine_uri, TWINSHIP.twPowerPropulsionTotalInKw, power_propulsion_total_kw
+    )
 
     return engine_uri, g
 
