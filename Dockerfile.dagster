@@ -7,6 +7,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 WORKDIR /app
 
+# Put the venv on PATH so dagster commands are directly executable
+ENV PATH="/app/.venv/bin:$PATH"
+
 # Copy dependency files
 COPY pyproject.toml uv.lock README.md ./
 
