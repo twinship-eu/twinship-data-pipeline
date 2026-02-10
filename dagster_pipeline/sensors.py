@@ -57,9 +57,7 @@ def vessel_discovery_sensor(
         )
 
     # Get the metadata from the materialization
-    metadata = (
-        events.asset_materialization.metadata if events.asset_materialization else {}
-    )
+    metadata = events.asset_materialization.metadata if events.asset_materialization else {}
 
     # Look for vessels in metadata
     vessels_meta = metadata.get("vessels")
@@ -68,9 +66,7 @@ def vessel_discovery_sensor(
 
     # Parse vessels from metadata
     try:
-        vessels_text = (
-            vessels_meta.text if hasattr(vessels_meta, "text") else str(vessels_meta)
-        )
+        vessels_text = vessels_meta.text if hasattr(vessels_meta, "text") else str(vessels_meta)
         discovered_vessels = [v.strip() for v in vessels_text.split(",") if v.strip()]
     except Exception as e:
         return SkipReason(f"Could not parse vessels metadata: {e}")
@@ -79,9 +75,7 @@ def vessel_discovery_sensor(
         return SkipReason("No vessels discovered from spreadsheet")
 
     # Get existing partitions
-    existing_partitions = set(
-        instance.get_dynamic_partitions(vessel_partitions_def.name)
-    )
+    existing_partitions = set(instance.get_dynamic_partitions(vessel_partitions_def.name))
 
     # Find new vessels to register
     new_vessels = [v for v in discovered_vessels if v not in existing_partitions]
@@ -104,8 +98,6 @@ def vessel_discovery_sensor(
     ]
 
     return SensorResult(
-        dynamic_partitions_requests=[
-            vessel_partitions_def.build_add_request(new_vessels)
-        ],
+        dynamic_partitions_requests=[vessel_partitions_def.build_add_request(new_vessels)],
         run_requests=run_requests,
     )

@@ -84,9 +84,7 @@ def harmonise_twinship_vessel(
     g += twinship_thrusters_graph(namespace, vessel_uri, thrusters)
     g += twinship_shaft_generators_graph(namespace, vessel_uri, shaft_generators)
     g += twinship_boilers_graph(namespace, vessel_uri, boilers)
-    g += twinship_emergency_generators_graph(
-        namespace, vessel_uri, emergency_generators
-    )
+    g += twinship_emergency_generators_graph(namespace, vessel_uri, emergency_generators)
     g += twinship_pms_graph(
         namespace,
         vessel_uri,
