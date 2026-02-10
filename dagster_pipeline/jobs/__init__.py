@@ -2,10 +2,10 @@
 
 from dagster import AssetSelection, define_asset_job
 
-# Job to run the full pipeline
+# Job to run the full pipeline (partitioned assets only — sensor triggers spreadsheet separately)
 full_pipeline_job = define_asset_job(
     name="full_pipeline",
-    selection=AssetSelection.all(),
+    selection=AssetSelection.all() - AssetSelection.assets("spreadsheet_data"),
     description="Run the complete pipeline: extract → harmonise → validate → upload",
 )
 
