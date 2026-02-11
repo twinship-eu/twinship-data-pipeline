@@ -21,6 +21,7 @@ COPY twinship_harmonisation/ ./twinship_harmonisation/
 COPY dagster_pipeline/ ./dagster_pipeline/
 COPY shacl/ ./shacl/
 COPY data/ ./data/
+COPY argo/ ./argo/
 
 # Expose Dagster gRPC port
 EXPOSE 4000
