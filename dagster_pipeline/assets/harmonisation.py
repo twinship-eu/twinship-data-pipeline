@@ -108,9 +108,7 @@ def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) 
     description="Extract vessel JSON for a specific vessel from spreadsheet",
     kinds={"json"},
 )
-def extracted_vessel_json(
-    context: AssetExecutionContext, spreadsheet_data: dict
-) -> dict:
+def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict) -> dict:
     """Extract vessel data for the current vessel partition."""
     # Get the current vessel namespace from the partition key (e.g., "grimaldi", "stena-tanker")
     namespace = context.partition_key
@@ -163,9 +161,7 @@ def extracted_vessel_json(
     description="Harmonise vessel JSON to RDF graph for a specific vessel",
     kinds={"RDF", "python"},
 )
-def vessel_rdf_graph(
-    context: AssetExecutionContext, extracted_vessel_json: dict
-) -> Graph:
+def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict) -> Graph:
     """Convert extracted vessel data to RDF triples."""
     namespace = context.partition_key
 
@@ -224,9 +220,7 @@ def validated_vessel_ttl(
             if config.fail_on_validation_error:
                 raise ValueError(f"SHACL validation failed for {namespace}:\n{report}")
             else:
-                context.log.warning(
-                    f"SHACL validation issues for {namespace}:\n{report}"
-                )
+                context.log.warning(f"SHACL validation issues for {namespace}:\n{report}")
 
     # Serialize the RDF graph to TTL format
     output_path = output_dir / f"{namespace}.ttl"
@@ -255,9 +249,7 @@ def validated_vessel_ttl(
     description="Combine all validated RDF graphs into one",
     kinds={"python", "RDF"},
 )
-def combined_vessel_graph(
-    context: AssetExecutionContext, config: CombinedGraphConfig
-) -> Graph:
+def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphConfig) -> Graph:
     """Combine all vessel TTL files into a single graph."""
     g = Graph()
     output_dir = Path(config.output_dir)
@@ -302,9 +294,7 @@ def combined_vessel_graph(
     description="Run SPARQL queries against the combined graph and display results",
     kinds={"python", "SPARQL"},
 )
-def sparql_summary(
-    context: AssetExecutionContext, combined_vessel_graph: Graph
-) -> None:
+def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph) -> None:
     """Run SPARQL queries and attach results as metadata tables in the Dagster UI."""
     g = combined_vessel_graph
     queries_dir = Path(__file__).parent.parent / "queries"
