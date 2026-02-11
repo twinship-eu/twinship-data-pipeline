@@ -1,0 +1,155 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: twinship-profiling-
+  labels:
+    simpipe.sct.sintef.no/project: twinship
+spec:
+  entrypoint: twinship-pipeline
+  # Override SIM-PIPE's default parallelism=1 so per-vessel steps run in parallel
+  parallelism: 3
+  volumeClaimTemplates:
+    - metadata:
+        name: shared
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+  templates:
+    # =========================================================================
+    # DAG: pipeline structure
+    # =========================================================================
+    - name: twinship-pipeline
+      dag:
+        tasks:
+          # Step 1: Load spreadsheet and discover vessels
+          - name: extract-spreadsheet
+            template: run-step
+            arguments:
+              parameters:
+                - name: step
+                  value: extract-spreadsheet
+
+          # Step 2: Extract vessel JSON (parallel per vessel)
+          - name: extract-grimaldi
+            template: run-step
+            dependencies: [extract-spreadsheet]
+            arguments:
+              parameters:
+                - name: step
+                  value: extract-vessel
+                - name: vessel
+                  value: grimaldi
+          - name: extract-stena-scandinavica
+            template: run-step
+            dependencies: [extract-spreadsheet]
+            arguments:
+              parameters:
+                - name: step
+                  value: extract-vessel
+                - name: vessel
+                  value: stena-scandinavica
+          - name: extract-stena-tanker
+            template: run-step
+            dependencies: [extract-spreadsheet]
+            arguments:
+              parameters:
+                - name: step
+                  value: extract-vessel
+                - name: vessel
+                  value: stena-tanker
+
+          # Step 3: Harmonise to RDF (parallel per vessel)
+          - name: harmonise-grimaldi
+            template: run-step
+            dependencies: [extract-grimaldi]
+            arguments:
+              parameters:
+                - name: step
+                  value: harmonise-vessel
+                - name: vessel
+                  value: grimaldi
+          - name: harmonise-stena-scandinavica
+            template: run-step
+            dependencies: [extract-stena-scandinavica]
+            arguments:
+              parameters:
+                - name: step
+                  value: harmonise-vessel
+                - name: vessel
+                  value: stena-scandinavica
+          - name: harmonise-stena-tanker
+            template: run-step
+            dependencies: [extract-stena-tanker]
+            arguments:
+              parameters:
+                - name: step
+                  value: harmonise-vessel
+                - name: vessel
+                  value: stena-tanker
+
+          # Step 4: SHACL validate + write TTL (parallel per vessel)
+          - name: validate-grimaldi
+            template: run-step
+            dependencies: [harmonise-grimaldi]
+            arguments:
+              parameters:
+                - name: step
+                  value: validate-vessel
+                - name: vessel
+                  value: grimaldi
+          - name: validate-stena-scandinavica
+            template: run-step
+            dependencies: [harmonise-stena-scandinavica]
+            arguments:
+              parameters:
+                - name: step
+                  value: validate-vessel
+                - name: vessel
+                  value: stena-scandinavica
+          - name: validate-stena-tanker
+            template: run-step
+            dependencies: [harmonise-stena-tanker]
+            arguments:
+              parameters:
+                - name: step
+                  value: validate-vessel
+                - name: vessel
+                  value: stena-tanker
+
+          # Step 5: Combine all TTL files
+          - name: combine-graphs
+            template: run-step
+            dependencies:
+              - validate-grimaldi
+              - validate-stena-scandinavica
+              - validate-stena-tanker
+            arguments:
+              parameters:
+                - name: step
+                  value: combine-graphs
+
+    # =========================================================================
+    # Container template: runs one pipeline step
+    # =========================================================================
+    - name: run-step
+      inputs:
+        parameters:
+          - name: step
+          - name: vessel
+            default: ""
+      container:
+        image: twinship_user_code:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
+        args:
+          - "{{inputs.parameters.step}}"
+          - "{{inputs.parameters.vessel}}"
+        workingDir: /app
+        env:
+          - name: PYTHONPATH
+            value: /app/.venv/lib/python3.11/site-packages:/app
+        volumeMounts:
+          - name: shared
+            mountPath: /tmp/pipeline

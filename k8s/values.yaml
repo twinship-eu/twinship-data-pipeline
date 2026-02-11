@@ -1,0 +1,92 @@
+# Dagster Helm chart values for minikube deployment.
+# Install with: helm upgrade --install dagster dagster/dagster -n dagster -f k8s/values.yaml
+#
+# For a production cluster, adjust:
+#   - image repository/tag to point at a real registry
+#   - resource requests/limits
+#   - PostgreSQL to an external managed database
+#   - storage class for PVCs
+#   - IO manager to use S3/GCS instead of filesystem
+
+# -- User code deployment (gRPC server hosting pipeline definitions)
+dagster-user-deployments:
+  enabled: true
+  enableSubchart: true
+  deployments:
+    - name: "twinship-pipeline"
+      image:
+        repository: "twinship_user_code"
+        tag: "latest"
+        pullPolicy: IfNotPresent
+      dagsterApiGrpcArgs:
+        - "-m"
+        - "dagster_pipeline"
+      port: 4000
+      includeConfigInLaunchedRuns:
+        enabled: true
+      volumes:
+        - name: pipeline-output
+          persistentVolumeClaim:
+            claimName: pipeline-output
+        - name: dagster-storage
+          persistentVolumeClaim:
+            claimName: dagster-storage
+      volumeMounts:
+        - name: pipeline-output
+          mountPath: /app/output
+        - name: dagster-storage
+          mountPath: /opt/dagster/dagster_home/storage
+
+# -- Webserver: override default image (dagster-celery-k8s) with our local build
+dagsterWebserver:
+  image:
+    repository: "twinship_dagster"
+    tag: "latest"
+    pullPolicy: IfNotPresent
+
+# -- Run launcher: each Dagster run becomes a Kubernetes Job
+runLauncher:
+  type: K8sRunLauncher
+  config:
+    k8sRunLauncher:
+      imagePullPolicy: IfNotPresent
+      loadInclusterConfig: true
+      volumes:
+        - name: pipeline-output
+          persistentVolumeClaim:
+            claimName: pipeline-output
+        - name: dagster-storage
+          persistentVolumeClaim:
+            claimName: dagster-storage
+      volumeMounts:
+        - name: pipeline-output
+          mountPath: /app/output
+        - name: dagster-storage
+          mountPath: /opt/dagster/dagster_home/storage
+      failPodOnRunFailure: true
+      runK8sConfig:
+        jobSpecConfig:
+          ttlSecondsAfterFinished: 3600
+
+# -- Daemon: override default image with our local build, configure run coordinator
+dagsterDaemon:
+  enabled: true
+  image:
+    repository: "twinship_dagster"
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  runCoordinator:
+    enabled: true
+    type: QueuedRunCoordinator
+    config:
+      queuedRunCoordinator:
+        maxConcurrentRuns: 2
+
+# -- PostgreSQL (Helm subchart — replaces Docker Compose postgresql service)
+postgresql:
+  enabled: true
+  postgresqlUsername: dagster
+  postgresqlPassword: dagster
+  postgresqlDatabase: dagster
+
+generatePostgresqlPasswordSecret: true

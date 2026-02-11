@@ -82,15 +82,28 @@ def create_twinship_emergency_generator(
         g.add((emergency_generator_uri, RDFS.label, Literal(label)))
 
     # Data properties
-    add_optional_double(g, emergency_generator_uri, TWINSHIP.twEmergencyDieselGeneratorPowerMaxInKW, power_max_kw)
-    add_optional_double(g, emergency_generator_uri, TWINSHIP.twEmergencyDieselGeneratorSpeedMaxInRevPerMin, speed_max_rpm)
+    add_optional_double(
+        g, emergency_generator_uri, TWINSHIP.twEmergencyDieselGeneratorPowerMaxInKW, power_max_kw
+    )
+    add_optional_double(
+        g,
+        emergency_generator_uri,
+        TWINSHIP.twEmergencyDieselGeneratorSpeedMaxInRevPerMin,
+        speed_max_rpm,
+    )
     if do_mode is not None:
         # do_mode can be an int or a string like '[0,1]' - try to parse as int, default to -1
         try:
             do_mode_int = int(do_mode)
         except (ValueError, TypeError):
             do_mode_int = -1
-        g.add((emergency_generator_uri, TWINSHIP.twEmergencyDieselGeneratorEmergencyDOMode, Literal(do_mode_int, datatype=XSD.integer)))
+        g.add(
+            (
+                emergency_generator_uri,
+                TWINSHIP.twEmergencyDieselGeneratorEmergencyDOMode,
+                Literal(do_mode_int, datatype=XSD.integer),
+            )
+        )
 
     return emergency_generator_uri, g
 
@@ -131,10 +144,14 @@ def create_twinship_thruster(
     # Data properties - use bow or stern property depending on thruster type
     if is_bow:
         add_optional_double(g, thruster_uri, TWINSHIP.twBowThrusterPowerMaxInKW, power_max_kw)
-        add_optional_double(g, thruster_uri, TWINSHIP.twBowThrusterSpeedMaxInRevPerMin, speed_max_rpm)
+        add_optional_double(
+            g, thruster_uri, TWINSHIP.twBowThrusterSpeedMaxInRevPerMin, speed_max_rpm
+        )
     else:
         add_optional_double(g, thruster_uri, TWINSHIP.twSternThrusterPowerMaxInKW, power_max_kw)
-        add_optional_double(g, thruster_uri, TWINSHIP.twSternThrusterSpeedMaxInRevPerMin, speed_max_rpm)
+        add_optional_double(
+            g, thruster_uri, TWINSHIP.twSternThrusterSpeedMaxInRevPerMin, speed_max_rpm
+        )
 
     return thruster_uri, g
 
@@ -173,6 +190,8 @@ def create_twinship_shaft_generator(
 
     # Data properties
     add_optional_double(g, shaft_generator_uri, TWINSHIP.twShaftGeneratorPowerMaxInKW, power_max_kw)
-    add_optional_double(g, shaft_generator_uri, TWINSHIP.twShaftGeneratorSpeedMaxInRevPerMin, speed_max_rpm)
+    add_optional_double(
+        g, shaft_generator_uri, TWINSHIP.twShaftGeneratorSpeedMaxInRevPerMin, speed_max_rpm
+    )
 
     return shaft_generator_uri, g

@@ -84,9 +84,7 @@ def twinship_propellers_graph(
             blades=propeller.get("blades"),
             pitch_diameter_ratio=propeller.get("pitch_diameter_ratio"),
             pitch_max_percentage=propeller.get("pitch_max_percentage"),
-            expanded_area_ratio_percentage=propeller.get(
-                "expanded_area_ratio_percentage"
-            ),
+            expanded_area_ratio_percentage=propeller.get("expanded_area_ratio_percentage"),
             hub_ratio=propeller.get("hub_ratio"),
             skew_angle_degree=propeller.get("skew_angle_degree"),
             efficiency=propeller.get("efficiency"),

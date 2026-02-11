@@ -74,9 +74,7 @@ def build_twinship_pms(
 
     # Connect thrusters to PMS
     for thruster_id in thruster_ids or []:
-        g += build_twinship_direct_connection(
-            create_twinship_uri(thruster_id, namespace), pms_uri
-        )
+        g += build_twinship_direct_connection(create_twinship_uri(thruster_id, namespace), pms_uri)
 
     # Connect shaft generators to PMS
     for shaft_generator_id in shaft_generator_ids or []:
