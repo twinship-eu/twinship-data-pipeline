@@ -2,7 +2,7 @@
 
 A data processing pipeline for converting maritime vessel data into RDF triples that conform to the [TwinShip ontology](https://github.com/twinship-eu/twinship-ontology).
 
-**Pipeline:** Excel spreadsheet → JSON extraction → RDF harmonisation → SHACL validation → TTL output → GraphDB upload
+**Pipeline:** Excel spreadsheet → JSON extraction → RDF harmonisation → SHACL validation → TTL output → GraphDB upload → GraphDB SPARQL summary
 
 ## Prerequisites
 
@@ -52,7 +52,8 @@ GraphDB is also started by Compose at http://localhost:7200 with repository defa
 - `GRAPHDB_REPOSITORY_TITLE=TwinShip Data Repository`
 
 The `graphdb_upload` asset creates the repository if missing, clears it, and uploads
-the latest combined Turtle graph.
+the latest combined Turtle graph. The `sparql_summary` asset then runs SPARQL queries
+against GraphDB and shows result tables in Dagster metadata.
 
 To reset all state (database, storage, outputs) and start fresh:
 

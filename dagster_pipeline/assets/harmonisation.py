@@ -6,8 +6,8 @@ Pipeline structure:
 3. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
 4. validated_vessel_ttl - Validate and write TTL files (partitioned)
 5. combined_vessel_graph - Combine all RDF graphs
-6. sparql_summary - SPARQL data tables for the Dagster UI
-7. graphdb_upload - Upload the combined graph to GraphDB
+6. graphdb_upload - Upload the combined graph to GraphDB
+7. sparql_summary - SPARQL summary tables queried from GraphDB
 """
 
 import os
@@ -321,6 +321,45 @@ def _repository_triple_count(
         return None
 
 
+def _run_graphdb_select_query(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    repository_id: str,
+    query: str,
+    timeout_seconds: int,
+) -> pd.DataFrame:
+    try:
+        response = requests.post(
+            f"{base_url}/repositories/{repository_id}",
+            data={"query": query},
+            headers={"Accept": "application/sparql-results+json"},
+            auth=auth,
+            timeout=timeout_seconds,
+        )
+    except requests.RequestException as e:
+        _raise_graphdb_error(f"Could not query GraphDB repository '{repository_id}': {e}")
+
+    if response.status_code != 200:
+        _raise_graphdb_error(
+            f"GraphDB SPARQL query failed for repository '{repository_id}'",
+            response,
+        )
+
+    try:
+        payload = response.json()
+    except ValueError:
+        _raise_graphdb_error(
+            f"GraphDB returned a non-JSON response for repository '{repository_id}'",
+            response,
+        )
+
+    columns = payload.get("head", {}).get("vars", [])
+    bindings = payload.get("results", {}).get("bindings", [])
+
+    rows = [{col: binding.get(col, {}).get("value") for col in columns} for binding in bindings]
+    return pd.DataFrame(rows, columns=columns)
+
+
 # =============================================================================
 # Extraction Assets
 # =============================================================================
@@ -548,16 +587,28 @@ def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphC
 
 @asset(
     group_name="output",
-    description="Run SPARQL queries against the combined graph and display results",
+    description="Run SPARQL queries against GraphDB and display results",
     kinds={"python", "SPARQL"},
 )
-def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph) -> None:
-    """Run SPARQL queries and attach results as metadata tables in the Dagster UI."""
-    g = combined_vessel_graph
+def sparql_summary(
+    context: AssetExecutionContext,
+    config: GraphDBConfig,
+    graphdb_upload: str,
+) -> None:
+    """Run SPARQL queries on GraphDB and attach results as metadata tables in Dagster UI."""
+    base_url = _normalize_graphdb_base_url(config.base_url)
+    auth = _graphdb_auth(config)
+    _wait_for_graphdb(base_url, auth, config)
+
     queries_dir = Path(__file__).parent.parent / "queries"
 
-    # Run SPARQL query to get vessel overview
-    vessel_df = pd.DataFrame(g.query((queries_dir / "vessel_overview.rq").read_text()))
+    vessel_df = _run_graphdb_select_query(
+        base_url=base_url,
+        auth=auth,
+        repository_id=config.repository_id,
+        query=(queries_dir / "vessel_overview.rq").read_text(),
+        timeout_seconds=config.timeout_seconds,
+    )
     vessel_df.columns = [
         "Vessel",
         "Label",
@@ -567,20 +618,39 @@ def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph)
         "Gearboxes",
     ]
 
-    # Run SPARQL query to get engine details
-    engine_df = pd.DataFrame(g.query((queries_dir / "engine_details.rq").read_text()))
+    engine_df = _run_graphdb_select_query(
+        base_url=base_url,
+        auth=auth,
+        repository_id=config.repository_id,
+        query=(queries_dir / "engine_details.rq").read_text(),
+        timeout_seconds=config.timeout_seconds,
+    )
     engine_df.columns = ["Engine", "Label", "Power (kW)", "Fuels"]
 
-    # Run SPARQL query to get fuel usage summary
-    fuel_df = pd.DataFrame(g.query((queries_dir / "fuel_usage.rq").read_text()))
+    fuel_df = _run_graphdb_select_query(
+        base_url=base_url,
+        auth=auth,
+        repository_id=config.repository_id,
+        query=(queries_dir / "fuel_usage.rq").read_text(),
+        timeout_seconds=config.timeout_seconds,
+    )
     fuel_df.columns = ["Fuel", "Consumers"]
+
+    remote_triple_count = _repository_triple_count(
+        base_url=base_url,
+        auth=auth,
+        repository_id=config.repository_id,
+        timeout_seconds=config.timeout_seconds,
+    )
 
     context.add_output_metadata(
         {
             "vessel_overview": MetadataValue.md(vessel_df.to_markdown(index=False)),
             "engine_details": MetadataValue.md(engine_df.to_markdown(index=False)),
             "fuel_usage": MetadataValue.md(fuel_df.to_markdown(index=False)),
-            "total_triples": MetadataValue.int(len(g)),
+            "graphdb_repository": MetadataValue.text(graphdb_upload),
+            "graphdb_repository_id": MetadataValue.text(config.repository_id),
+            "total_triples": MetadataValue.int(remote_triple_count or 0),
         }
     )
 
