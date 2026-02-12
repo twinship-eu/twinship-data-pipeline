@@ -23,6 +23,15 @@ run_launcher:
       - DAGSTER_POSTGRES_DB
       - DAGSTER_POSTGRES_HOST
       - DAGSTER_HOME
+      - GRAPHDB_BASE_URL
+      - GRAPHDB_REPOSITORY_ID
+      - GRAPHDB_REPOSITORY_TITLE
+      - GRAPHDB_CLEAR_BEFORE_UPLOAD
+      - GRAPHDB_TIMEOUT_SECONDS
+      - GRAPHDB_MAX_READINESS_CHECKS
+      - GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS
+      - GRAPHDB_USERNAME
+      - GRAPHDB_PASSWORD
     network: twinship-data-pipeline_twinship_network
     container_kwargs:
       volumes:

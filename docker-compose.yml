@@ -17,6 +17,17 @@ services:
       timeout: 5s
       retries: 5
 
+  # GraphDB triplestore
+  graphdb:
+    image: ontotext/graphdb:10.8.12
+    container_name: twinship_graphdb
+    ports:
+      - "7200:7200"
+    volumes:
+      - graphdb_home:/opt/graphdb/home
+    networks:
+      - twinship_network
+
   # User code container (gRPC server)
   user_code:
     build:
@@ -32,6 +43,15 @@ services:
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
       DAGSTER_HOME: /app
+      GRAPHDB_BASE_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY_ID: twinship
+      GRAPHDB_REPOSITORY_TITLE: TwinShip Data Repository
+      GRAPHDB_CLEAR_BEFORE_UPLOAD: "true"
+      GRAPHDB_TIMEOUT_SECONDS: "30"
+      GRAPHDB_MAX_READINESS_CHECKS: "20"
+      GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS: "3"
+      GRAPHDB_USERNAME: ""
+      GRAPHDB_PASSWORD: ""
     volumes:
       - ./data:/app/data
       - pipeline_output:/app/output
@@ -41,6 +61,8 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+      graphdb:
+        condition: service_started
 
   # Dagster webserver
   webserver:
@@ -67,6 +89,15 @@ services:
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
+      GRAPHDB_BASE_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY_ID: twinship
+      GRAPHDB_REPOSITORY_TITLE: TwinShip Data Repository
+      GRAPHDB_CLEAR_BEFORE_UPLOAD: "true"
+      GRAPHDB_TIMEOUT_SECONDS: "30"
+      GRAPHDB_MAX_READINESS_CHECKS: "20"
+      GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS: "3"
+      GRAPHDB_USERNAME: ""
+      GRAPHDB_PASSWORD: ""
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - pipeline_output:/app/output
@@ -76,6 +107,7 @@ services:
     depends_on:
       - postgresql
       - user_code
+      - graphdb
 
   # Dagster daemon (schedules, sensors, run queue)
   daemon:
@@ -96,6 +128,15 @@ services:
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
+      GRAPHDB_BASE_URL: http://graphdb:7200
+      GRAPHDB_REPOSITORY_ID: twinship
+      GRAPHDB_REPOSITORY_TITLE: TwinShip Data Repository
+      GRAPHDB_CLEAR_BEFORE_UPLOAD: "true"
+      GRAPHDB_TIMEOUT_SECONDS: "30"
+      GRAPHDB_MAX_READINESS_CHECKS: "20"
+      GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS: "3"
+      GRAPHDB_USERNAME: ""
+      GRAPHDB_PASSWORD: ""
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - pipeline_output:/app/output
@@ -105,9 +146,11 @@ services:
     depends_on:
       - postgresql
       - user_code
+      - graphdb
 
 volumes:
   postgresql_data:
+  graphdb_home:
   dagster_storage:
   pipeline_output:
 

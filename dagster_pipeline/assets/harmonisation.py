@@ -7,16 +7,21 @@ Pipeline structure:
 4. validated_vessel_ttl - Validate and write TTL files (partitioned)
 5. combined_vessel_graph - Combine all RDF graphs
 6. sparql_summary - SPARQL data tables for the Dagster UI
-7. graphdb_upload - Upload to GraphDB (placeholder)
+7. graphdb_upload - Upload the combined graph to GraphDB
 """
 
+import os
+import time
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
+import requests
 from dagster import (
     AssetExecutionContext,
     Config,
     DynamicPartitionsDefinition,
+    Failure,
     MetadataValue,
     asset,
 )
@@ -43,6 +48,23 @@ vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 # =============================================================================
 
 
+def _env_bool(var_name: str, default: bool) -> bool:
+    raw = os.getenv(var_name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(var_name: str, default: int) -> int:
+    raw = os.getenv(var_name)
+    if raw is None:
+        return default
+    try:
+        return int(raw.strip())
+    except ValueError:
+        return default
+
+
 class SpreadsheetConfig(Config):
     """Configuration for spreadsheet asset."""
 
@@ -62,6 +84,241 @@ class CombinedGraphConfig(Config):
 
     output_dir: str = "output"
     combined_output: str = "output/all_vessels.ttl"
+
+
+class GraphDBConfig(Config):
+    """Configuration for GraphDB upload."""
+
+    base_url: str = os.getenv("GRAPHDB_BASE_URL", "http://localhost:7200")
+    repository_id: str = os.getenv("GRAPHDB_REPOSITORY_ID", "twinship")
+    repository_title: str = os.getenv("GRAPHDB_REPOSITORY_TITLE", "TwinShip Data Repository")
+    clear_repository_before_upload: bool = _env_bool("GRAPHDB_CLEAR_BEFORE_UPLOAD", True)
+    timeout_seconds: int = _env_int("GRAPHDB_TIMEOUT_SECONDS", 30)
+    max_readiness_checks: int = _env_int("GRAPHDB_MAX_READINESS_CHECKS", 20)
+    readiness_check_interval_seconds: int = _env_int(
+        "GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS", 3
+    )
+    username: str | None = os.getenv("GRAPHDB_USERNAME")
+    password: str | None = os.getenv("GRAPHDB_PASSWORD")
+
+
+# =============================================================================
+# GraphDB Helpers
+# =============================================================================
+
+
+def _normalize_graphdb_base_url(base_url: str) -> str:
+    return base_url.rstrip("/")
+
+
+def _graphdb_auth(config: GraphDBConfig) -> tuple[str, str] | None:
+    if not config.username and not config.password:
+        return None
+    if not config.username or not config.password:
+        raise Failure(
+            "GraphDB credentials misconfigured: both username and password are required."
+        )
+    return config.username, config.password
+
+
+def _ttl_escape_literal(value: str) -> str:
+    return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _create_graphdb_repo_config(repository_id: str, title: str) -> str:
+    escaped_repo_id = _ttl_escape_literal(repository_id)
+    escaped_title = _ttl_escape_literal(title)
+    return f"""@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rep: <http://www.openrdf.org/config/repository#>.
+@prefix sr: <http://www.openrdf.org/config/repository/sail#>.
+@prefix sail: <http://www.openrdf.org/config/sail#>.
+@prefix graphdb: <http://www.ontotext.com/config/graphdb#>.
+
+[] a rep:Repository ;
+    rep:repositoryID "{escaped_repo_id}" ;
+    rdfs:label "{escaped_title}" ;
+    rep:repositoryImpl [
+        rep:repositoryType "graphdb:SailRepository" ;
+        sr:sailImpl [
+            sail:sailType "graphdb:Sail" ;
+            graphdb:ruleset "empty" ;
+            graphdb:check-for-inconsistencies "false" ;
+            graphdb:disable-sameAs "true" ;
+            graphdb:enable-context-index "true"
+        ]
+    ].
+"""
+
+
+def _raise_graphdb_error(message: str, response: requests.Response | None = None) -> None:
+    if response is None:
+        raise Failure(message)
+
+    body = response.text.strip()
+    if len(body) > 400:
+        body = f"{body[:397]}..."
+
+    raise Failure(
+        f"{message}. HTTP {response.status_code} {response.reason}. "
+        f"Response: {body or '<empty>'}"
+    )
+
+
+def _wait_for_graphdb(base_url: str, auth: tuple[str, str] | None, config: GraphDBConfig) -> None:
+    repositories_url = f"{base_url}/rest/repositories"
+    attempts = config.max_readiness_checks
+
+    for attempt in range(1, attempts + 1):
+        try:
+            response = requests.get(
+                repositories_url,
+                auth=auth,
+                timeout=config.timeout_seconds,
+            )
+        except requests.RequestException:
+            response = None
+
+        if response is not None and response.status_code == 200:
+            return
+
+        if response is not None and response.status_code in {401, 403}:
+            _raise_graphdb_error(
+                "GraphDB is reachable but authentication failed while listing repositories",
+                response,
+            )
+
+        if attempt < attempts:
+            time.sleep(config.readiness_check_interval_seconds)
+
+    _raise_graphdb_error(
+        f"GraphDB at {base_url} did not become ready after "
+        f"{attempts} checks with {config.readiness_check_interval_seconds}s interval"
+    )
+
+
+def _repository_exists(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    repository_id: str,
+    timeout_seconds: int,
+) -> bool:
+    try:
+        response = requests.get(
+            f"{base_url}/rest/repositories/{repository_id}",
+            auth=auth,
+            timeout=timeout_seconds,
+        )
+    except requests.RequestException as e:
+        _raise_graphdb_error(f"Could not reach GraphDB while checking repository: {e}")
+
+    if response.status_code == 200:
+        return True
+    if response.status_code == 404:
+        return False
+    _raise_graphdb_error(f"Could not check repository '{repository_id}'", response)
+    return False
+
+
+def _create_repository_if_missing(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    config: GraphDBConfig,
+) -> bool:
+    if _repository_exists(base_url, auth, config.repository_id, config.timeout_seconds):
+        return False
+
+    try:
+        response = requests.post(
+            f"{base_url}/rest/repositories",
+            auth=auth,
+            files={
+                "config": (
+                    "repo-config.ttl",
+                    _create_graphdb_repo_config(config.repository_id, config.repository_title),
+                    "text/turtle",
+                )
+            },
+            timeout=config.timeout_seconds,
+        )
+    except requests.RequestException as e:
+        _raise_graphdb_error(
+            f"Could not reach GraphDB while creating repository '{config.repository_id}': {e}"
+        )
+
+    if response.status_code not in {200, 201, 204}:
+        _raise_graphdb_error(
+            f"Could not create GraphDB repository '{config.repository_id}'",
+            response,
+        )
+
+    return True
+
+
+def _clear_repository(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    repository_id: str,
+    timeout_seconds: int,
+) -> None:
+    try:
+        response = requests.delete(
+            f"{base_url}/repositories/{repository_id}/statements",
+            auth=auth,
+            timeout=timeout_seconds,
+        )
+    except requests.RequestException as e:
+        _raise_graphdb_error(f"Could not reach GraphDB while clearing repository '{repository_id}': {e}")
+
+    if response.status_code not in {200, 204}:
+        _raise_graphdb_error(
+            f"Could not clear GraphDB repository '{repository_id}' before upload",
+            response,
+        )
+
+
+def _upload_graph_ttl(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    repository_id: str,
+    ttl_data: str,
+    timeout_seconds: int,
+) -> None:
+    try:
+        response = requests.post(
+            f"{base_url}/repositories/{repository_id}/statements",
+            data=ttl_data.encode("utf-8"),
+            headers={"Content-Type": "text/turtle; charset=utf-8"},
+            auth=auth,
+            timeout=timeout_seconds,
+        )
+    except requests.RequestException as e:
+        _raise_graphdb_error(f"Could not reach GraphDB while uploading data to '{repository_id}': {e}")
+
+    if response.status_code not in {200, 204}:
+        _raise_graphdb_error(f"Could not upload data to repository '{repository_id}'", response)
+
+
+def _repository_triple_count(
+    base_url: str,
+    auth: tuple[str, str] | None,
+    repository_id: str,
+    timeout_seconds: int,
+) -> int | None:
+    try:
+        response = requests.get(
+            f"{base_url}/repositories/{repository_id}/size",
+            auth=auth,
+            timeout=timeout_seconds,
+        )
+    except requests.RequestException:
+        return None
+
+    if response.status_code != 200:
+        return None
+    try:
+        return int(response.text.strip())
+    except ValueError:
+        return None
 
 
 # =============================================================================
@@ -330,13 +587,59 @@ def sparql_summary(context: AssetExecutionContext, combined_vessel_graph: Graph)
 
 @asset(
     group_name="output",
-    description="Upload combined graph to GraphDB (not yet implemented)",
+    description="Upload combined graph to GraphDB",
     kinds={"python", "GraphDB"},
 )
-def graphdb_upload(context: AssetExecutionContext, combined_vessel_graph: Graph) -> str:
-    """Placeholder for GraphDB upload - to be implemented later."""
-    context.log.info(
-        f"GraphDB upload not yet implemented. "
-        f"Combined graph has {len(combined_vessel_graph)} triples."
+def graphdb_upload(
+    context: AssetExecutionContext,
+    config: GraphDBConfig,
+    combined_vessel_graph: Graph,
+) -> str:
+    """Upload the combined graph to GraphDB via RDF4J HTTP endpoints."""
+    triple_count = len(combined_vessel_graph)
+    base_url = _normalize_graphdb_base_url(config.base_url)
+    auth = _graphdb_auth(config)
+
+    _wait_for_graphdb(base_url, auth, config)
+    repo_created = _create_repository_if_missing(base_url, auth, config)
+
+    if config.clear_repository_before_upload:
+        _clear_repository(base_url, auth, config.repository_id, config.timeout_seconds)
+
+    ttl_data = combined_vessel_graph.serialize(format="turtle")
+    if isinstance(ttl_data, bytes):
+        ttl_data = ttl_data.decode("utf-8")
+    _upload_graph_ttl(
+        base_url,
+        auth,
+        config.repository_id,
+        ttl_data,
+        config.timeout_seconds,
     )
-    return ""
+
+    remote_triple_count = _repository_triple_count(
+        base_url,
+        auth,
+        config.repository_id,
+        config.timeout_seconds,
+    )
+
+    metadata: dict[str, Any] = {
+        "graphdb_base_url": MetadataValue.text(base_url),
+        "repository_id": MetadataValue.text(config.repository_id),
+        "uploaded_triples": MetadataValue.int(triple_count),
+        "repository_created": MetadataValue.text(str(repo_created)),
+        "repository_cleared_before_upload": MetadataValue.text(
+            str(config.clear_repository_before_upload)
+        ),
+    }
+    if remote_triple_count is not None:
+        metadata["remote_triple_count"] = MetadataValue.int(remote_triple_count)
+
+    context.add_output_metadata(metadata)
+    context.log.info(
+        f"Uploaded {triple_count} triples to GraphDB repository '{config.repository_id}' "
+        f"at {base_url}."
+    )
+
+    return f"{base_url}/repositories/{config.repository_id}"

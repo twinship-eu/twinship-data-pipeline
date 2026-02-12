@@ -46,6 +46,14 @@ docker compose up -d --build
 
 Open http://localhost:3000. The same sensor-driven workflow runs automatically.
 
+GraphDB is also started by Compose at http://localhost:7200 with repository defaults:
+
+- `GRAPHDB_REPOSITORY_ID=twinship`
+- `GRAPHDB_REPOSITORY_TITLE=TwinShip Data Repository`
+
+The `graphdb_upload` asset creates the repository if missing, clears it, and uploads
+the latest combined Turtle graph.
+
 To reset all state (database, storage, outputs) and start fresh:
 
 ```bash
@@ -100,6 +108,22 @@ print(g.serialize(format="turtle"))
 ```bash
 uv sync                        # install all dependencies
 uv run pre-commit install      # set up git hooks (auto-formats code on commit)
+```
+
+### GraphDB configuration
+
+`graphdb_upload` reads these environment variables (optional):
+
+```bash
+GRAPHDB_BASE_URL=http://localhost:7200
+GRAPHDB_REPOSITORY_ID=twinship
+GRAPHDB_REPOSITORY_TITLE="TwinShip Data Repository"
+GRAPHDB_CLEAR_BEFORE_UPLOAD=true
+GRAPHDB_TIMEOUT_SECONDS=30
+GRAPHDB_MAX_READINESS_CHECKS=20
+GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS=3
+GRAPHDB_USERNAME=
+GRAPHDB_PASSWORD=
 ```
 
 ### Tests
