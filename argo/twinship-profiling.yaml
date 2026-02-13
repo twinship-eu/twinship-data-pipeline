@@ -8,14 +8,6 @@ spec:
   entrypoint: twinship-pipeline
   # Override SIM-PIPE's default parallelism=1 so per-vessel steps run in parallel
   parallelism: 3
-  volumeClaimTemplates:
-    - metadata:
-        name: shared
-      spec:
-        accessModes: ["ReadWriteOnce"]
-        resources:
-          requests:
-            storage: 1Gi
   templates:
     # =========================================================================
     # DAG: pipeline structure
@@ -25,131 +17,240 @@ spec:
         tasks:
           # Step 1: Load spreadsheet and discover vessels
           - name: extract-spreadsheet
-            template: run-step
-            arguments:
-              parameters:
-                - name: step
-                  value: extract-spreadsheet
+            template: extract-spreadsheet-step
 
           # Step 2: Extract vessel JSON (parallel per vessel)
           - name: extract-grimaldi
-            template: run-step
+            template: extract-vessel-step
             dependencies: [extract-spreadsheet]
             arguments:
               parameters:
-                - name: step
-                  value: extract-vessel
                 - name: vessel
                   value: grimaldi
+              artifacts:
+                - name: spreadsheet-data
+                  from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
           - name: extract-stena-scandinavica
-            template: run-step
+            template: extract-vessel-step
             dependencies: [extract-spreadsheet]
             arguments:
               parameters:
-                - name: step
-                  value: extract-vessel
                 - name: vessel
                   value: stena-scandinavica
+              artifacts:
+                - name: spreadsheet-data
+                  from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
           - name: extract-stena-tanker
-            template: run-step
+            template: extract-vessel-step
             dependencies: [extract-spreadsheet]
             arguments:
               parameters:
-                - name: step
-                  value: extract-vessel
                 - name: vessel
                   value: stena-tanker
+              artifacts:
+                - name: spreadsheet-data
+                  from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
 
           # Step 3: Harmonise to RDF (parallel per vessel)
           - name: harmonise-grimaldi
-            template: run-step
+            template: harmonise-vessel-step
             dependencies: [extract-grimaldi]
             arguments:
               parameters:
-                - name: step
-                  value: harmonise-vessel
                 - name: vessel
                   value: grimaldi
+              artifacts:
+                - name: vessel-json
+                  from: "{{tasks.extract-grimaldi.outputs.artifacts.vessel-json}}"
           - name: harmonise-stena-scandinavica
-            template: run-step
+            template: harmonise-vessel-step
             dependencies: [extract-stena-scandinavica]
             arguments:
               parameters:
-                - name: step
-                  value: harmonise-vessel
                 - name: vessel
                   value: stena-scandinavica
+              artifacts:
+                - name: vessel-json
+                  from: "{{tasks.extract-stena-scandinavica.outputs.artifacts.vessel-json}}"
           - name: harmonise-stena-tanker
-            template: run-step
+            template: harmonise-vessel-step
             dependencies: [extract-stena-tanker]
             arguments:
               parameters:
-                - name: step
-                  value: harmonise-vessel
                 - name: vessel
                   value: stena-tanker
+              artifacts:
+                - name: vessel-json
+                  from: "{{tasks.extract-stena-tanker.outputs.artifacts.vessel-json}}"
 
           # Step 4: SHACL validate + write TTL (parallel per vessel)
           - name: validate-grimaldi
-            template: run-step
+            template: validate-vessel-step
             dependencies: [harmonise-grimaldi]
             arguments:
               parameters:
-                - name: step
-                  value: validate-vessel
                 - name: vessel
                   value: grimaldi
+              artifacts:
+                - name: vessel-rdf
+                  from: "{{tasks.harmonise-grimaldi.outputs.artifacts.vessel-rdf}}"
           - name: validate-stena-scandinavica
-            template: run-step
+            template: validate-vessel-step
             dependencies: [harmonise-stena-scandinavica]
             arguments:
               parameters:
-                - name: step
-                  value: validate-vessel
                 - name: vessel
                   value: stena-scandinavica
+              artifacts:
+                - name: vessel-rdf
+                  from: "{{tasks.harmonise-stena-scandinavica.outputs.artifacts.vessel-rdf}}"
           - name: validate-stena-tanker
-            template: run-step
+            template: validate-vessel-step
             dependencies: [harmonise-stena-tanker]
             arguments:
               parameters:
-                - name: step
-                  value: validate-vessel
                 - name: vessel
                   value: stena-tanker
+              artifacts:
+                - name: vessel-rdf
+                  from: "{{tasks.harmonise-stena-tanker.outputs.artifacts.vessel-rdf}}"
 
           # Step 5: Combine all TTL files
           - name: combine-graphs
-            template: run-step
+            template: combine-graphs-step
             dependencies:
               - validate-grimaldi
               - validate-stena-scandinavica
               - validate-stena-tanker
             arguments:
-              parameters:
-                - name: step
-                  value: combine-graphs
+              artifacts:
+                - name: ttl-grimaldi
+                  from: "{{tasks.validate-grimaldi.outputs.artifacts.vessel-ttl}}"
+                - name: ttl-stena-scandinavica
+                  from: "{{tasks.validate-stena-scandinavica.outputs.artifacts.vessel-ttl}}"
+                - name: ttl-stena-tanker
+                  from: "{{tasks.validate-stena-tanker.outputs.artifacts.vessel-ttl}}"
 
     # =========================================================================
-    # Container template: runs one pipeline step
+    # Step templates
     # =========================================================================
-    - name: run-step
-      inputs:
-        parameters:
-          - name: step
-          - name: vessel
-            default: ""
+
+    # Step 1: Extract spreadsheet data
+    - name: extract-spreadsheet-step
+      outputs:
+        artifacts:
+          - name: spreadsheet-data
+            path: /tmp/pipeline/spreadsheet_data.pkl
+            archive:
+              none: {}
       container:
         image: twinship_user_code:latest
         imagePullPolicy: IfNotPresent
         command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
-        args:
-          - "{{inputs.parameters.step}}"
-          - "{{inputs.parameters.vessel}}"
+        args: ["extract-spreadsheet"]
         workingDir: /app
         env:
           - name: PYTHONPATH
             value: /app/.venv/lib/python3.11/site-packages:/app
-        volumeMounts:
-          - name: shared
-            mountPath: /tmp/pipeline
+
+    # Step 2: Extract vessel JSON from spreadsheet
+    - name: extract-vessel-step
+      inputs:
+        parameters:
+          - name: vessel
+        artifacts:
+          - name: spreadsheet-data
+            path: /tmp/pipeline/spreadsheet_data.pkl
+      outputs:
+        artifacts:
+          - name: vessel-json
+            path: "/tmp/pipeline/extracted_vessel_json__{{inputs.parameters.vessel}}.pkl"
+            archive:
+              none: {}
+      container:
+        image: twinship_user_code:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
+        args: ["extract-vessel", "{{inputs.parameters.vessel}}"]
+        workingDir: /app
+        env:
+          - name: PYTHONPATH
+            value: /app/.venv/lib/python3.11/site-packages:/app
+
+    # Step 3: Harmonise vessel JSON to RDF graph
+    - name: harmonise-vessel-step
+      inputs:
+        parameters:
+          - name: vessel
+        artifacts:
+          - name: vessel-json
+            path: "/tmp/pipeline/extracted_vessel_json__{{inputs.parameters.vessel}}.pkl"
+      outputs:
+        artifacts:
+          - name: vessel-rdf
+            path: "/tmp/pipeline/vessel_rdf_graph__{{inputs.parameters.vessel}}.pkl"
+            archive:
+              none: {}
+      container:
+        image: twinship_user_code:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
+        args: ["harmonise-vessel", "{{inputs.parameters.vessel}}"]
+        workingDir: /app
+        env:
+          - name: PYTHONPATH
+            value: /app/.venv/lib/python3.11/site-packages:/app
+
+    # Step 4: SHACL validate RDF graph and write TTL file
+    - name: validate-vessel-step
+      inputs:
+        parameters:
+          - name: vessel
+        artifacts:
+          - name: vessel-rdf
+            path: "/tmp/pipeline/vessel_rdf_graph__{{inputs.parameters.vessel}}.pkl"
+      outputs:
+        artifacts:
+          - name: validated-ttl
+            path: "/tmp/pipeline/validated_vessel_ttl__{{inputs.parameters.vessel}}.pkl"
+            archive:
+              none: {}
+          - name: vessel-ttl
+            path: "/tmp/pipeline/output/{{inputs.parameters.vessel}}.ttl"
+            archive:
+              none: {}
+      container:
+        image: twinship_user_code:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
+        args: ["validate-vessel", "{{inputs.parameters.vessel}}"]
+        workingDir: /app
+        env:
+          - name: PYTHONPATH
+            value: /app/.venv/lib/python3.11/site-packages:/app
+
+    # Step 5: Combine all vessel TTL files into one graph
+    - name: combine-graphs-step
+      inputs:
+        artifacts:
+          - name: ttl-grimaldi
+            path: /tmp/pipeline/output/grimaldi.ttl
+          - name: ttl-stena-scandinavica
+            path: /tmp/pipeline/output/stena-scandinavica.ttl
+          - name: ttl-stena-tanker
+            path: /tmp/pipeline/output/stena-tanker.ttl
+      outputs:
+        artifacts:
+          - name: combined-ttl
+            path: /tmp/pipeline/output/all_vessels.ttl
+            archive:
+              none: {}
+      container:
+        image: twinship_user_code:latest
+        imagePullPolicy: IfNotPresent
+        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
+        args: ["combine-graphs"]
+        workingDir: /app
+        env:
+          - name: PYTHONPATH
+            value: /app/.venv/lib/python3.11/site-packages:/app
