@@ -95,9 +95,7 @@ class GraphDBConfig(Config):
     clear_repository_before_upload: bool = _env_bool("GRAPHDB_CLEAR_BEFORE_UPLOAD", True)
     timeout_seconds: int = _env_int("GRAPHDB_TIMEOUT_SECONDS", 30)
     max_readiness_checks: int = _env_int("GRAPHDB_MAX_READINESS_CHECKS", 20)
-    readiness_check_interval_seconds: int = _env_int(
-        "GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS", 3
-    )
+    readiness_check_interval_seconds: int = _env_int("GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS", 3)
     username: str | None = os.getenv("GRAPHDB_USERNAME")
     password: str | None = os.getenv("GRAPHDB_PASSWORD")
 
@@ -115,9 +113,7 @@ def _graphdb_auth(config: GraphDBConfig) -> tuple[str, str] | None:
     if not config.username and not config.password:
         return None
     if not config.username or not config.password:
-        raise Failure(
-            "GraphDB credentials misconfigured: both username and password are required."
-        )
+        raise Failure("GraphDB credentials misconfigured: both username and password are required.")
     return config.username, config.password
 
 
@@ -159,8 +155,7 @@ def _raise_graphdb_error(message: str, response: requests.Response | None = None
         body = f"{body[:397]}..."
 
     raise Failure(
-        f"{message}. HTTP {response.status_code} {response.reason}. "
-        f"Response: {body or '<empty>'}"
+        f"{message}. HTTP {response.status_code} {response.reason}. Response: {body or '<empty>'}"
     )
 
 
@@ -267,7 +262,9 @@ def _clear_repository(
             timeout=timeout_seconds,
         )
     except requests.RequestException as e:
-        _raise_graphdb_error(f"Could not reach GraphDB while clearing repository '{repository_id}': {e}")
+        _raise_graphdb_error(
+            f"Could not reach GraphDB while clearing repository '{repository_id}': {e}"
+        )
 
     if response.status_code not in {200, 204}:
         _raise_graphdb_error(
@@ -292,7 +289,9 @@ def _upload_graph_ttl(
             timeout=timeout_seconds,
         )
     except requests.RequestException as e:
-        _raise_graphdb_error(f"Could not reach GraphDB while uploading data to '{repository_id}': {e}")
+        _raise_graphdb_error(
+            f"Could not reach GraphDB while uploading data to '{repository_id}': {e}"
+        )
 
     if response.status_code not in {200, 204}:
         _raise_graphdb_error(f"Could not upload data to repository '{repository_id}'", response)
