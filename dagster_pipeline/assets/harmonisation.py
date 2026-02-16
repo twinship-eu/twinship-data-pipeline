@@ -30,6 +30,7 @@ from dagster_pipeline.extraction import (
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
 from twinship_harmonisation import harmonise_twinship_vessel
 from twinship_harmonisation.utils import bind_namespaces
+from dagster_pipeline.validation.json_validation import validate_vessel_json
 
 # =============================================================================
 # Partitions Definition
@@ -127,6 +128,26 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
         vessel_info["prefix"],
         namespace,
     )
+
+    report = validate_vessel_json(data)
+
+    # Log warnings but continue
+    for w in report.warnings:
+        context.log.warning(f"[{namespace}] JSON validation: {w}")
+
+    # Add metadata so it appears in Dagster UI
+    context.add_output_metadata(
+        {
+            "json_validation_errors": len(report.errors),
+            "json_validation_warnings": len(report.warnings),
+        }
+    )
+
+    # Stop the run if there are errors
+    if not report.ok():
+        raise ValueError(
+            f"[{namespace}] JSON validation failed:\n" + "\n".join(report.errors)
+        )
 
     # Log summary of extracted data for this vessel
     vessel_id = data.get("vessel", {}).get("id", "unknown")
