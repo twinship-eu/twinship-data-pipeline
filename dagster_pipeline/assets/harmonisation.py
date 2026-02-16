@@ -138,8 +138,8 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     # Add metadata so it appears in Dagster UI
     context.add_output_metadata(
         {
-            "json_validation_errors": len(report.errors),
             "json_validation_warnings": len(report.warnings),
+            "sample_warnings": MetadataValue.md("\n".join(f"- {w}" for w in report.warnings[:10])),
         }
     )
 
