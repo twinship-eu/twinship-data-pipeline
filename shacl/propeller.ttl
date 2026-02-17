@@ -1,0 +1,91 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for Propellers (CPP and FPP subtypes)
+# Uses targetSubjectsOf to catch any node with a propeller property,
+# robust against new propeller subtypes being added.
+tws:PropellerShape a sh:NodeShape ;
+    sh:targetSubjectsOf tws:twPropellerDiameterMm ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Propeller must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Propeller should have at most one label" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerDiameterMm ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Propeller diameter must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerBlades ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1 ;
+        sh:maxInclusive 7 ;
+        sh:message "Propeller blades must be an integer between 1 and 7" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerPitchDiameterRatio ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Pitch/diameter ratio must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerPitchMaxInPercentage ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Pitch max percentage must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerExpandedAreaRatioPercentage ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Expanded area ratio must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerHubRatio ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Hub ratio must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerSkewAngleDegree ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Skew angle must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twPropellerEfficiency ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:minInclusive 0 ;
+        sh:maxInclusive 1 ;
+        sh:message "Propeller efficiency must be between 0 and 1" ;
+    ] ;
+    sh:property [
+        sh:path tws:twRudderAngleDegree ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Rudder angle must be a number" ;
+    ] .
