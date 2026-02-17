@@ -16,9 +16,11 @@ Pipeline structure:
            ▼
     combined_vessel_graph (non-partitioned)
            │
-           ├─► sparql_summary (SPARQL data tables)
            ▼
     graphdb_upload (non-partitioned)
+           │
+           ▼
+    sparql_summary (SPARQL data tables from GraphDB)
 
 Workflow:
 1. Materialize spreadsheet_data first
