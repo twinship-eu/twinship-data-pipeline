@@ -78,15 +78,17 @@ tws:PropulsionChainShape a sh:NodeShape ;
         """ ;
     ] .
 
-# Every gearbox must be connected to at least one propeller
+# Every propulsion gearbox (connected to a main engine) must also connect to a propeller
 tws:GearboxPropellerChainShape a sh:NodeShape ;
     sh:targetClass tws:DirectDrive, tws:Reduction, tws:SingleSpeed, tws:TISO, tws:PTO ;
     sh:sparql [
-        sh:message "Gearbox {$this} is not connected to any propeller" ;
+        sh:message "Propulsion gearbox {$this} is not connected to any propeller" ;
         sh:prefixes tws:PrefixDeclarations ;
         sh:select """
             SELECT $this
             WHERE {
+                $this ido:directlyConnectedTo ?engine .
+                ?engine a tws:MainEngineSystem .
                 FILTER NOT EXISTS {
                     $this ido:directlyConnectedTo ?prop .
                     ?prop a ?type .
