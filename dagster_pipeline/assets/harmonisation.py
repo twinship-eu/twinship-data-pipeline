@@ -314,7 +314,7 @@ def graphdb_upload(
     remote_triple_count = graphdb_client.triple_count()
 
     metadata: dict[str, Any] = {
-        "graphdb_base_url": MetadataValue.text(graphdb_client._base_url),
+        "graphdb_base_url": MetadataValue.text(graphdb_client.normalized_base_url),
         "repository_id": MetadataValue.text(graphdb_client.repository_id),
         "uploaded_triples": MetadataValue.int(triple_count),
         "repository_created": MetadataValue.text(str(repo_created)),
@@ -328,10 +328,10 @@ def graphdb_upload(
     context.add_output_metadata(metadata)
     context.log.info(
         f"Uploaded {triple_count} triples to GraphDB repository "
-        f"'{graphdb_client.repository_id}' at {graphdb_client._base_url}."
+        f"'{graphdb_client.repository_id}' at {graphdb_client.normalized_base_url}."
     )
 
-    return f"{graphdb_client._base_url}/repositories/{graphdb_client.repository_id}"
+    return f"{graphdb_client.normalized_base_url}/repositories/{graphdb_client.repository_id}"
 
 
 @asset(

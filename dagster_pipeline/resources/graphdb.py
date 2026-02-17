@@ -94,7 +94,7 @@ class GraphDBClient(ConfigurableResource):
     password: str = EnvVar("GRAPHDB_PASSWORD").get_value("")
 
     @property
-    def _base_url(self) -> str:
+    def normalized_base_url(self) -> str:
         return _normalize_graphdb_base_url(self.base_url)
 
     @property
@@ -109,7 +109,7 @@ class GraphDBClient(ConfigurableResource):
 
     def wait_for_readiness(self) -> None:
         """Block until GraphDB responds to a repository listing request."""
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
         repositories_url = f"{base_url}/rest/repositories"
         attempts = self.max_readiness_checks
@@ -142,7 +142,7 @@ class GraphDBClient(ConfigurableResource):
 
         Returns True if a new repository was created, False if it already existed.
         """
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
 
         # Check existence
@@ -188,7 +188,7 @@ class GraphDBClient(ConfigurableResource):
 
     def clear_repository(self) -> None:
         """Delete all statements from the repository."""
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
 
         try:
@@ -210,7 +210,7 @@ class GraphDBClient(ConfigurableResource):
 
     def upload_ttl(self, ttl_data: str) -> None:
         """Upload Turtle data to the repository."""
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
 
         try:
@@ -233,7 +233,7 @@ class GraphDBClient(ConfigurableResource):
 
     def triple_count(self) -> int | None:
         """Return the number of triples in the repository, or None on failure."""
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
 
         try:
@@ -254,7 +254,7 @@ class GraphDBClient(ConfigurableResource):
 
     def run_select_query(self, query: str) -> pd.DataFrame:
         """Execute a SPARQL SELECT query and return results as a DataFrame."""
-        base_url = self._base_url
+        base_url = self.normalized_base_url
         auth = self._auth
 
         try:

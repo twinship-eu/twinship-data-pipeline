@@ -98,7 +98,6 @@ services:
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
-      <<: *graphdb-env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - pipeline_output:/app/output
@@ -108,7 +107,6 @@ services:
     depends_on:
       - postgresql
       - user_code
-      - graphdb
 
   # Dagster daemon (schedules, sensors, run queue)
   daemon:
@@ -129,7 +127,6 @@ services:
       DAGSTER_POSTGRES_DB: dagster
       DAGSTER_POSTGRES_HOST: postgresql
       DAGSTER_CURRENT_IMAGE: twinship_user_code:latest
-      <<: *graphdb-env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - pipeline_output:/app/output
@@ -139,7 +136,6 @@ services:
     depends_on:
       - postgresql
       - user_code
-      - graphdb
 
 volumes:
   postgresql_data:
