@@ -54,6 +54,7 @@ def prefix_to_namespace(prefix: str) -> str:
 
 MISSING_SENTINEL = -1  # TwinShip convention
 
+
 def clean_value_typed(val: Any, declared_type: str | None) -> Any:
     """
     Clean a value from Excel using the declared type row in the spreadsheet.
