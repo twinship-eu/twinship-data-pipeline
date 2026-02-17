@@ -1,0 +1,115 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+# Prefix declarations for SPARQL-based constraints
+tws:PrefixDeclarations a owl:Ontology ;
+    sh:declare [
+        sh:prefix "tws" ;
+        sh:namespace "https://twin-ship.eu/twinship#"^^xsd:anyURI ;
+    ] ;
+    sh:declare [
+        sh:prefix "ido" ;
+        sh:namespace "http://rds.posccaesar.org/ontology/lis14/rdl/"^^xsd:anyURI ;
+    ] .
+
+# Validate that all tws: types are from the known ontology vocabulary
+tws:KnownTypeShape a sh:NodeShape ;
+    sh:targetSubjectsOf <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> ;
+    sh:sparql [
+        sh:message "Unknown TwinShip type {?type} on {$this}" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this ?type
+            WHERE {
+                $this a ?type .
+                FILTER (STRSTARTS(STR(?type), "https://twin-ship.eu/twinship#"))
+                FILTER (?type NOT IN (
+                    tws:VesselSystem, tws:RoRo, tws:RoPax, tws:Tanker,
+                    tws:MainEngineSystem, tws:TwoStroke, tws:FourStroke,
+                    tws:DieselEngine, tws:MechanicalConfiguration,
+                    tws:AuxiliaryEngineSystem,
+                    tws:CPP, tws:FPP,
+                    tws:DirectDrive, tws:Reduction, tws:SingleSpeed, tws:TISO, tws:PTO,
+                    tws:Pms,
+                    tws:EmergencyEquipment,
+                    tws:Maneuvering,
+                    tws:ShaftGeneratorSystem, tws:RGShaftGenerator,
+                    tws:Boiler,
+                    tws:Fuel
+                ))
+            }
+        """ ;
+    ] .
+
+# Symmetry check: if A directlyConnectedTo B, then B must directlyConnectedTo A
+tws:ConnectionSymmetryShape a sh:NodeShape ;
+    sh:targetSubjectsOf ido:directlyConnectedTo ;
+    sh:sparql [
+        sh:message "Symmetry violation: {$this} is directlyConnectedTo {?other} but not vice versa" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this ?other
+            WHERE {
+                $this ido:directlyConnectedTo ?other .
+                FILTER NOT EXISTS { ?other ido:directlyConnectedTo $this }
+            }
+        """ ;
+    ] .
+
+# Every main engine must be connected to at least one gearbox
+tws:PropulsionChainShape a sh:NodeShape ;
+    sh:targetClass tws:MainEngineSystem ;
+    sh:sparql [
+        sh:message "Main engine {$this} is not connected to any gearbox" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this a tws:MainEngineSystem .
+                FILTER NOT EXISTS {
+                    $this ido:directlyConnectedTo ?gearbox .
+                    ?gearbox a ?type .
+                    FILTER (?type IN (tws:DirectDrive, tws:Reduction, tws:SingleSpeed, tws:TISO, tws:PTO))
+                }
+            }
+        """ ;
+    ] .
+
+# Every gearbox must be connected to at least one propeller
+tws:GearboxPropellerChainShape a sh:NodeShape ;
+    sh:targetClass tws:DirectDrive, tws:Reduction, tws:SingleSpeed, tws:TISO, tws:PTO ;
+    sh:sparql [
+        sh:message "Gearbox {$this} is not connected to any propeller" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                FILTER NOT EXISTS {
+                    $this ido:directlyConnectedTo ?prop .
+                    ?prop a ?type .
+                    FILTER (?type IN (tws:CPP, tws:FPP))
+                }
+            }
+        """ ;
+    ] .
+
+# Every PMS must be connected to at least one auxiliary engine
+tws:PmsConnectivityShape a sh:NodeShape ;
+    sh:targetClass tws:Pms ;
+    sh:sparql [
+        sh:message "PMS {$this} is not connected to any auxiliary engine" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this
+            WHERE {
+                $this a tws:Pms .
+                FILTER NOT EXISTS {
+                    $this ido:directlyConnectedTo ?ae .
+                    ?ae a tws:AuxiliaryEngineSystem .
+                }
+            }
+        """ ;
+    ] .
