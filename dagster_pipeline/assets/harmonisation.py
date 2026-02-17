@@ -28,9 +28,9 @@ from dagster_pipeline.extraction import (
     load_spreadsheet_sheets,
 )
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
+from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
 from twinship_harmonisation.utils import bind_namespaces
-from dagster_pipeline.validation.json_validation import validate_vessel_json
 
 # =============================================================================
 # Partitions Definition

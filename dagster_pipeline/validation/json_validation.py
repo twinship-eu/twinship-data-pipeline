@@ -13,10 +13,9 @@ The proposed rule to follow:
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Set
 import re
-
+from dataclasses import dataclass, field
+from typing import Any, dict, list, set
 
 # =============================================================================
 # ID patterns (based on current JSON files)
@@ -38,7 +37,7 @@ BOILER_ID_RE = re.compile(r"^(BLR-[A-Z]{3}-\d+|CMP-BLR-[A-Z]{3}-\d+)$")     # BL
 
 # Fuels should match the ontology list.
 # Started with the ones already seen in data; expand later if needed.
-ALLOWED_FUELS: Set[str] = {
+ALLOWED_FUELS: set[str] = {
     "HFO", "MGO", "MDO",
     "LNG", "H2", "NH3", "Methanol",
 }
@@ -50,8 +49,8 @@ ALLOWED_FUELS: Set[str] = {
 
 @dataclass
 class ValidationReport:
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
 
     def ok(self) -> bool:
         return len(self.errors) == 0
@@ -113,7 +112,7 @@ def _expect_id(report: ValidationReport, path: str, v: Any, pat: re.Pattern[str]
         report.errors.append(f"{path}: invalid {label} '{v}'")
 
 
-def _normalize_fuels(v: Any) -> List[str]:
+def _normalize_fuels(v: Any) -> list[str]:
     """
     Fuels are usually a list: ["HFO", "MGO", ...]
     Sometimes they can be "", None, or a single string.
@@ -132,7 +131,7 @@ def _normalize_fuels(v: Any) -> List[str]:
 # Main validator
 # =============================================================================
 
-def validate_vessel_json(data: Dict[str, Any]) -> ValidationReport:
+def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
     """
     Validate a single vessel JSON file.
 
@@ -197,13 +196,13 @@ def validate_vessel_json(data: Dict[str, Any]) -> ValidationReport:
 
     # Collect IDs used for reference checks
     # These sets let us verify "this thing references an existing object"
-    gearbox_ids: Set[str] = set()
-    propeller_ids: Set[str] = set()
-    pms_ids: Set[str] = set()
+    gearbox_ids: set[str] = set()
+    propeller_ids: set[str] = set()
+    pms_ids: set[str] = set()
 
-    def _collect_ids(arr: Any, path: str, pat: re.Pattern[str], label: str) -> Set[str]:
+    def _collect_ids(arr: Any, path: str, pat: re.Pattern[str], label: str) -> set[str]:
         """Collect IDs from list of objects and check duplicates."""
-        ids: Set[str] = set()
+        ids: set[str] = set()
         if not isinstance(arr, list):
             return ids
         for i, obj in enumerate(arr):
