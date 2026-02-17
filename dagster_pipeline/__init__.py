@@ -44,7 +44,7 @@ from dagster_pipeline.jobs import (
     output_job,
     spreadsheet_job,
 )
-from dagster_pipeline.resources import shacl_validator
+from dagster_pipeline.resources import graphdb_client, shacl_validator
 from dagster_pipeline.sensors import vessel_discovery_sensor
 
 defs = Definitions(
@@ -63,5 +63,5 @@ defs = Definitions(
     ],
     jobs=[full_pipeline_job, extraction_job, harmonisation_job, output_job, spreadsheet_job],
     sensors=[vessel_discovery_sensor],
-    resources={"shacl_validator": shacl_validator},
+    resources={"shacl_validator": shacl_validator, "graphdb_client": graphdb_client},
 )

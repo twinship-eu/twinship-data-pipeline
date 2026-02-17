@@ -6,6 +6,8 @@ from dagster import ConfigurableResource
 from pyshacl import validate
 from rdflib import Graph
 
+from dagster_pipeline.resources.graphdb import GraphDBClient, graphdb_client
+
 
 class ShaclValidator(ConfigurableResource):
     """Resource for SHACL validation of RDF graphs."""
@@ -35,3 +37,5 @@ class ShaclValidator(ConfigurableResource):
 
 # Default resource instance
 shacl_validator = ShaclValidator()
+
+__all__ = ["GraphDBClient", "ShaclValidator", "graphdb_client", "shacl_validator"]
