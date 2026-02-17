@@ -78,9 +78,7 @@ tws:PropellerShape a sh:NodeShape ;
         sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
-        sh:minInclusive 0 ;
-        sh:maxInclusive 1 ;
-        sh:message "Propeller efficiency must be between 0 and 1" ;
+        sh:message "Propeller efficiency must be a number" ;
     ] ;
     sh:property [
         sh:path tws:twRudderAngleDegree ;
