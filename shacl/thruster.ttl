@@ -1,0 +1,50 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for Maneuvering (Bow and Stern Thrusters)
+tws:ManeuveringShape a sh:NodeShape ;
+    sh:targetClass tws:Maneuvering ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Thruster must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Thruster should have at most one label" ;
+    ] ;
+    sh:property [
+        sh:path tws:twBowThrusterPowerMaxInKW ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Bow thruster power must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twBowThrusterSpeedMaxInRevPerMin ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Bow thruster speed must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSternThrusterPowerMaxInKW ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Stern thruster power must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSternThrusterSpeedMaxInRevPerMin ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Stern thruster speed must be a number" ;
+    ] .

@@ -1,0 +1,70 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for AuxiliaryEngineSystem
+tws:AuxiliaryEngineSystemShape a sh:NodeShape ;
+    sh:targetClass tws:AuxiliaryEngineSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Auxiliary engine must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:message "Auxiliary engine should have at most one label" ;
+    ] ;
+    sh:property [
+        sh:path tws:twDieselEnginePowerMaxInKW ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Diesel engine power must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twDieselEngineSpeedInRevPerMin ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Diesel engine speed must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twGeneratorPowerMaxInKW ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Generator power must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twGeneratorSpeedInRevPerMin ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Generator speed must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twAuxiliaryFuelRateMassNetKgPerHr ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Auxiliary fuel rate must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twAuxiliaryDOMode ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:in (-1 0 1) ;
+        sh:message "Auxiliary DO mode must be -1 (missing), 0 (off), or 1 (on)" ;
+    ] ;
+    sh:property [
+        sh:path tws:consume ;
+        sh:class tws:Fuel ;
+        sh:message "Auxiliary engine consume property must reference a Fuel individual" ;
+    ] .
