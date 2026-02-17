@@ -13,11 +13,9 @@ Pipeline structure:
            ▼
     vessel_rdf_graph (partitioned by vessel)
            │
-           ▼
-    validated_vessel_ttl (partitioned by vessel)
+           ├─► vessel_ttl (partitioned by vessel)
            │
-           ▼
-    combined_vessel_graph (non-partitioned)
+           └─► shacl_validation_report (partitioned by vessel)
            │
            ▼
     graphdb_upload (non-partitioned)
@@ -34,14 +32,14 @@ Workflow:
 from dagster import Definitions
 
 from dagster_pipeline.assets.harmonisation import (
-    combined_vessel_graph,
     extracted_vessel_json,
     graphdb_upload,
+    shacl_validation_report,
     sparql_summary,
     spreadsheet_data,
     validated_vessel_json,
-    validated_vessel_ttl,
     vessel_rdf_graph,
+    vessel_ttl,
 )
 from dagster_pipeline.jobs import (
     extraction_job,
@@ -61,10 +59,10 @@ defs = Definitions(
         validated_vessel_json,
         # Harmonisation
         vessel_rdf_graph,
+        vessel_ttl,
         # Validation
-        validated_vessel_ttl,
+        shacl_validation_report,
         # Output
-        combined_vessel_graph,
         sparql_summary,
         graphdb_upload,
     ],
