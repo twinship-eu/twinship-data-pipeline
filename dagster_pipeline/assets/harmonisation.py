@@ -52,7 +52,7 @@ class SpreadsheetConfig(Config):
 class ValidationConfig(Config):
     """Configuration for SHACL validation."""
 
-    shapes_path: str = "shacl/twinship_shapes.ttl"
+    shapes_path: str = "shacl/"
     output_dir: str = "output"
     fail_on_validation_error: bool = True
 
