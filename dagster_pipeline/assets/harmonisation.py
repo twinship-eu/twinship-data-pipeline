@@ -5,10 +5,10 @@ Pipeline structure:
 2. extracted_vessel_json - Extract JSON for each vessel (partitioned)
 3. validated_vessel_json - Validate extracted JSON (partitioned)
 4. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
-5. validated_vessel_ttl - Validate and write TTL files (partitioned)
-6. combined_vessel_graph - Combine all RDF graphs
-7. graphdb_upload - Upload the combined graph to GraphDB
-8. sparql_summary - SPARQL summary tables queried from GraphDB
+5a. vessel_ttl - Serialize RDF graph to TTL file (partitioned)
+5b. shacl_validation_report - SHACL validation of RDF graph (partitioned)
+6. graphdb_upload - Upload vessel TTL files to GraphDB
+7. sparql_summary - SPARQL summary tables queried from GraphDB
 """
 
 from pathlib import Path
@@ -31,7 +31,6 @@ from dagster_pipeline.extraction import (
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
 from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
-from twinship_harmonisation.utils import bind_namespaces
 
 # =============================================================================
 # Partitions Definition
@@ -51,19 +50,17 @@ class SpreadsheetConfig(Config):
     spreadsheet_path: str = "data/TwinShip-table-schema-specification.xlsx"
 
 
-class ValidationConfig(Config):
+class TtlOutputConfig(Config):
+    """Configuration for TTL file output."""
+
+    output_dir: str = "output"
+
+
+class ShaclConfig(Config):
     """Configuration for SHACL validation."""
 
     shapes_path: str = "shacl/"
-    output_dir: str = "output"
     fail_on_validation_error: bool = True
-
-
-class CombinedGraphConfig(Config):
-    """Configuration for combined graph."""
-
-    output_dir: str = "output"
-    combined_output: str = "output/all_vessels.ttl"
 
 
 # =============================================================================
@@ -156,7 +153,7 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     group_name="extraction",
     partitions_def=vessel_partitions_def,
     description="Validate extracted vessel JSON (ID formats, referential integrity, types/fuels)",
-    kinds={"json", "pydantic"},
+    kinds={"pydantic"},
 )
 def validated_vessel_json(context: AssetExecutionContext, extracted_vessel_json: dict) -> dict:
     """Validate the extracted vessel JSON and pass it through."""
@@ -219,45 +216,29 @@ def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict
 
 
 @asset(
-    group_name="validation",
+    group_name="harmonisation",
     partitions_def=vessel_partitions_def,
-    description="Validate RDF graph and write TTL file for a specific vessel",
-    kinds={"python", "SHACL", "RDF"},
+    description="Serialize RDF graph to TTL file for a specific vessel",
+    kinds={"turtle"},
 )
-def validated_vessel_ttl(
+def vessel_ttl(
     context: AssetExecutionContext,
-    config: ValidationConfig,
+    config: TtlOutputConfig,
     vessel_rdf_graph: Graph,
-    shacl_validator: ShaclValidator,
 ) -> str:
-    """Validate RDF graph and serialize to TTL file."""
+    """Serialize RDF graph to TTL file."""
     namespace = context.partition_key
-    shapes_path = Path(config.shapes_path)
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Check if the graph is empty before attempting validation or serialization
     if vessel_rdf_graph is None or len(vessel_rdf_graph) == 0:
         context.log.warning(f"Empty graph for {namespace}, skipping")
         return ""
 
-    # Validate with SHACL if shapes file exists
-    if shapes_path.exists():
-        conforms, report = shacl_validator.validate(vessel_rdf_graph, shapes_path)
-        if conforms:
-            context.log.info(f"SHACL validation passed for {namespace}")
-        else:
-            if config.fail_on_validation_error:
-                raise ValueError(f"SHACL validation failed for {namespace}:\n{report}")
-            else:
-                context.log.warning(f"SHACL validation issues for {namespace}:\n{report}")
-
-    # Serialize the RDF graph to TTL format
     output_path = output_dir / f"{namespace}.ttl"
     vessel_rdf_graph.serialize(destination=str(output_path), format="turtle")
     context.log.info(f"Wrote {len(vessel_rdf_graph)} triples to {output_path}")
 
-    # Add metadata about the output file to the context for Dagster UI
     context.add_output_metadata(
         {
             "output_path": MetadataValue.path(str(output_path)),
@@ -268,6 +249,61 @@ def validated_vessel_ttl(
     return str(output_path)
 
 
+@asset(
+    group_name="harmonisation",
+    partitions_def=vessel_partitions_def,
+    description="Run SHACL validation on RDF graph for a specific vessel",
+    kinds={"SHACL"},
+)
+def shacl_validation_report(
+    context: AssetExecutionContext,
+    config: ShaclConfig,
+    vessel_rdf_graph: Graph,
+    shacl_validator: ShaclValidator,
+) -> str:
+    """Validate RDF graph against SHACL shapes and return the report."""
+    namespace = context.partition_key
+    shapes_path = Path(config.shapes_path)
+
+    if vessel_rdf_graph is None or len(vessel_rdf_graph) == 0:
+        context.log.warning(f"Empty graph for {namespace}, skipping validation")
+        return "SKIPPED"
+
+    if not shapes_path.exists():
+        context.log.warning(f"Shapes path {shapes_path} not found, skipping validation")
+        return "SKIPPED"
+
+    conforms, report = shacl_validator.validate(vessel_rdf_graph, shapes_path)
+
+    if conforms:
+        context.log.info(f"SHACL validation passed for {namespace}")
+        context.add_output_metadata(
+            {
+                "conforms": MetadataValue.bool(True),
+                "report": MetadataValue.md("SHACL validation **passed**."),
+            }
+        )
+        return "PASSED"
+
+    if config.fail_on_validation_error:
+        context.add_output_metadata(
+            {
+                "conforms": MetadataValue.bool(False),
+                "report": MetadataValue.md(f"```\n{report}\n```"),
+            }
+        )
+        raise ValueError(f"SHACL validation failed for {namespace}:\n{report}")
+
+    context.log.warning(f"SHACL validation issues for {namespace}:\n{report}")
+    context.add_output_metadata(
+        {
+            "conforms": MetadataValue.bool(False),
+            "report": MetadataValue.md(f"```\n{report}\n```"),
+        }
+    )
+    return report
+
+
 # =============================================================================
 # Output Assets
 # =============================================================================
@@ -275,62 +311,17 @@ def validated_vessel_ttl(
 
 @asset(
     group_name="output",
-    deps=[validated_vessel_ttl],
-    description="Combine all validated RDF graphs into one",
-    kinds={"python", "RDF"},
-)
-def combined_vessel_graph(context: AssetExecutionContext, config: CombinedGraphConfig) -> Graph:
-    """Combine all vessel TTL files into a single graph."""
-    g = Graph()
-    output_dir = Path(config.output_dir)
-    combined_output = Path(config.combined_output)
-
-    # Read all TTL files in the output directory and combine them into one graph
-    ttl_files = list(output_dir.glob("*.ttl"))
-    for ttl_file in ttl_files:
-        # Skip the combined output file if it already exists from a previous run
-        if ttl_file == combined_output:
-            continue
-        try:
-            vessel_graph = Graph()
-            vessel_graph.parse(ttl_file, format="turtle")
-            g += vessel_graph
-            context.log.info(f"Added {len(vessel_graph)} triples from {ttl_file.name}")
-        except Exception as e:
-            context.log.warning(f"Could not parse {ttl_file}: {e}")
-
-    # Bind standard namespaces for cleaner TTL output
-    g = bind_namespaces(g)
-
-    # Write the combined graph to a TTL file
-    combined_output.parent.mkdir(parents=True, exist_ok=True)
-    g.serialize(destination=str(combined_output), format="turtle")
-    context.log.info(f"Combined graph: {len(g)} triples written to {combined_output}")
-
-    # Add metadata about the combined graph to the context for Dagster UI
-    context.add_output_metadata(
-        {
-            "output_path": MetadataValue.path(str(combined_output)),
-            "triple_count": MetadataValue.int(len(g)),
-            "source_files": MetadataValue.int(len(ttl_files) - 1),
-        }
-    )
-
-    return g
-
-
-@asset(
-    group_name="output",
-    description="Upload combined graph to GraphDB",
-    kinds={"python", "GraphDB"},
+    deps=[vessel_ttl, shacl_validation_report],
+    description="Upload vessel TTL files to GraphDB",
+    kinds={"GraphDB"},
 )
 def graphdb_upload(
     context: AssetExecutionContext,
+    config: TtlOutputConfig,
     graphdb_client: GraphDBClient,
-    combined_vessel_graph: Graph,
 ) -> str:
-    """Upload the combined graph to GraphDB via RDF4J HTTP endpoints."""
-    triple_count = len(combined_vessel_graph)
+    """Upload individual vessel TTL files to GraphDB via RDF4J HTTP endpoints."""
+    output_dir = Path(config.output_dir)
 
     graphdb_client.wait_for_readiness()
     repo_created = graphdb_client.ensure_repository()
@@ -338,15 +329,24 @@ def graphdb_upload(
     if graphdb_client.clear_before_upload:
         graphdb_client.clear_repository()
 
-    ttl_data = combined_vessel_graph.serialize(format="turtle")
-    graphdb_client.upload_ttl(ttl_data)
+    # Upload each vessel TTL file individually
+    ttl_files = sorted(output_dir.glob("*.ttl"))
+    total_triples = 0
+    for ttl_file in ttl_files:
+        g = Graph()
+        g.parse(ttl_file, format="turtle")
+        triple_count = len(g)
+        graphdb_client.upload_ttl(g.serialize(format="turtle"))
+        context.log.info(f"Uploaded {triple_count} triples from {ttl_file.name}")
+        total_triples += triple_count
 
     remote_triple_count = graphdb_client.triple_count()
 
     metadata: dict[str, Any] = {
         "graphdb_base_url": MetadataValue.text(graphdb_client.normalized_base_url),
         "repository_id": MetadataValue.text(graphdb_client.repository_id),
-        "uploaded_triples": MetadataValue.int(triple_count),
+        "uploaded_triples": MetadataValue.int(total_triples),
+        "source_files": MetadataValue.int(len(ttl_files)),
         "repository_created": MetadataValue.text(str(repo_created)),
         "repository_cleared_before_upload": MetadataValue.text(
             str(graphdb_client.clear_before_upload)
@@ -357,7 +357,7 @@ def graphdb_upload(
 
     context.add_output_metadata(metadata)
     context.log.info(
-        f"Uploaded {triple_count} triples to GraphDB repository "
+        f"Uploaded {total_triples} triples from {len(ttl_files)} files to GraphDB repository "
         f"'{graphdb_client.repository_id}' at {graphdb_client.normalized_base_url}."
     )
 
@@ -367,7 +367,7 @@ def graphdb_upload(
 @asset(
     group_name="output",
     description="Run SPARQL queries against GraphDB and display results",
-    kinds={"python", "SPARQL"},
+    kinds={"SPARQL"},
 )
 def sparql_summary(
     context: AssetExecutionContext,
