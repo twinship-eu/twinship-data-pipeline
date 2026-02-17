@@ -3,11 +3,12 @@
 Pipeline structure:
 1. spreadsheet_data - Load the Excel spreadsheet and discover vessels
 2. extracted_vessel_json - Extract JSON for each vessel (partitioned)
-3. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
-4. validated_vessel_ttl - Validate and write TTL files (partitioned)
-5. combined_vessel_graph - Combine all RDF graphs
-6. graphdb_upload - Upload the combined graph to GraphDB
-7. sparql_summary - SPARQL summary tables queried from GraphDB
+3. validated_vessel_json - Validate extracted JSON (partitioned)
+4. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
+5. validated_vessel_ttl - Validate and write TTL files (partitioned)
+6. combined_vessel_graph - Combine all RDF graphs
+7. graphdb_upload - Upload the combined graph to GraphDB
+8. sparql_summary - SPARQL summary tables queried from GraphDB
 """
 
 from pathlib import Path
@@ -28,6 +29,7 @@ from dagster_pipeline.extraction import (
     load_spreadsheet_sheets,
 )
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
+from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
 from twinship_harmonisation.utils import bind_namespaces
 
@@ -150,6 +152,34 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     return data
 
 
+@asset(
+    group_name="extraction",
+    partitions_def=vessel_partitions_def,
+    description="Validate extracted vessel JSON (ID formats, referential integrity, types/fuels)",
+    kinds={"json", "pydantic"},
+)
+def validated_vessel_json(context: AssetExecutionContext, extracted_vessel_json: dict) -> dict:
+    """Validate the extracted vessel JSON and pass it through."""
+    namespace = context.partition_key
+
+    report = validate_vessel_json(extracted_vessel_json)
+
+    for w in report.warnings:
+        context.log.warning(f"[{namespace}] JSON validation: {w}")
+
+    context.add_output_metadata(
+        {
+            "json_validation_warnings": MetadataValue.int(len(report.warnings)),
+            "sample_warnings": MetadataValue.md("\n".join(f"- {w}" for w in report.warnings[:10])),
+        }
+    )
+
+    if not report.ok():
+        raise ValueError(f"[{namespace}] JSON validation failed:\n" + "\n".join(report.errors))
+
+    return extracted_vessel_json
+
+
 # =============================================================================
 # Harmonisation Assets
 # =============================================================================
@@ -161,20 +191,20 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
     description="Harmonise vessel JSON to RDF graph for a specific vessel",
     kinds={"RDF", "python"},
 )
-def vessel_rdf_graph(context: AssetExecutionContext, extracted_vessel_json: dict) -> Graph:
+def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict) -> Graph:
     """Convert extracted vessel data to RDF triples."""
     namespace = context.partition_key
 
     # Validate that we have extracted data for this vessel before attempting harmonisation
-    if not extracted_vessel_json:
+    if not validated_vessel_json:
         context.log.warning(f"No data for {namespace}, returning empty graph")
         return Graph()
 
     # Harmonise the extracted vessel data into RDF triples
-    g = harmonise_twinship_vessel(**extracted_vessel_json)
+    g = harmonise_twinship_vessel(**validated_vessel_json)
 
     # Log the number of triples generated
-    vessel_id = extracted_vessel_json.get("vessel", {}).get("id", "unknown")
+    vessel_id = validated_vessel_json.get("vessel", {}).get("id", "unknown")
     context.log.info(f"Generated {len(g)} triples for {namespace} ({vessel_id})")
 
     # Add metadata about the harmonised graph to the context for Dagster UI

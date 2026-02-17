@@ -8,6 +8,9 @@ Pipeline structure:
     extracted_vessel_json (partitioned by vessel)
            │
            ▼
+    validated_vessel_json (partitioned by vessel)
+           │
+           ▼
     vessel_rdf_graph (partitioned by vessel)
            │
            ▼
@@ -36,6 +39,7 @@ from dagster_pipeline.assets.harmonisation import (
     graphdb_upload,
     sparql_summary,
     spreadsheet_data,
+    validated_vessel_json,
     validated_vessel_ttl,
     vessel_rdf_graph,
 )
@@ -54,6 +58,7 @@ defs = Definitions(
         # Extraction
         spreadsheet_data,
         extracted_vessel_json,
+        validated_vessel_json,
         # Harmonisation
         vessel_rdf_graph,
         # Validation
