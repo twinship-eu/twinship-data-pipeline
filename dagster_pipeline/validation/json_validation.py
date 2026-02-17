@@ -23,12 +23,12 @@ from typing import Any, dict, list, set
 
 # Validate IDs with regex to catch typos like "STL-RP" or "STL--RP-1".
 # These are "format checks" only.
-VESSEL_ID_RE = re.compile(r"^[A-Z]{3}-[A-Z]{2,}-\d+$")                      # GRI-RR-1, STL-RP-1, STT-TK-1
-ENGINE_ID_RE = re.compile(r"^[A-Z]{3}-(ME|AU)-\d+$")                        # STL-ME-1, STT-AU-4
-GEARBOX_ID_RE = re.compile(r"^(DD|RG)-[A-Z]{3}-\d+$")                       # DD-GRI-1, RG-STL-2
-PROPELLER_ID_RE = re.compile(r"^(CPP|FPP)-[A-Z]{3}-\d+$")                   # CPP-STL-1, FPP-STT-1
-PMS_ID_RE = re.compile(r"^PMS-[A-Z]{3}-\d+$")                               # PMS-STL-1
-BOILER_ID_RE = re.compile(r"^(BLR-[A-Z]{3}-\d+|CMP-BLR-[A-Z]{3}-\d+)$")     # BLR-STT-1, CMP-BLR-STT-1
+VESSEL_ID_RE = re.compile(r"^[A-Z]{3}-[A-Z]{2,}-\d+$")  # GRI-RR-1, STL-RP-1, STT-TK-1
+ENGINE_ID_RE = re.compile(r"^[A-Z]{3}-(ME|AU)-\d+$")  # STL-ME-1, STT-AU-4
+GEARBOX_ID_RE = re.compile(r"^(DD|RG)-[A-Z]{3}-\d+$")  # DD-GRI-1, RG-STL-2
+PROPELLER_ID_RE = re.compile(r"^(CPP|FPP)-[A-Z]{3}-\d+$")  # CPP-STL-1, FPP-STT-1
+PMS_ID_RE = re.compile(r"^PMS-[A-Z]{3}-\d+$")  # PMS-STL-1
+BOILER_ID_RE = re.compile(r"^(BLR-[A-Z]{3}-\d+|CMP-BLR-[A-Z]{3}-\d+)$")  # BLR-STT-1, CMP-BLR-STT-1
 
 
 # =============================================================================
@@ -38,14 +38,20 @@ BOILER_ID_RE = re.compile(r"^(BLR-[A-Z]{3}-\d+|CMP-BLR-[A-Z]{3}-\d+)$")     # BL
 # Fuels should match the ontology list.
 # Started with the ones already seen in data; expand later if needed.
 ALLOWED_FUELS: set[str] = {
-    "HFO", "MGO", "MDO",
-    "LNG", "H2", "NH3", "Methanol",
+    "HFO",
+    "MGO",
+    "MDO",
+    "LNG",
+    "H2",
+    "NH3",
+    "Methanol",
 }
 
 
 # =============================================================================
 # Report
 # =============================================================================
+
 
 @dataclass
 class ValidationReport:
@@ -59,6 +65,7 @@ class ValidationReport:
 # =============================================================================
 # Helpers
 # =============================================================================
+
 
 def _is_missing_marker(v: Any) -> bool:
     # Erik said "-1 means missing"; JSON currently uses null a lot too.
@@ -103,7 +110,9 @@ def _expect_num(report: ValidationReport, path: str, v: Any, allow_none: bool = 
         report.errors.append(f"{path}: expected number")
 
 
-def _expect_id(report: ValidationReport, path: str, v: Any, pat: re.Pattern[str], label: str) -> None:
+def _expect_id(
+    report: ValidationReport, path: str, v: Any, pat: re.Pattern[str], label: str
+) -> None:
     """Require an ID string and check it matches the expected pattern."""
     if not isinstance(v, str) or not v.strip():
         report.errors.append(f"{path}: missing/empty {label}")
@@ -130,6 +139,7 @@ def _normalize_fuels(v: Any) -> list[str]:
 # =============================================================================
 # Main validator
 # =============================================================================
+
 
 def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
     """
@@ -238,7 +248,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
             # vessel_id should match the top vessel.id
             if vessel_id and obj.get("vessel_id") is not None:
                 if obj.get("vessel_id") != vessel_id:
-                    report.errors.append(f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'")
+                    report.errors.append(
+                        f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'"
+                    )
 
             # gearbox_id matters because harmonisation uses it
             gb = obj.get("gearbox_id")
@@ -252,7 +264,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
                 if f == "":
                     report.warnings.append(f"{path}.fuels: contains empty string fuel")
                 elif f not in ALLOWED_FUELS:
-                    report.errors.append(f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})")
+                    report.errors.append(
+                        f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})"
+                    )
 
             # numeric-ish fields (check all keys with unit suffixes)
             for k, v in obj.items():
@@ -271,7 +285,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
 
             if vessel_id and obj.get("vessel_id") is not None:
                 if obj.get("vessel_id") != vessel_id:
-                    report.errors.append(f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'")
+                    report.errors.append(
+                        f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'"
+                    )
 
             pid = obj.get("pms_id")
             if pid is not None:
@@ -283,19 +299,25 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
                         report.errors.append(f"{path}.pms_id: references unknown PMS '{pid}'")
                 else:
                     if not warned_missing_pms_objects:
-                        report.warnings.append("pms: PMS objects not provided in this JSON, so pms_id references are not cross-checked")
+                        report.warnings.append(
+                            "pms: PMS objects not provided in this JSON, so pms_id references are not cross-checked"
+                        )
                         warned_missing_pms_objects = True
 
             for f in _normalize_fuels(obj.get("fuels")):
                 if f == "":
                     report.warnings.append(f"{path}.fuels: contains empty string fuel")
                 elif f not in ALLOWED_FUELS:
-                    report.errors.append(f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})")
+                    report.errors.append(
+                        f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})"
+                    )
 
             # "[0, 1]" probably means "allowed values"
             adm = obj.get("auxiliary_do_mode")
             if isinstance(adm, str) and adm.strip().replace(" ", "") in {"[0,1]", "[1,0]"}:
-                report.warnings.append(f"{path}.auxiliary_do_mode: looks like allowed-values '{adm}' (ignored)")
+                report.warnings.append(
+                    f"{path}.auxiliary_do_mode: looks like allowed-values '{adm}' (ignored)"
+                )
 
             for k, v in obj.items():
                 if k.endswith(("_kw", "_rpm", "_knm", "_kg_per_hr", "_c", "_hpa", "_mt", "_m")):
@@ -313,7 +335,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
 
             if vessel_id and obj.get("vessel_id") is not None:
                 if obj.get("vessel_id") != vessel_id:
-                    report.errors.append(f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'")
+                    report.errors.append(
+                        f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'"
+                    )
 
             gb = obj.get("gearbox_id")
             if gb is not None:
@@ -322,8 +346,14 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
                     report.errors.append(f"{path}.gearbox_id: references unknown gearbox '{gb}'")
 
             for k in [
-                "diameter_mm", "blades", "pitch_diameter_ratio", "pitch_max_percentage",
-                "expanded_area_ratio_percentage", "hub_ratio", "skew_angle_degree", "efficiency",
+                "diameter_mm",
+                "blades",
+                "pitch_diameter_ratio",
+                "pitch_max_percentage",
+                "expanded_area_ratio_percentage",
+                "hub_ratio",
+                "skew_angle_degree",
+                "efficiency",
             ]:
                 if k in obj:
                     _expect_num(report, f"{path}.{k}", obj.get(k), allow_none=True)
@@ -340,7 +370,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
 
             if vessel_id and obj.get("vessel_id") is not None:
                 if obj.get("vessel_id") != vessel_id:
-                    report.errors.append(f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'")
+                    report.errors.append(
+                        f"{path}.vessel_id: '{obj.get('vessel_id')}' != vessel.id '{vessel_id}'"
+                    )
 
             # Redundant backlink: not used by pipeline
             if obj.get("engine_id") is not None:
@@ -351,7 +383,9 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
             if prop is not None:
                 _expect_id(report, f"{path}.propeller_id", prop, PROPELLER_ID_RE, "propeller id")
                 if isinstance(prop, str) and prop not in propeller_ids:
-                    report.errors.append(f"{path}.propeller_id: references unknown propeller '{prop}'")
+                    report.errors.append(
+                        f"{path}.propeller_id: references unknown propeller '{prop}'"
+                    )
 
     # Boilers (treat gently because current data has null vessel_id / empty fuels)
     if isinstance(boilers, list):
@@ -371,6 +405,8 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
                 if f == "":
                     report.warnings.append(f"{path}.fuels: contains empty string fuel")
                 elif f not in ALLOWED_FUELS:
-                    report.errors.append(f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})")
+                    report.errors.append(
+                        f"{path}.fuels: unknown fuel '{f}' (allowed: {sorted(ALLOWED_FUELS)})"
+                    )
 
     return report

@@ -145,9 +145,7 @@ def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict
 
     # Stop the run if there are errors
     if not report.ok():
-        raise ValueError(
-            f"[{namespace}] JSON validation failed:\n" + "\n".join(report.errors)
-        )
+        raise ValueError(f"[{namespace}] JSON validation failed:\n" + "\n".join(report.errors))
 
     # Log summary of extracted data for this vessel
     vessel_id = data.get("vessel", {}).get("id", "unknown")
