@@ -50,3 +50,28 @@ def parse_types(type_string: str | None) -> list[str]:
 def prefix_to_namespace(prefix: str) -> str:
     """Convert operator prefix to namespace (GRI -> grimaldi)."""
     return KNOWN_OPERATORS.get(prefix.upper(), prefix.lower())
+
+
+MISSING_SENTINEL = -1  # TwinShip convention
+
+
+def clean_value_typed(val: Any, declared_type: str | None) -> Any:
+    """
+    Clean a value from Excel using the declared type row in the spreadsheet.
+    Goal: preserve -1 sentinel (missing) and avoid losing missingness as None.
+
+    Rules (simple, can evolve):
+    - If cell is empty/NaN:
+        - for numeric types -> return -1
+        - otherwise -> return None
+    - If cell is present:
+        - return value unchanged
+    """
+    # Treat NaN/None as empty
+    if pd.isna(val) or (isinstance(val, float) and val != val):
+        if declared_type in {"DOUBLE"}:
+            return float(MISSING_SENTINEL)
+        # If you also have integer types later, you can add them here
+        return None
+
+    return val
