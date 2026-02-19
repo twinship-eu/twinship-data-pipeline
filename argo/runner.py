@@ -10,7 +10,6 @@ Usage:
     python runner.py extract-vessel grimaldi
     python runner.py harmonise-vessel grimaldi
     python runner.py validate-vessel grimaldi
-    python runner.py combine-graphs
 """
 
 import pickle
@@ -20,11 +19,11 @@ from pathlib import Path
 from dagster import DagsterInstance, InputContext, IOManager, OutputContext, io_manager, materialize
 
 from dagster_pipeline.assets.harmonisation import (
-    combined_vessel_graph,
     extracted_vessel_json,
+    shacl_validation_report,
     spreadsheet_data,
-    validated_vessel_ttl,
     vessel_rdf_graph,
+    vessel_ttl,
 )
 from dagster_pipeline.resources import shacl_validator
 
@@ -118,41 +117,32 @@ def materialize_rdf_graph(vessel: str):
 
 def materialize_validated_ttl(vessel: str):
     result = materialize(
-        [spreadsheet_data, extracted_vessel_json, vessel_rdf_graph, validated_vessel_ttl],
+        [
+            spreadsheet_data,
+            extracted_vessel_json,
+            vessel_rdf_graph,
+            vessel_ttl,
+            shacl_validation_report,
+        ],
         resources={
             "io_manager": shared_volume_io_manager,
             "shacl_validator": shacl_validator,
         },
         instance=make_instance(),
         partition_key=vessel,
-        selection=["validated_vessel_ttl"],
+        selection=["vessel_ttl", "shacl_validation_report"],
         run_config={
             "ops": {
-                "validated_vessel_ttl": {
+                "vessel_ttl": {
                     "config": {
                         "output_dir": OUTPUT_DIR,
+                    }
+                },
+                "shacl_validation_report": {
+                    "config": {
                         "shapes_path": "shacl/twinship_shapes.ttl",
                     }
-                }
-            }
-        },
-    )
-    assert result.success
-
-
-def materialize_combined_graph():
-    result = materialize(
-        [combined_vessel_graph],
-        resources={"io_manager": shared_volume_io_manager},
-        instance=make_instance(),
-        run_config={
-            "ops": {
-                "combined_vessel_graph": {
-                    "config": {
-                        "output_dir": OUTPUT_DIR,
-                        "combined_output": str(SHARED / "output" / "all_vessels.ttl"),
-                    }
-                }
+                },
             }
         },
     )
@@ -164,7 +154,6 @@ STEPS = {
     "extract-vessel": materialize_vessel_json,
     "harmonise-vessel": materialize_rdf_graph,
     "validate-vessel": materialize_validated_ttl,
-    "combine-graphs": materialize_combined_graph,
 }
 
 if __name__ == "__main__":

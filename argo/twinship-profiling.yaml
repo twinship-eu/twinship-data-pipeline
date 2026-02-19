@@ -115,21 +115,6 @@ spec:
                 - name: vessel-rdf
                   from: "{{tasks.harmonise-stena-tanker.outputs.artifacts.vessel-rdf}}"
 
-          # Step 5: Combine all TTL files
-          - name: combine-graphs
-            template: combine-graphs-step
-            dependencies:
-              - validate-grimaldi
-              - validate-stena-scandinavica
-              - validate-stena-tanker
-            arguments:
-              artifacts:
-                - name: ttl-grimaldi
-                  from: "{{tasks.validate-grimaldi.outputs.artifacts.vessel-ttl}}"
-                - name: ttl-stena-scandinavica
-                  from: "{{tasks.validate-stena-scandinavica.outputs.artifacts.vessel-ttl}}"
-                - name: ttl-stena-tanker
-                  from: "{{tasks.validate-stena-tanker.outputs.artifacts.vessel-ttl}}"
 
     # =========================================================================
     # Step templates
@@ -211,10 +196,6 @@ spec:
             path: "/tmp/pipeline/vessel_rdf_graph__{{inputs.parameters.vessel}}.pkl"
       outputs:
         artifacts:
-          - name: validated-ttl
-            path: "/tmp/pipeline/validated_vessel_ttl__{{inputs.parameters.vessel}}.pkl"
-            archive:
-              none: {}
           - name: vessel-ttl
             path: "/tmp/pipeline/output/{{inputs.parameters.vessel}}.ttl"
             archive:
@@ -229,28 +210,3 @@ spec:
           - name: PYTHONPATH
             value: /app/.venv/lib/python3.11/site-packages:/app
 
-    # Step 5: Combine all vessel TTL files into one graph
-    - name: combine-graphs-step
-      inputs:
-        artifacts:
-          - name: ttl-grimaldi
-            path: /tmp/pipeline/output/grimaldi.ttl
-          - name: ttl-stena-scandinavica
-            path: /tmp/pipeline/output/stena-scandinavica.ttl
-          - name: ttl-stena-tanker
-            path: /tmp/pipeline/output/stena-tanker.ttl
-      outputs:
-        artifacts:
-          - name: combined-ttl
-            path: /tmp/pipeline/output/all_vessels.ttl
-            archive:
-              none: {}
-      container:
-        image: twinship_user_code:latest
-        imagePullPolicy: IfNotPresent
-        command: ["/app/.venv/bin/python", "/app/argo/runner.py"]
-        args: ["combine-graphs"]
-        workingDir: /app
-        env:
-          - name: PYTHONPATH
-            value: /app/.venv/lib/python3.11/site-packages:/app
