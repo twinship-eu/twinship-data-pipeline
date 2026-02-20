@@ -18,10 +18,10 @@ Pipeline structure:
            └─► shacl_validation_report (partitioned by vessel)
            │
            ▼
-    graphdb_upload (non-partitioned)
+    graphdb_upload (partitioned, per-vessel repository)
            │
            ▼
-    sparql_summary (SPARQL data tables from GraphDB)
+    sparql_summary (SPARQL data tables from all vessel repositories)
 
 Workflow:
 1. Materialize spreadsheet_data first

@@ -7,8 +7,8 @@ Pipeline structure:
 4. vessel_rdf_graph - Harmonise to RDF for each vessel (partitioned)
 5a. vessel_ttl - Serialize RDF graph to TTL file (partitioned)
 5b. shacl_validation_report - SHACL validation of RDF graph (partitioned)
-6. graphdb_upload - Upload vessel TTL files to GraphDB
-7. sparql_summary - SPARQL summary tables queried from GraphDB
+6. graphdb_upload - Upload vessel TTL to per-vessel GraphDB repository (partitioned)
+7. sparql_summary - SPARQL summary tables queried from all vessel repositories
 """
 
 from pathlib import Path
@@ -311,42 +311,53 @@ def shacl_validation_report(
 
 @asset(
     group_name="output",
-    deps=[vessel_ttl, shacl_validation_report],
-    description="Upload vessel TTL files to GraphDB",
+    partitions_def=vessel_partitions_def,
+    description="Upload vessel TTL to its own per-vessel GraphDB repository",
     kinds={"GraphDB"},
 )
 def graphdb_upload(
     context: AssetExecutionContext,
-    config: TtlOutputConfig,
     graphdb_client: GraphDBClient,
+    vessel_ttl: str,
+    shacl_validation_report: str,
 ) -> str:
-    """Upload individual vessel TTL files to GraphDB via RDF4J HTTP endpoints."""
-    output_dir = Path(config.output_dir)
+    """Upload a single vessel's TTL file to its own GraphDB repository."""
+    # Use the vessel namespace as the repository ID (e.g., "grimaldi", "stena-tanker")
+    vessel = context.partition_key
+    repo_id = vessel
+    repo_title = f"TwinShip - {vessel}"
+
+    if not vessel_ttl:
+        context.log.warning(f"No TTL output for {vessel}, skipping upload")
+        return ""
+
+    ttl_path = Path(vessel_ttl)
+    if not ttl_path.exists():
+        context.log.warning(f"TTL file {ttl_path} not found for {vessel}, skipping upload")
+        return ""
 
     graphdb_client.wait_for_readiness()
-    repo_created = graphdb_client.ensure_repository()
+    # Ensure the repository exists (will be created if it doesn't exist)
+    repo_created = graphdb_client.ensure_repository(repo_id=repo_id, title=repo_title)
 
+    # Optionally clear the repository before upload if configured to do so
     if graphdb_client.clear_before_upload:
-        graphdb_client.clear_repository()
+        graphdb_client.clear_repository(repo_id=repo_id)
 
-    # Upload each vessel TTL file individually
-    ttl_files = sorted(output_dir.glob("*.ttl"))
-    total_triples = 0
-    for ttl_file in ttl_files:
-        g = Graph()
-        g.parse(ttl_file, format="turtle")
-        triple_count = len(g)
-        graphdb_client.upload_ttl(g.serialize(format="turtle"))
-        context.log.info(f"Uploaded {triple_count} triples from {ttl_file.name}")
-        total_triples += triple_count
+    # Load the TTL file into an RDFLib graph to count triples before upload
+    g = Graph()
+    g.parse(ttl_path, format="turtle")
+    triple_count = len(g)
+    graphdb_client.upload_ttl(g.serialize(format="turtle"), repo_id=repo_id)
+    context.log.info(f"Uploaded {triple_count} triples to repository '{repo_id}'")
 
-    remote_triple_count = graphdb_client.triple_count()
+    remote_triple_count = graphdb_client.triple_count(repo_id=repo_id)
 
+    # Add metadata about the upload to the context for Dagster UI
     metadata: dict[str, Any] = {
         "graphdb_base_url": MetadataValue.text(graphdb_client.normalized_base_url),
-        "repository_id": MetadataValue.text(graphdb_client.repository_id),
-        "uploaded_triples": MetadataValue.int(total_triples),
-        "source_files": MetadataValue.int(len(ttl_files)),
+        "repository_id": MetadataValue.text(repo_id),
+        "uploaded_triples": MetadataValue.int(triple_count),
         "repository_created": MetadataValue.text(str(repo_created)),
         "repository_cleared_before_upload": MetadataValue.text(
             str(graphdb_client.clear_before_upload)
@@ -356,52 +367,98 @@ def graphdb_upload(
         metadata["remote_triple_count"] = MetadataValue.int(remote_triple_count)
 
     context.add_output_metadata(metadata)
-    context.log.info(
-        f"Uploaded {total_triples} triples from {len(ttl_files)} files to GraphDB repository "
-        f"'{graphdb_client.repository_id}' at {graphdb_client.normalized_base_url}."
-    )
-
-    return f"{graphdb_client.normalized_base_url}/repositories/{graphdb_client.repository_id}"
+    return f"{graphdb_client.normalized_base_url}/repositories/{repo_id}"
 
 
 @asset(
     group_name="output",
-    description="Run SPARQL queries against GraphDB and display results",
+    deps=[graphdb_upload],
+    description="Run SPARQL queries against all per-vessel GraphDB repositories",
     kinds={"SPARQL"},
 )
 def sparql_summary(
     context: AssetExecutionContext,
     graphdb_client: GraphDBClient,
-    graphdb_upload: str,
 ) -> None:
-    """Run SPARQL queries on GraphDB and attach results as metadata tables in Dagster UI."""
+    """Run SPARQL queries on all vessel repositories and show combined results."""
+    import pandas as pd
+
+    # SPARQL query files are located in a "queries" directory at the same level as this script
     queries_dir = Path(__file__).parent.parent / "queries"
 
-    vessel_df = graphdb_client.run_select_query((queries_dir / "vessel_overview.rq").read_text())
-    vessel_df.columns = [
-        "Vessel",
-        "Label",
-        "Main Engines",
-        "Aux Engines",
-        "Propellers",
-        "Gearboxes",
-    ]
+    # Get the list of vessel partitions to know which repositories to query (e.g., "grimaldi", "stena-tanker", etc.)
+    vessel_partitions = list(context.instance.get_dynamic_partitions(vessel_partitions_def.name))
 
-    engine_df = graphdb_client.run_select_query((queries_dir / "engine_details.rq").read_text())
-    engine_df.columns = ["Engine", "Label", "Power (kW)", "Fuels"]
+    if not vessel_partitions:
+        context.log.warning("No vessel partitions registered, skipping SPARQL summary")
+        return
 
-    fuel_df = graphdb_client.run_select_query((queries_dir / "fuel_usage.rq").read_text())
-    fuel_df.columns = ["Fuel", "Consumers"]
+    all_vessels = []
+    all_engines = []
+    all_fuels = []
+    total_triples = 0
 
-    remote_triple_count = graphdb_client.triple_count()
+    # Loop through each vessel partition, query its GraphDB repository, and collect results
+    for repo_id in vessel_partitions:
+        count = graphdb_client.triple_count(repo_id=repo_id)
+        if count is None or count == 0:
+            context.log.info(f"Repository '{repo_id}' empty or missing, skipping")
+            continue
+
+        total_triples += count
+
+        vessel_df = graphdb_client.run_select_query(
+            (queries_dir / "vessel_overview.rq").read_text(), repo_id=repo_id
+        )
+        if not vessel_df.empty:
+            all_vessels.append(vessel_df)
+
+        engine_df = graphdb_client.run_select_query(
+            (queries_dir / "engine_details.rq").read_text(), repo_id=repo_id
+        )
+        if not engine_df.empty:
+            all_engines.append(engine_df)
+
+        fuel_df = graphdb_client.run_select_query(
+            (queries_dir / "fuel_usage.rq").read_text(), repo_id=repo_id
+        )
+        if not fuel_df.empty:
+            all_fuels.append(fuel_df)
+
+    vessel_combined = pd.concat(all_vessels, ignore_index=True) if all_vessels else pd.DataFrame()
+    engine_combined = pd.concat(all_engines, ignore_index=True) if all_engines else pd.DataFrame()
+    fuel_combined = pd.concat(all_fuels, ignore_index=True) if all_fuels else pd.DataFrame()
+
+    if not vessel_combined.empty:
+        vessel_combined.columns = [
+            "Vessel",
+            "Label",
+            "Main Engines",
+            "Aux Engines",
+            "Propellers",
+            "Gearboxes",
+        ]
+    if not engine_combined.empty:
+        engine_combined.columns = ["Engine", "Label", "Power (kW)", "Fuels"]
+    if not fuel_combined.empty:
+        fuel_combined.columns = ["Fuel", "Consumers"]
 
     context.add_output_metadata(
         {
-            "vessel_overview": MetadataValue.md(vessel_df.to_markdown(index=False)),
-            "engine_details": MetadataValue.md(engine_df.to_markdown(index=False)),
-            "fuel_usage": MetadataValue.md(fuel_df.to_markdown(index=False)),
-            "graphdb_repository": MetadataValue.text(graphdb_upload),
-            "graphdb_repository_id": MetadataValue.text(graphdb_client.repository_id),
-            "total_triples": MetadataValue.int(remote_triple_count or 0),
+            "vessel_overview": MetadataValue.md(
+                vessel_combined.to_markdown(index=False)
+                if not vessel_combined.empty
+                else "_No data_"
+            ),
+            "engine_details": MetadataValue.md(
+                engine_combined.to_markdown(index=False)
+                if not engine_combined.empty
+                else "_No data_"
+            ),
+            "fuel_usage": MetadataValue.md(
+                fuel_combined.to_markdown(index=False) if not fuel_combined.empty else "_No data_"
+            ),
+            "repositories_queried": MetadataValue.text(", ".join(vessel_partitions)),
+            "total_triples": MetadataValue.int(total_triples),
         }
     )
