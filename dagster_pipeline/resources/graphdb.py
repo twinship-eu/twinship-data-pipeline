@@ -137,18 +137,24 @@ class GraphDBClient(ConfigurableResource):
             f"{attempts} checks with {self.readiness_check_interval_seconds}s interval"
         )
 
-    def ensure_repository(self) -> bool:
+    def ensure_repository(self, repo_id: str | None = None, title: str | None = None) -> bool:
         """Create the repository if it does not already exist.
+
+        Args:
+            repo_id: Repository ID to create. Defaults to self.repository_id.
+            title: Repository title. Defaults to self.repository_title.
 
         Returns True if a new repository was created, False if it already existed.
         """
+        repo_id = repo_id or self.repository_id
+        title = title or self.repository_title
         base_url = self.normalized_base_url
         auth = self._auth
 
         # Check existence
         try:
             response = requests.get(
-                f"{base_url}/rest/repositories/{self.repository_id}",
+                f"{base_url}/rest/repositories/{repo_id}",
                 auth=auth,
                 timeout=self.timeout_seconds,
             )
@@ -158,7 +164,7 @@ class GraphDBClient(ConfigurableResource):
         if response.status_code == 200:
             return False
         if response.status_code != 404:
-            _raise_graphdb_error(f"Could not check repository '{self.repository_id}'", response)
+            _raise_graphdb_error(f"Could not check repository '{repo_id}'", response)
 
         # Create
         try:
@@ -168,7 +174,7 @@ class GraphDBClient(ConfigurableResource):
                 files={
                     "config": (
                         "repo-config.ttl",
-                        _create_graphdb_repo_config(self.repository_id, self.repository_title),
+                        _create_graphdb_repo_config(repo_id, title),
                         "text/turtle",
                     )
                 },
@@ -176,46 +182,46 @@ class GraphDBClient(ConfigurableResource):
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
-                f"Could not reach GraphDB while creating repository '{self.repository_id}': {e}"
+                f"Could not reach GraphDB while creating repository '{repo_id}': {e}"
             )
 
         if response.status_code not in {200, 201, 204}:
-            _raise_graphdb_error(
-                f"Could not create GraphDB repository '{self.repository_id}'", response
-            )
+            _raise_graphdb_error(f"Could not create GraphDB repository '{repo_id}'", response)
 
         return True
 
-    def clear_repository(self) -> None:
+    def clear_repository(self, repo_id: str | None = None) -> None:
         """Delete all statements from the repository."""
+        repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
         auth = self._auth
 
         try:
             response = requests.delete(
-                f"{base_url}/repositories/{self.repository_id}/statements",
+                f"{base_url}/repositories/{repo_id}/statements",
                 auth=auth,
                 timeout=self.timeout_seconds,
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
-                f"Could not reach GraphDB while clearing repository '{self.repository_id}': {e}"
+                f"Could not reach GraphDB while clearing repository '{repo_id}': {e}"
             )
 
         if response.status_code not in {200, 204}:
             _raise_graphdb_error(
-                f"Could not clear GraphDB repository '{self.repository_id}' before upload",
+                f"Could not clear GraphDB repository '{repo_id}' before upload",
                 response,
             )
 
-    def upload_ttl(self, ttl_data: str) -> None:
+    def upload_ttl(self, ttl_data: str, repo_id: str | None = None) -> None:
         """Upload Turtle data to the repository."""
+        repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
         auth = self._auth
 
         try:
             response = requests.post(
-                f"{base_url}/repositories/{self.repository_id}/statements",
+                f"{base_url}/repositories/{repo_id}/statements",
                 data=ttl_data.encode("utf-8"),
                 headers={"Content-Type": "text/turtle; charset=utf-8"},
                 auth=auth,
@@ -223,22 +229,21 @@ class GraphDBClient(ConfigurableResource):
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
-                f"Could not reach GraphDB while uploading data to '{self.repository_id}': {e}"
+                f"Could not reach GraphDB while uploading data to '{repo_id}': {e}"
             )
 
         if response.status_code not in {200, 204}:
-            _raise_graphdb_error(
-                f"Could not upload data to repository '{self.repository_id}'", response
-            )
+            _raise_graphdb_error(f"Could not upload data to repository '{repo_id}'", response)
 
-    def triple_count(self) -> int | None:
+    def triple_count(self, repo_id: str | None = None) -> int | None:
         """Return the number of triples in the repository, or None on failure."""
+        repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
         auth = self._auth
 
         try:
             response = requests.get(
-                f"{base_url}/repositories/{self.repository_id}/size",
+                f"{base_url}/repositories/{repo_id}/size",
                 auth=auth,
                 timeout=self.timeout_seconds,
             )
@@ -252,25 +257,26 @@ class GraphDBClient(ConfigurableResource):
         except ValueError:
             return None
 
-    def run_select_query(self, query: str) -> pd.DataFrame:
+    def run_select_query(self, query: str, repo_id: str | None = None) -> pd.DataFrame:
         """Execute a SPARQL SELECT query and return results as a DataFrame."""
+        repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
         auth = self._auth
 
         try:
             response = requests.post(
-                f"{base_url}/repositories/{self.repository_id}",
+                f"{base_url}/repositories/{repo_id}",
                 data={"query": query},
                 headers={"Accept": "application/sparql-results+json"},
                 auth=auth,
                 timeout=self.timeout_seconds,
             )
         except requests.RequestException as e:
-            _raise_graphdb_error(f"Could not query GraphDB repository '{self.repository_id}': {e}")
+            _raise_graphdb_error(f"Could not query GraphDB repository '{repo_id}': {e}")
 
         if response.status_code != 200:
             _raise_graphdb_error(
-                f"GraphDB SPARQL query failed for repository '{self.repository_id}'",
+                f"GraphDB SPARQL query failed for repository '{repo_id}'",
                 response,
             )
 
@@ -278,7 +284,7 @@ class GraphDBClient(ConfigurableResource):
             payload = response.json()
         except ValueError:
             _raise_graphdb_error(
-                f"GraphDB returned a non-JSON response for repository '{self.repository_id}'",
+                f"GraphDB returned a non-JSON response for repository '{repo_id}'",
                 response,
             )
 
