@@ -1,0 +1,138 @@
+{
+  "realm": "twinship",
+  "enabled": true,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      { "name": "ROLE_ADMIN", "description": "GraphDB administrator" },
+      { "name": "ROLE_USER", "description": "Basic GraphDB user" },
+      { "name": "ROLE_REPO_MANAGER", "description": "GraphDB repository manager" },
+      { "name": "READ_REPO_grimaldi", "description": "Read access to grimaldi repository" },
+      { "name": "WRITE_REPO_grimaldi", "description": "Write access to grimaldi repository" },
+      { "name": "READ_REPO_stena-scandinavica", "description": "Read access to stena-scandinavica repository" },
+      { "name": "WRITE_REPO_stena-scandinavica", "description": "Write access to stena-scandinavica repository" },
+      { "name": "READ_REPO_stena-tanker", "description": "Read access to stena-tanker repository" },
+      { "name": "WRITE_REPO_stena-tanker", "description": "Write access to stena-tanker repository" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "graphdb",
+      "name": "GraphDB Workbench",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "rootUrl": "http://localhost:7200",
+      "redirectUris": [
+        "http://localhost:7200/*",
+        "http://graphdb:7200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:7200",
+        "http://graphdb:7200"
+      ],
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins"],
+      "optionalClientScopes": ["offline_access"],
+      "protocolMappers": [
+        {
+          "name": "graphdb-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "graphdb",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "dagster-pipeline",
+      "name": "Dagster Pipeline Service Account",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "dagster-pipeline-secret",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "graphdb-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "graphdb",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "grimaldi-user",
+      "enabled": true,
+      "email": "grimaldi@example.com",
+      "firstName": "Grimaldi",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "grimaldi-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_grimaldi"]
+    },
+    {
+      "username": "stena-scandinavica-user",
+      "enabled": true,
+      "email": "stena-scandinavica@example.com",
+      "firstName": "Stena Scandinavica",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "stena-scandinavica-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-scandinavica"]
+    },
+    {
+      "username": "stena-tanker-user",
+      "enabled": true,
+      "email": "stena-tanker@example.com",
+      "firstName": "Stena Tanker",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "stena-tanker-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-tanker"]
+    },
+    {
+      "username": "service-account-dagster-pipeline",
+      "enabled": true,
+      "serviceAccountClientId": "dagster-pipeline",
+      "realmRoles": [
+        "ROLE_REPO_MANAGER",
+        "READ_REPO_grimaldi",
+        "WRITE_REPO_grimaldi",
+        "READ_REPO_stena-scandinavica",
+        "WRITE_REPO_stena-scandinavica",
+        "READ_REPO_stena-tanker",
+        "WRITE_REPO_stena-tanker"
+      ]
+    }
+  ]
+}
