@@ -32,6 +32,10 @@ run_launcher:
       - GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS
       - GRAPHDB_USERNAME
       - GRAPHDB_PASSWORD
+      - KEYCLOAK_SERVER_URL
+      - KEYCLOAK_REALM
+      - KEYCLOAK_CLIENT_ID
+      - KEYCLOAK_CLIENT_SECRET
     network: twinship-data-pipeline_twinship_network
     container_kwargs:
       volumes:
