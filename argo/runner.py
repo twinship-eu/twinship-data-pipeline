@@ -22,6 +22,7 @@ from dagster_pipeline.assets.harmonisation import (
     extracted_vessel_json,
     shacl_validation_report,
     spreadsheet_data,
+    validated_vessel_json,
     vessel_rdf_graph,
     vessel_ttl,
 )
@@ -95,18 +96,18 @@ def materialize_spreadsheet():
 
 def materialize_vessel_json(vessel: str):
     result = materialize(
-        [spreadsheet_data, extracted_vessel_json],
+        [spreadsheet_data, extracted_vessel_json, validated_vessel_json],
         resources={"io_manager": shared_volume_io_manager},
         instance=make_instance(),
         partition_key=vessel,
-        selection=["extracted_vessel_json"],
+        selection=["extracted_vessel_json", "validated_vessel_json"],
     )
     assert result.success
 
 
 def materialize_rdf_graph(vessel: str):
     result = materialize(
-        [spreadsheet_data, extracted_vessel_json, vessel_rdf_graph],
+        [spreadsheet_data, extracted_vessel_json, validated_vessel_json, vessel_rdf_graph],
         resources={"io_manager": shared_volume_io_manager},
         instance=make_instance(),
         partition_key=vessel,
@@ -120,6 +121,7 @@ def materialize_validated_ttl(vessel: str):
         [
             spreadsheet_data,
             extracted_vessel_json,
+            validated_vessel_json,
             vessel_rdf_graph,
             vessel_ttl,
             shacl_validation_report,
@@ -140,7 +142,7 @@ def materialize_validated_ttl(vessel: str):
                 },
                 "shacl_validation_report": {
                     "config": {
-                        "shapes_path": "shacl/twinship_shapes.ttl",
+                        "shapes_path": "shacl/",
                     }
                 },
             }
