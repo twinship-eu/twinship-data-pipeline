@@ -42,11 +42,13 @@ You can also manually materialise assets from the UI.
 
 **Host entry required:** GraphDB authenticates via Keycloak using the Docker-internal hostname `keycloak`. Your browser must be able to resolve it:
 
-```
-127.0.0.1 keycloak
-```
+```bash
+# macOS / Linux
+echo "127.0.0.1 keycloak" | sudo tee -a /etc/hosts
 
-Add this line to your `/etc/hosts` file if it's not already present.
+# Windows (run as administrator)
+echo 127.0.0.1 keycloak >> C:\Windows\System32\drivers\etc\hosts
+```
 
 Then start the services:
 
