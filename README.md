@@ -40,6 +40,16 @@ You can also manually materialise assets from the UI.
 
 ## Quick Start (Docker Compose)
 
+**Host entry required:** GraphDB authenticates via Keycloak using the Docker-internal hostname `keycloak`. Your browser must be able to resolve it:
+
+```
+127.0.0.1 keycloak
+```
+
+Add this line to your `/etc/hosts` file if it's not already present.
+
+Then start the services:
+
 ```bash
 docker compose up -d --build
 ```
