@@ -1,0 +1,55 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix vesselai: <http://www.vesselAI-project.eu/vesselai#> .
+
+<https://twin-ship.eu/twinship/weatherconditions> a owl:Ontology ;
+    owl:versionIRI <https://twin-ship.eu/twinship/weatherconditions/0.0.4> ;
+    owl:imports <https://twin-ship.eu/twinship/base> ;
+    dcterms:title "TwinShip Weather Conditions Module"@en ;
+    dcterms:description "Ontology module for environmental and weather conditions affecting ship operations. Reuses weather-related classes and properties from the VesselAI ontology and extends the IDO upper ontology."@en ;
+    dcterms:creator "TwinShip Project" ;
+    dcterms:created "2026-01-30"^^xsd:date ;
+    dcterms:modified "2026-03-03"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    owl:versionInfo "0.0.4" ;
+    rdfs:comment "This module reuses weather-related concepts from VesselAI ontology (vesselai-v1) as an external dependency. VesselAI provides WeatherCondition class and related properties for wind components, temperature, precipitation, sea surface conditions, and wave characteristics."@en .
+
+#################################################################
+#    Reused Classes from VesselAI
+#################################################################
+
+# The following classes are imported from VesselAI ontology:
+# - vesselai:WeatherCondition - Weather condition reported for an associated region
+# - vesselai:Environmental - Environmental events affecting moving objects' behaviour
+# - vesselai:WeatherPhenomena - Significant weather phenomena (WMO code table 4678)
+
+#################################################################
+#    Reused Properties from VesselAI
+#################################################################
+
+# The following data properties are imported from VesselAI ontology:
+# - vesselai:hasReferencePosition - Reference position for weather data (range: ogc:Geometry)
+# - vesselai:Mean_sea_level_pressure_surface - Mean sea level pressure
+# - vesselai:10_metre_U_wind_component_surface - 10 metre U wind component
+# - vesselai:10_metre_V_wind_component_surface - 10 metre V wind component
+# - vesselai:2_metre_temperature_surface - 2 metre temperature
+# - vesselai:2_metre_dewpoint_temperature_surface - 2 metre dewpoint temperature
+# - vesselai:Total_precipitation_surface_1_Hour_Accumulation - Total precipitation (1 hour)
+# - vesselai:Sea_surface_temperature_surface - Sea surface temperature
+# - vesselai:Mean_wave_direction_msl - Mean wave direction
+# - vesselai:Mean_wave_period_msl - Mean wave period
+# - vesselai:hasWeatherPhenomena - Links to significant weather phenomena
+# - vesselai:hasWeatherCondition - Links trajectory part to weather condition
+
+#################################################################
+#    TwinShip Extensions (if needed)
+#################################################################
+
+# Additional weather-related classes or properties specific to TwinShip
+# can be defined here as extensions of the VesselAI vocabulary.

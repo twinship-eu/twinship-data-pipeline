@@ -1,0 +1,145 @@
+## provides information about contextual knowledge such as regions of interest, protected areas, ports, vessel characteristics etc
+
+@prefix : <http://www.vesselAI-project.eu/ontology#> .
+@prefix dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>.
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+
+
+:Place rdfs:subClassOf dul:PhysicalPlace .
+
+## the following describe the vessels:
+:hasTrajectory rdfs:domain :Vessel ; rdfs:range :Trajectory .
+:hasStart rdfs:domain :Trajectory ; rdfs:range :TrajectoryPart .
+:hasEnd rdfs:domain :Trajectory ; rdfs:range :TrajectoryPart .
+:hasGeometry rdfs:domain dul:Entity ; rdfs:range ogc:Geometry .
+:hasCallsign rdfs:domain :Vessel ; rdfs:range xsd:string .
+:Vessel rdfs:subClassOf :MovingObject ; rdfs:comment "The class of moving objects with floating capabilities. Please notice that aviation specific classes and properties are provided in a separate module" .
+
+##:hasName applies on every entity (vessels, protected areas, ports, etc)
+
+## Regions, protected areas
+:Place rdfs:subClassOf dul:PhysicalPlace ; rdfs:comment "A physical place described by a geometry, name, ICAO, IATA etc codes. Please notice that aviation or marine places are described in separate modules" .
+:SurveillanceStation rdfs:subClassOf :Place .
+:Antenna rdfs:subClassOf :SurveillanceStation .
+:Beacon rdfs:subClassOf :SurveillanceStation .
+:Buoy rdfs:subClassOf :SurveillanceStation ; rdfs:comment "An anchored float serving as a navigation mark, to show reefs or other hazards, or for mooring" .
+:Cape rdfs:subClassOf :ElevatedPlace .
+:City rdfs:subClassOf :Place .
+:Communication_tower rdfs:subClassOf :SurveillanceStation .
+:CoordWaypoint rdfs:subClassOf :Waypoint .
+:Country rdfs:subClassOf :Place .
+:DepressionSpot rdfs:subClassOf :ElevatedPlace .
+:EEZ_Zone rdfs:subClassOf :Place ; rdfs:comment "Exclusive Economic zone" .
+:ElevatedPlace rdfs:subClassOf :Place .
+:FAO_area rdfs:subClassOf :FishingRegion .
+:FishingRegion rdfs:subClassOf :Place .
+:Lighthouse rdfs:subClassOf :Place .
+:MarineHeritage rdfs:subClassOf :ProtectedArea .
+:Mountain rdfs:subClassOf :ElevatedPlace .
+:MarineRoute rdfs:subClassOf :Route .
+:NationalFerryLine rdfs:subClassOf :MarineRoute .
+:National_borders rdfs:subClassOf :Place ; rdfs:comment "Includes maritime borders between states" .
+:Plateau rdfs:subClassOf :ElevatedPlace .
+:PopulatedPlace rdfs:subClassOf :Place ; rdfs:comment "An organized community within an adminstration area of a country" .
+:Marina rdfs:subClassOf :Place .
+:Marine_region rdfs:subClassOf :Place ; rdfs:comment "The surface where any vessel can autonomously moved, separated into regions. This surface includes rivers, estuaries, lakes and open sea" .
+
+:InternationalFerryLine rdfs:subClassOf :MarineRoute .
+
+:Island rdfs:subClassOf :Place ; rdfs:comment "Any part of land surrounded with water." .
+
+
+:ProtectedArea rdfs:subClassOf :Place .
+:Natura2000_zone rdfs:subClassOf :ProtectedArea .
+
+:Reefs rdfs:subClassOf :Place .
+:fish_passage rdfs:subClassOf :Place .
+
+:TradeAndTransportRegion rdfs:subClassOf :Place ; rdfs:comment "Trade and Transport Locations as being identified by the United Nations Economic Commission for Europe. This class includes locations used in trade and transport with functions such as seaports, rail and road terminals, airports, Postal Exchange Office and border crossing points. The first issue in 1981 contained 8,000 locations. The version from 2011 contained codes for about 82,000 locations." .
+:Port rdfs:subClassOf :TradeAndTransportRegion .
+:hasUNLOCODE rdfs:domain :TradeAndTransportRegion  ; rdfs:range xsd:string .
+:hasPortFeatures rdfs:domain :Port ; rdfs:range xsd:string.
+
+:hasName rdfs:domain dul:Entity ; rdfs:range xsd:string.
+:hasDescription rdfs:domain dul:Entity ; rdfs:range xsd:string.
+
+:CoastalBreakwaterPort rdfs:subClassOf :Port ; rdfs:comment "Coastal Breakwater port." .
+:CoastalNaturalPort rdfs:subClassOf :Port ; rdfs:comment "Coastal Natural port." .
+:CoastalTideGatePort rdfs:subClassOf :Port ; rdfs:comment "Coastal Tide Gate port." .
+:Coastline rdfs:subClassOf :Place ; rdfs:comment "A line following the general contour of the shore, except that in cases of inlets or bays less than 30 nautical miles in width, the line shall pass directly across the inlet or bay to intersect the general contour on the opposite side." .
+:LakeCanalPort rdfs:subClassOf :Port ; rdfs:comment "Lake or Canal port. See Pub150bk.pdf" .
+
+:LargeSizePort rdfs:subClassOf :Port ; rdfs:comment "The classification of harbor size is based on several applicable factors, including area, facilities, and wharf space. It is not based on area alone or on any other single factor." .
+
+:MediumSizePort rdfs:subClassOf :Port ; rdfs:comment "The classification of harbor size is based on several applicable factors, including area, facilities, and wharf space. It is not based on area alone or on any other single factor." .
+:OpenRoadsteadPort rdfs:subClassOf :Port ; rdfs:comment "Open Roadstead port. See Pub150bk.pdf" .
+
+:RiverBasinNPort rdfs:subClassOf :Port ; rdfs:comment "River Basin N - None port. See Pub150bk.pdf" .
+
+:RiverNaturalPort rdfs:subClassOf :Port ; rdfs:comment "River Natural port." .
+
+:RiverTideGatePort rdfs:subClassOf :Port ; rdfs:comment "River Tide Gate port. See Pub150bk.pdf" .
+
+:SmallSizePort rdfs:subClassOf :Port ; rdfs:comment "The classification of harbor size is based on several applicable factors, including area, facilities, and wharf space. It is not based on area alone or on any other single factor." .
+
+:VerySmallSizePort rdfs:subClassOf :Port ; rdfs:comment "The classification of harbor size is based on several applicable factors, including area, facilities, and wharf space. It is not based on area alone or on any other single factor." .
+
+
+:Route rdfs:subClassOf dul:Region ; rdfs:comment "A course taken in getting from a starting point to a destination. A route is not bound to specific moving entities and has no requirement for time reference in the intermediate points. For example, the route that connects two sea ports, exists irrevelantly to the departure/arrival time." .
+
+:RouteAvailability rdfs:subClassOf dul:InformationEntity .
+:RouteSegment rdfs:subClassOf dul:Region .
+:TerminalWaypoint rdfs:subClassOf :Waypoint .
+
+## WDPA protected areas
+:Wetland rdfs:subClassOf :ProtectedArea .
+:Wildlife_botanicalConservationArea rdfs:subClassOf :ProtectedArea .
+:WildlifeReserve_refa_ rdfs:subClassOf :ProtectedArea .
+:AreaOfSpecialScientificInterest_ni_ rdfs:subClassOf :ProtectedArea .
+:CommunityConservationArea rdfs:subClassOf :ProtectedArea .
+:ForestConservationArea rdfs:subClassOf :ProtectedArea .
+:NationalPark-BufferZone_areaOfAdhesion rdfs:subClassOf :ProtectedArea .
+:NaturePlace rdfs:subClassOf :ProtectedArea .
+:NatureReserve_special_ rdfs:subClassOf :ProtectedArea .
+:SiteOfSpecialScientificInterest_gb_ rdfs:subClassOf :ProtectedArea .
+:Botanical_zoologicalProtectionOfSpecies rdfs:subClassOf :ProtectedArea .
+:BotanicalProtectionOfSpecies rdfs:subClassOf :ProtectedArea .
+:HerbRichForestReserve rdfs:subClassOf :ProtectedArea .
+:NatureReserve_wildlife_ rdfs:subClassOf :ProtectedArea .
+:OldGrowthForestReserve rdfs:subClassOf :ProtectedArea .
+:PrivateNatureReserve rdfs:subClassOf :ProtectedArea .
+:ZoologicalProtectionOfSpecies rdfs:subClassOf :ProtectedArea .
+:GreySealProtectionArea rdfs:subClassOf :ProtectedArea .
+:LimitedManagementZoneOfNationalPark rdfs:subClassOf :ProtectedArea .
+:LimitedManagementZoneOfNatureReserve rdfs:subClassOf :ProtectedArea .
+:LimitedManagementZoneOfProtectedLandscape rdfs:subClassOf :ProtectedArea .
+:ManagedConservationZoneOfNationalPark rdfs:subClassOf :ProtectedArea .
+:ManagedConservationZoneOfNatureReserve rdfs:subClassOf :ProtectedArea .
+:ManagedConservationZoneOfProtectedLandscape rdfs:subClassOf :ProtectedArea .
+:NatureMonument rdfs:subClassOf :ProtectedArea .
+:NoBerthingZone_noEntryZoneExceptForFisheries rdfs:subClassOf :ProtectedArea .
+:ProtectedNatureMonument rdfs:subClassOf :ProtectedArea .
+:RegionalNatureMonument rdfs:subClassOf :ProtectedArea .
+:RegionalZakaznik rdfs:subClassOf :ProtectedArea .
+:RestrictedArea rdfs:subClassOf :ProtectedArea .
+:SiteOfScientificImportance rdfs:subClassOf :ProtectedArea .
+:StateZakaznik rdfs:subClassOf :ProtectedArea .
+:StrictNatureReserveOfNationalPark rdfs:subClassOf :ProtectedArea .
+:UnzonedProtectedArea rdfs:subClassOf :ProtectedArea .
+:WildernessConservationZoneOfNationalPark rdfs:subClassOf :ProtectedArea .
+:WildernessConservationZoneOfNatureReserve rdfs:subClassOf :ProtectedArea .
+:WildernessConservationZoneOfProtectedLandscape rdfs:subClassOf :ProtectedArea .
+:WildlifePreserve rdfs:subClassOf :ProtectedArea .
+:BirdSanctuary rdfs:subClassOf :ProtectedArea .
+:CertifiedNatureReserve_flemishRegion_ rdfs:subClassOf :ProtectedArea .
+:Co-managementArea rdfs:subClassOf :ProtectedArea .
+:InternationalSignificanceNaturalMarineArea rdfs:subClassOf :ProtectedArea .
+:LocallyManagedProtectedArea rdfs:subClassOf :ProtectedArea .
+:NacionalPark rdfs:subClassOf :ProtectedArea .
+:NatureMonument_categoryIiiIucn_ rdfs:subClassOf :ProtectedArea .
+:NatureReserve_filfla_ rdfs:subClassOf :ProtectedArea .
+:NatureReserve_integral_ rdfs:subClassOf :ProtectedArea .
+:NatureReserve_islands_ rdfs:subClassOf :ProtectedArea .
+:OtherProtectedNaturalRegionalAreas rdfs:subClassOf :ProtectedArea .
+:Others rdfs:subClassOf :ProtectedArea .
+

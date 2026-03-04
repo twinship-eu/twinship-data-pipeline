@@ -47,10 +47,13 @@ def _normalize_graphdb_base_url(base_url: str) -> str:
     return base_url.rstrip("/")
 
 
-def _create_graphdb_repo_config(repository_id: str, title: str) -> str:
+def _create_graphdb_repo_config(
+    repository_id: str, title: str, ruleset: str = "rdfsplus-optimized"
+) -> str:
     """Generate a TTL repository configuration for GraphDB."""
     escaped_repo_id = _ttl_escape_literal(repository_id)
     escaped_title = _ttl_escape_literal(title)
+    escaped_ruleset = _ttl_escape_literal(ruleset)
     return f"""@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix rep: <http://www.openrdf.org/config/repository#>.
 @prefix sr: <http://www.openrdf.org/config/repository/sail#>.
@@ -64,7 +67,7 @@ def _create_graphdb_repo_config(repository_id: str, title: str) -> str:
         rep:repositoryType "graphdb:SailRepository" ;
         sr:sailImpl [
             sail:sailType "graphdb:Sail" ;
-            graphdb:ruleset "empty" ;
+            graphdb:ruleset "{escaped_ruleset}" ;
             graphdb:check-for-inconsistencies "false" ;
             graphdb:disable-sameAs "true" ;
             graphdb:enable-context-index "true"
@@ -177,12 +180,18 @@ class GraphDBClient(ConfigurableResource):
             f"{attempts} checks with {self.readiness_check_interval_seconds}s interval"
         )
 
-    def ensure_repository(self, repo_id: str | None = None, title: str | None = None) -> bool:
+    def ensure_repository(
+        self,
+        repo_id: str | None = None,
+        title: str | None = None,
+        ruleset: str = "rdfsplus-optimized",
+    ) -> bool:
         """Create the repository if it does not already exist.
 
         Args:
             repo_id: Repository ID to create. Defaults to self.repository_id.
             title: Repository title. Defaults to self.repository_title.
+            ruleset: GraphDB ruleset for reasoning. Defaults to rdfsplus-optimized.
 
         Returns True if a new repository was created, False if it already existed.
         """
@@ -212,7 +221,7 @@ class GraphDBClient(ConfigurableResource):
                 files={
                     "config": (
                         "repo-config.ttl",
-                        _create_graphdb_repo_config(repo_id, title),
+                        _create_graphdb_repo_config(repo_id, title, ruleset),
                         "text/turtle",
                     )
                 },
@@ -228,6 +237,54 @@ class GraphDBClient(ConfigurableResource):
             _raise_graphdb_error(f"Could not create GraphDB repository '{repo_id}'", response)
 
         return True
+
+    def import_server_files(self, file_names: list[str], repo_id: str | None = None) -> None:
+        """Import files from GraphDB's server import directory into a repository.
+
+
+        Args:
+            file_names: Paths relative to the GraphDB import directory.
+            repo_id: Target repository. Defaults to self.repository_id.
+        """
+        repo_id = repo_id or self.repository_id
+        base_url = self.normalized_base_url
+
+        try:
+            response = requests.post(
+                f"{base_url}/rest/repositories/{repo_id}/import/server",
+                json={"fileNames": file_names},
+                timeout=self.timeout_seconds,
+                **self._merge_kwargs(extra_headers={"Content-Type": "application/json"}),
+            )
+        except requests.RequestException as e:
+            _raise_graphdb_error(
+                f"Could not reach GraphDB while importing files into '{repo_id}': {e}"
+            )
+
+        if response.status_code not in {200, 202, 204}:
+            _raise_graphdb_error(
+                f"Could not import server files into repository '{repo_id}'", response
+            )
+
+    def wait_for_import(self, repo_id: str | None = None) -> None:
+        """Poll until all server-side imports finish for a repository."""
+        repo_id = repo_id or self.repository_id
+        base_url = self.normalized_base_url
+
+        while True:
+            try:
+                response = requests.get(
+                    f"{base_url}/rest/repositories/{repo_id}/import/server",
+                    timeout=self.timeout_seconds,
+                    **self._request_kwargs(),
+                )
+                if response.status_code == 200:
+                    body = response.text
+                    if '"IMPORTING"' not in body and '"PENDING"' not in body:
+                        return
+            except requests.RequestException:
+                pass
+            time.sleep(2)
 
     def clear_repository(self, repo_id: str | None = None) -> None:
         """Delete all statements from the repository."""
