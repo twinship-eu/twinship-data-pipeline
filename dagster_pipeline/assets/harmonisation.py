@@ -28,6 +28,11 @@ from dagster_pipeline.extraction import (
     extract_vessel_for_operator,
     load_spreadsheet_sheets,
 )
+from dagster_pipeline.futuristic_extraction import (
+    discover_futuristic_vessels,
+    extract_futuristic_vessel,
+    load_futuristic_sheets,
+)
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
 from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
@@ -48,6 +53,7 @@ class SpreadsheetConfig(Config):
     """Configuration for spreadsheet asset."""
 
     spreadsheet_path: str = "data/TwinShip-table-schema-specification.xlsx"
+    futuristic_spreadsheet_path: str = "data/RoRo Futuristic Vessel KG Working File.xlsx"
 
 
 class TtlOutputConfig(Config):
@@ -95,31 +101,43 @@ ONTOLOGY_SERVER_FILES = [
     kinds={"excel"},
 )
 def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) -> dict:
-    """Load all sheets from the TwinShip spreadsheet and discover vessels."""
-    # Load spreadsheet with configured path
+    """Load all sheets from both TwinShip spreadsheets and discover vessels."""
+    # Load conventional spreadsheet
     spreadsheet_path = Path(config.spreadsheet_path)
     if not spreadsheet_path.exists():
         raise FileNotFoundError(f"Spreadsheet not found: {spreadsheet_path}")
 
-    # Load all sheets and log their sizes
     sheets = load_spreadsheet_sheets(str(spreadsheet_path))
     for name, df in sheets.items():
         context.log.info(f"Loaded {name}: {len(df)} rows")
 
-    # Discover vessels from entity IDs in the spreadsheet
+    # Discover conventional vessels
     vessels = discover_vessels_from_sheets(sheets)
+
+    # Load futuristic spreadsheet if it exists
+    fv_path = Path(config.futuristic_spreadsheet_path)
+    fv_sheets: dict = {}
+    if fv_path.exists():
+        fv_sheets = load_futuristic_sheets(str(fv_path))
+        for name, df in fv_sheets.items():
+            context.log.info(f"Loaded futuristic {name}: {len(df)} rows")
+
+        fv_vessels = discover_futuristic_vessels(fv_sheets)
+        vessels.update(fv_vessels)
+    else:
+        context.log.info(f"Futuristic spreadsheet not found at {fv_path}, skipping")
+
     context.log.info(f"Discovered {len(vessels)} vessels: {list(vessels.keys())}")
 
-    # Add metadata to context so it appears in Dagster UI
     context.add_output_metadata(
         {
             "vessels": MetadataValue.text(", ".join(vessels.keys())),
             "vessel_count": MetadataValue.int(len(vessels)),
-            "sheet_count": MetadataValue.int(len(sheets)),
+            "sheet_count": MetadataValue.int(len(sheets) + len(fv_sheets)),
         }
     )
 
-    return {"sheets": sheets, "vessels": vessels}
+    return {"sheets": sheets, "fv_sheets": fv_sheets, "vessels": vessels}
 
 
 @asset(
@@ -130,40 +148,43 @@ def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) 
 )
 def extracted_vessel_json(context: AssetExecutionContext, spreadsheet_data: dict) -> dict:
     """Extract vessel data for the current vessel partition."""
-    # Get the current vessel namespace from the partition key (e.g., "grimaldi", "stena-tanker")
     namespace = context.partition_key
-    sheets = spreadsheet_data["sheets"]
     vessels = spreadsheet_data["vessels"]
 
-    # Validate that the namespace exists in the discovered vessels
     if namespace not in vessels:
         context.log.error(f"Unknown vessel namespace: {namespace}")
         return {}
 
-    # Extract vessel data for this specific vessel
     vessel_info = vessels[namespace]
-    data = extract_vessel_for_operator(
-        sheets,
-        vessel_info["prefix"],
-        namespace,
-    )
+    prefix = vessel_info["prefix"]
 
-    # Log summary of extracted data for this vessel
+    # Route extraction by prefix: FV uses futuristic spreadsheet
+    if prefix == "FV":
+        data = extract_futuristic_vessel(
+            spreadsheet_data["fv_sheets"],
+            prefix,
+            namespace,
+        )
+    else:
+        data = extract_vessel_for_operator(
+            spreadsheet_data["sheets"],
+            prefix,
+            namespace,
+        )
+
     vessel_id = data.get("vessel", {}).get("id", "unknown")
     context.log.info(
         f"Extracted {namespace}: vessel={vessel_id}, "
-        f"main_engines={len(data['main_engines'])}, "
-        f"aux_engines={len(data['auxiliary_engines'])}, "
-        f"propellers={len(data['propellers'])}, "
-        f"gearboxes={len(data['gearboxes'])}"
+        f"main_engines={len(data.get('main_engines', []))}, "
+        f"gensets={len(data.get('gensets', []))}, "
+        f"propellers={len(data.get('propellers', []))}"
     )
 
-    # Add metadata about the extracted vessel to the context for Dagster UI
     context.add_output_metadata(
         {
             "vessel_id": MetadataValue.text(vessel_id),
-            "main_engine_count": MetadataValue.int(len(data["main_engines"])),
-            "auxiliary_engine_count": MetadataValue.int(len(data["auxiliary_engines"])),
+            "main_engine_count": MetadataValue.int(len(data.get("main_engines", []))),
+            "genset_count": MetadataValue.int(len(data.get("gensets", []))),
         }
     )
 

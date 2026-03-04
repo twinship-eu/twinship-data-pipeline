@@ -39,6 +39,12 @@ def get_twinship_type_uri(type_name: str) -> URIRef | None:
         "FourStroke": TWINSHIP.FourStroke,
         "DieselEngine": TWINSHIP.DieselEngine,
         "MechanicalConfiguration": TWINSHIP.MechanicalConfiguration,
+        # Futuristic engine/configuration types
+        "GenSetSystem": TWINSHIP.GenSetSystem,
+        "DieselElectricConfiguration": TWINSHIP.DieselElectricConfiguration,
+        "AC": TWINSHIP.AC,
+        "DC": TWINSHIP.DC,
+        "ESD": TWINSHIP.ESD,
         # Propeller types
         "CPP": TWINSHIP.CPP,
         "FPP": TWINSHIP.FPP,
@@ -50,15 +56,36 @@ def get_twinship_type_uri(type_name: str) -> URIRef | None:
         "PTO": TWINSHIP.PTO,
         # PMS
         "Pms": TWINSHIP.Pms,
+        "PMS": TWINSHIP.Pms,
         # Emergency equipment
         "EmergencyEquipment": TWINSHIP.EmergencyEquipment,
         # Thrusters / Maneuvering
         "Maneuvering": TWINSHIP.Maneuvering,
+        "BowThruster": TWINSHIP.BowThruster,
+        "Bow": TWINSHIP.Bow,
         # Shaft generators
         "ShaftGeneratorSystem": TWINSHIP.ShaftGeneratorSystem,
         "RGShaftGenerator": TWINSHIP.RGShaftGenerator,
         # Boiler
         "Boiler": TWINSHIP.Boiler,
+        # Futuristic component types
+        "EnergyStorageSystem": TWINSHIP.EnergyStorageSystem,
+        "BidirectionalConverterSystem": TWINSHIP.BidirectionalConverterSystem,
+        "SCR": TWINSHIP.SCR,
+        "EmissionReduction": TWINSHIP.SCR,
+        "AUXLOAD": TWINSHIP.AUXLOAD,
+        "ShipServices": TWINSHIP.ShipServices,
+        "HotelLoad": TWINSHIP.HotelLoad,
+        "OSP": TWINSHIP.OSP,
+        "FrequencyConverterSystem": TWINSHIP.FrequencyConverterSystem,
+        "ElectricMotorSystem": TWINSHIP.ElectricMotorSystem,
+        "ElectricMotorShaft": TWINSHIP.ElectricMotorShaft,
+        "GateRudder": TWINSHIP.GateRudder,
+        "WindAssistedPropulsionSystem": TWINSHIP.WindAssistedPropulsionSystem,
+        "SuctionSail": TWINSHIP.SuctionSail,
+        "AirLubricationSystem": TWINSHIP.AirLubricationSystem,
+        "DynamicWing": TWINSHIP.DynamicWing,
+        "FuelCellSystem": TWINSHIP.FuelCellSystem,
     }
     return type_map.get(type_name)
 

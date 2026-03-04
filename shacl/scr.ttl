@@ -1,0 +1,35 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for SCR (Selective Catalytic Reduction)
+tws:SCRShape a sh:NodeShape ;
+    sh:targetClass tws:SCR ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "SCR must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:twSCRNOReductionEfficiency ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "SCR NOx reduction efficiency must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSCRCatalystVolumeInM3 ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "SCR catalyst volume must be a number" ;
+    ] .

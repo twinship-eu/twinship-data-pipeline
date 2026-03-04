@@ -12,7 +12,9 @@
       { "name": "READ_REPO_stena-scandinavica", "description": "Read access to stena-scandinavica repository" },
       { "name": "WRITE_REPO_stena-scandinavica", "description": "Write access to stena-scandinavica repository" },
       { "name": "READ_REPO_stena-tanker", "description": "Read access to stena-tanker repository" },
-      { "name": "WRITE_REPO_stena-tanker", "description": "Write access to stena-tanker repository" }
+      { "name": "WRITE_REPO_stena-tanker", "description": "Write access to stena-tanker repository" },
+      { "name": "READ_REPO_futuristic-vessel", "description": "Read access to futuristic-vessel repository" },
+      { "name": "WRITE_REPO_futuristic-vessel", "description": "Write access to futuristic-vessel repository" }
     ]
   },
   "clients": [
@@ -121,6 +123,21 @@
       "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-tanker"]
     },
     {
+      "username": "futuristic-vessel-user",
+      "enabled": true,
+      "email": "futuristic-vessel@example.com",
+      "firstName": "Futuristic Vessel",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "futuristic-vessel-password",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_futuristic-vessel"]
+    },
+    {
       "username": "service-account-dagster-pipeline",
       "enabled": true,
       "serviceAccountClientId": "dagster-pipeline",
@@ -131,7 +148,9 @@
         "READ_REPO_stena-scandinavica",
         "WRITE_REPO_stena-scandinavica",
         "READ_REPO_stena-tanker",
-        "WRITE_REPO_stena-tanker"
+        "WRITE_REPO_stena-tanker",
+        "READ_REPO_futuristic-vessel",
+        "WRITE_REPO_futuristic-vessel"
       ]
     }
   ]
