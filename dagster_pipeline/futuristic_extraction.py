@@ -76,6 +76,38 @@ def discover_futuristic_vessels(sheets: dict[str, pd.DataFrame]) -> dict[str, di
     return {}
 
 
+def _append_instance_number(components: list[dict]) -> list[dict]:
+    """Append the instance number from the ID to each component's name.
+
+    E.g. id="FV-EMM-1", name="ELECTRIC MOTOR" → name="ELECTRIC MOTOR 1"
+
+    Handles two edge cases:
+    - Name already ends with the instance number (gensets) → skip
+    - Name ends with the type abbreviation from the ID (PMS) → replace with number
+    """
+    for comp in components:
+        entity_id = comp.get("id", "")
+        name = comp.get("name", "")
+        if entity_id and name:
+            # Instance number is the last segment: FV-EMM-1 → 1
+            parts = str(entity_id).rsplit("-", 1)
+            if len(parts) == 2 and parts[1].isdigit():
+                num = parts[1]
+                # Already ends with the instance number? Skip.
+                if name.endswith(f" {num}"):
+                    continue
+                # Extract type abbreviation (middle part of ID: FV-PMS-1 → PMS)
+                id_parts = str(entity_id).split("-")
+                if len(id_parts) >= 3:
+                    type_abbrev = "-".join(id_parts[1:-1])
+                    # Name ends with the type abbreviation? Replace with number.
+                    if name.endswith(f" {type_abbrev}"):
+                        comp["name"] = name[: -len(type_abbrev)] + num
+                        continue
+                comp["name"] = f"{name} {num}"
+    return components
+
+
 def extract_futuristic_vessel(
     sheets: dict[str, pd.DataFrame],
     prefix: str,
@@ -120,25 +152,25 @@ def extract_futuristic_vessel(
         "main_engines": [],
         "auxiliary_engines": [],
         "gearboxes": [],
-        "propellers": propellers,
+        "propellers": _append_instance_number(propellers),
         "boilers": [],
         # Futuristic-specific components
-        "gensets": gensets,
-        "ess": ess_data["ess"],
-        "dc_bus_converters": ess_data["dc_bus_converters"],
-        "scrs": scrs,
-        "pms": pms,
-        "auxiliary_loads": auxiliary_loads,
-        "shore_power": shore_power,
-        "frequency_converters": em_data["frequency_converters"],
-        "electric_motors": em_data["electric_motors"],
-        "electric_motor_shafts": em_data["electric_motor_shafts"],
-        "gate_rudders": gate_rudders,
-        "thrusters": thrusters,
-        "wasps": wasps,
-        "als": als,
-        "dynamic_wings": dynamic_wings,
-        "ammonia_fuel_cells": ammonia_fuel_cells,
+        "gensets": _append_instance_number(gensets),
+        "ess": _append_instance_number(ess_data["ess"]),
+        "dc_bus_converters": _append_instance_number(ess_data["dc_bus_converters"]),
+        "scrs": _append_instance_number(scrs),
+        "pms": _append_instance_number(pms),
+        "auxiliary_loads": _append_instance_number(auxiliary_loads),
+        "shore_power": _append_instance_number(shore_power),
+        "frequency_converters": _append_instance_number(em_data["frequency_converters"]),
+        "electric_motors": _append_instance_number(em_data["electric_motors"]),
+        "electric_motor_shafts": _append_instance_number(em_data["electric_motor_shafts"]),
+        "gate_rudders": _append_instance_number(gate_rudders),
+        "thrusters": _append_instance_number(thrusters),
+        "wasps": _append_instance_number(wasps),
+        "als": _append_instance_number(als),
+        "dynamic_wings": _append_instance_number(dynamic_wings),
+        "ammonia_fuel_cells": _append_instance_number(ammonia_fuel_cells),
     }
 
 
