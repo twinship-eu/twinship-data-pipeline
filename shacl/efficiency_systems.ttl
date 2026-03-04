@@ -1,0 +1,114 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for GateRudder
+tws:GateRudderShape a sh:NodeShape ;
+    sh:targetClass tws:GateRudder ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Gate rudder must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] .
+
+# Shape for BowThruster
+tws:BowThrusterShape a sh:NodeShape ;
+    sh:targetClass tws:BowThruster ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Bow thruster must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:twBowThrusterPowerMaxInKW ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Bow thruster power must be a number" ;
+    ] .
+
+# Shape for WindAssistedPropulsionSystem (WASP)
+tws:WindAssistedPropulsionSystemShape a sh:NodeShape ;
+    sh:targetClass tws:WindAssistedPropulsionSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "WASP must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] .
+
+# Shape for AirLubricationSystem (ALS)
+tws:AirLubricationSystemShape a sh:NodeShape ;
+    sh:targetClass tws:AirLubricationSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "ALS must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] .
+
+# Shape for DynamicWing
+tws:DynamicWingShape a sh:NodeShape ;
+    sh:targetClass tws:DynamicWing ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Dynamic wing must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] .
+
+# Shape for FuelCellSystem (Ammonia Fuel Cell)
+tws:FuelCellSystemShape a sh:NodeShape ;
+    sh:targetClass tws:FuelCellSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Fuel cell must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:consume ;
+        sh:minCount 1 ;
+        sh:class tws:Fuel ;
+        sh:message "Fuel cell must consume at least one fuel" ;
+    ] .

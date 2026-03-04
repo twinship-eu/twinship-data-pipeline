@@ -1,0 +1,81 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Shape for FrequencyConverterSystem
+tws:FrequencyConverterSystemShape a sh:NodeShape ;
+    sh:targetClass tws:FrequencyConverterSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Frequency converter must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMPowerInMWh ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "FC power must be a number" ;
+    ] .
+
+# Shape for ElectricMotorSystem
+tws:ElectricMotorSystemShape a sh:NodeShape ;
+    sh:targetClass tws:ElectricMotorSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Electric motor must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMPowerInMWh ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Motor power must be a number" ;
+    ] .
+
+# Shape for ElectricMotorShaft
+tws:ElectricMotorShaftShape a sh:NodeShape ;
+    sh:targetClass tws:ElectricMotorShaft ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:minCount 1 ;
+        sh:class tws:VesselSystem ;
+        sh:message "Electric motor shaft must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMSHSpeedInRevPerMin ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Shaft speed must be a number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMSHTorqueInKN ;
+        sh:minCount 0 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Shaft torque must be a number" ;
+    ] .
