@@ -317,12 +317,12 @@ def shacl_validation_report(
 )
 def graphdb_upload(
     context: AssetExecutionContext,
+    config: TtlOutputConfig,
     graphdb_client: GraphDBClient,
     vessel_ttl: str,
     shacl_validation_report: str,
 ) -> str:
     """Upload a single vessel's TTL file to its own GraphDB repository."""
-    # Use the vessel namespace as the repository ID (e.g., "grimaldi", "stena-tanker")
     vessel = context.partition_key
     repo_id = vessel
     repo_title = f"TwinShip - {vessel}"
@@ -337,14 +337,11 @@ def graphdb_upload(
         return ""
 
     graphdb_client.wait_for_readiness()
-    # Ensure the repository exists (will be created if it doesn't exist)
     repo_created = graphdb_client.ensure_repository(repo_id=repo_id, title=repo_title)
 
-    # Optionally clear the repository before upload if configured to do so
     if graphdb_client.clear_before_upload:
         graphdb_client.clear_repository(repo_id=repo_id)
 
-    # Load the TTL file into an RDFLib graph to count triples before upload
     g = Graph()
     g.parse(ttl_path, format="turtle")
     triple_count = len(g)
@@ -353,7 +350,6 @@ def graphdb_upload(
 
     remote_triple_count = graphdb_client.triple_count(repo_id=repo_id)
 
-    # Add metadata about the upload to the context for Dagster UI
     metadata: dict[str, Any] = {
         "graphdb_base_url": MetadataValue.text(graphdb_client.normalized_base_url),
         "repository_id": MetadataValue.text(repo_id),
@@ -383,10 +379,9 @@ def sparql_summary(
     """Run SPARQL queries on all vessel repositories and show combined results."""
     import pandas as pd
 
-    # SPARQL query files are located in a "queries" directory at the same level as this script
     queries_dir = Path(__file__).parent.parent / "queries"
 
-    # Get the list of vessel partitions to know which repositories to query (e.g., "grimaldi", "stena-tanker", etc.)
+    # Discover vessel repositories by listing all registered partitions
     vessel_partitions = list(context.instance.get_dynamic_partitions(vessel_partitions_def.name))
 
     if not vessel_partitions:
@@ -398,7 +393,6 @@ def sparql_summary(
     all_fuels = []
     total_triples = 0
 
-    # Loop through each vessel partition, query its GraphDB repository, and collect results
     for repo_id in vessel_partitions:
         count = graphdb_client.triple_count(repo_id=repo_id)
         if count is None or count == 0:

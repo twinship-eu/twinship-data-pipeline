@@ -9,21 +9,21 @@ from dagster_pipeline.resources.graphdb import GraphDBClient, _create_graphdb_re
 class TestAuthValidation:
     def test_no_credentials(self):
         client = GraphDBClient(username="", password="")
-        assert client._auth is None
+        assert client._request_kwargs() == {}
 
     def test_both_credentials(self):
         client = GraphDBClient(username="admin", password="secret")
-        assert client._auth == ("admin", "secret")
+        assert client._request_kwargs() == {"auth": ("admin", "secret")}
 
     def test_username_only_raises(self):
         client = GraphDBClient(username="admin", password="")
         with pytest.raises(Failure, match="both username and password"):
-            _ = client._auth
+            client._request_kwargs()
 
     def test_password_only_raises(self):
         client = GraphDBClient(username="", password="secret")
         with pytest.raises(Failure, match="both username and password"):
-            _ = client._auth
+            client._request_kwargs()
 
 
 class TestCreateRepoConfig:

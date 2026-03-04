@@ -1,10 +1,17 @@
 """Dagster resource for GraphDB interaction."""
 
+from __future__ import annotations
+
 import time
+from typing import TYPE_CHECKING
 
 import pandas as pd
 import requests
 from dagster import ConfigurableResource, EnvVar, Failure
+from pydantic import PrivateAttr
+
+if TYPE_CHECKING:
+    from dagster_pipeline.resources.keycloak import KeycloakTokenProvider
 
 
 def _env_bool(var_name: str, default: bool) -> bool:
@@ -93,30 +100,63 @@ class GraphDBClient(ConfigurableResource):
     username: str = EnvVar("GRAPHDB_USERNAME").get_value("")
     password: str = EnvVar("GRAPHDB_PASSWORD").get_value("")
 
+    _keycloak_token_provider: KeycloakTokenProvider | None = PrivateAttr(default=None)
+
     @property
     def normalized_base_url(self) -> str:
         return _normalize_graphdb_base_url(self.base_url)
 
-    @property
-    def _auth(self) -> tuple[str, str] | None:
+    def _get_keycloak_provider(self) -> KeycloakTokenProvider | None:
+        """Lazily create a KeycloakTokenProvider from env vars."""
+        if self._keycloak_token_provider is None:
+            from dagster_pipeline.resources.keycloak import KeycloakTokenProvider
+
+            provider = KeycloakTokenProvider()
+            if provider.is_configured:
+                self._keycloak_token_provider = provider
+        return self._keycloak_token_provider
+
+    def _request_kwargs(self) -> dict:
+        """Return auth kwargs for requests calls.
+
+        Uses JWT bearer token if Keycloak is configured, otherwise falls back
+        to basic auth (or no auth).
+        """
+        provider = self._get_keycloak_provider()
+        if provider is not None and provider.is_configured:
+            token = provider.get_access_token()
+            return {"headers": {"Authorization": f"Bearer {token}"}}
+
+        # Basic auth fallback
         if not self.username and not self.password:
-            return None
+            return {}
         if not self.username or not self.password:
             raise Failure(
                 "GraphDB credentials misconfigured: both username and password are required."
             )
-        return self.username, self.password
+        return {"auth": (self.username, self.password)}
+
+    def _merge_kwargs(self, extra_headers: dict | None = None, **kwargs: object) -> dict:
+        """Merge _request_kwargs with additional request arguments."""
+        base = self._request_kwargs()
+        if extra_headers:
+            existing_headers = base.get("headers", {})
+            existing_headers.update(extra_headers)
+            base["headers"] = existing_headers
+        base.update(kwargs)
+        return base
 
     def wait_for_readiness(self) -> None:
         """Block until GraphDB responds to a repository listing request."""
         base_url = self.normalized_base_url
-        auth = self._auth
         repositories_url = f"{base_url}/rest/repositories"
         attempts = self.max_readiness_checks
 
         for attempt in range(1, attempts + 1):
             try:
-                response = requests.get(repositories_url, auth=auth, timeout=self.timeout_seconds)
+                response = requests.get(
+                    repositories_url, timeout=self.timeout_seconds, **self._request_kwargs()
+                )
             except requests.RequestException:
                 response = None
 
@@ -149,14 +189,13 @@ class GraphDBClient(ConfigurableResource):
         repo_id = repo_id or self.repository_id
         title = title or self.repository_title
         base_url = self.normalized_base_url
-        auth = self._auth
 
         # Check existence
         try:
             response = requests.get(
                 f"{base_url}/rest/repositories/{repo_id}",
-                auth=auth,
                 timeout=self.timeout_seconds,
+                **self._request_kwargs(),
             )
         except requests.RequestException as e:
             _raise_graphdb_error(f"Could not reach GraphDB while checking repository: {e}")
@@ -170,7 +209,6 @@ class GraphDBClient(ConfigurableResource):
         try:
             response = requests.post(
                 f"{base_url}/rest/repositories",
-                auth=auth,
                 files={
                     "config": (
                         "repo-config.ttl",
@@ -179,6 +217,7 @@ class GraphDBClient(ConfigurableResource):
                     )
                 },
                 timeout=self.timeout_seconds,
+                **self._request_kwargs(),
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
@@ -194,13 +233,12 @@ class GraphDBClient(ConfigurableResource):
         """Delete all statements from the repository."""
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
-        auth = self._auth
 
         try:
             response = requests.delete(
                 f"{base_url}/repositories/{repo_id}/statements",
-                auth=auth,
                 timeout=self.timeout_seconds,
+                **self._request_kwargs(),
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
@@ -217,15 +255,13 @@ class GraphDBClient(ConfigurableResource):
         """Upload Turtle data to the repository."""
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
-        auth = self._auth
 
         try:
             response = requests.post(
                 f"{base_url}/repositories/{repo_id}/statements",
                 data=ttl_data.encode("utf-8"),
-                headers={"Content-Type": "text/turtle; charset=utf-8"},
-                auth=auth,
                 timeout=self.timeout_seconds,
+                **self._merge_kwargs(extra_headers={"Content-Type": "text/turtle; charset=utf-8"}),
             )
         except requests.RequestException as e:
             _raise_graphdb_error(
@@ -239,13 +275,12 @@ class GraphDBClient(ConfigurableResource):
         """Return the number of triples in the repository, or None on failure."""
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
-        auth = self._auth
 
         try:
             response = requests.get(
                 f"{base_url}/repositories/{repo_id}/size",
-                auth=auth,
                 timeout=self.timeout_seconds,
+                **self._request_kwargs(),
             )
         except requests.RequestException:
             return None
@@ -261,15 +296,13 @@ class GraphDBClient(ConfigurableResource):
         """Execute a SPARQL SELECT query and return results as a DataFrame."""
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
-        auth = self._auth
 
         try:
             response = requests.post(
                 f"{base_url}/repositories/{repo_id}",
                 data={"query": query},
-                headers={"Accept": "application/sparql-results+json"},
-                auth=auth,
                 timeout=self.timeout_seconds,
+                **self._merge_kwargs(extra_headers={"Accept": "application/sparql-results+json"}),
             )
         except requests.RequestException as e:
             _raise_graphdb_error(f"Could not query GraphDB repository '{repo_id}': {e}")

@@ -8,6 +8,10 @@ x-graphdb-env: &graphdb-env
   GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS: "3"
   GRAPHDB_USERNAME: ""
   GRAPHDB_PASSWORD: ""
+  KEYCLOAK_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_REALM: twinship
+  KEYCLOAK_CLIENT_ID: dagster-pipeline
+  KEYCLOAK_CLIENT_SECRET: dagster-pipeline-secret
 
 services:
   # PostgreSQL for Dagster storage
@@ -28,6 +32,30 @@ services:
       timeout: 5s
       retries: 5
 
+  # Keycloak OIDC provider
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    container_name: twinship_keycloak
+    command: start-dev --import-realm --health-enabled=true
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_PORT: "8080"
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - ./keycloak/twinship-realm.json:/opt/keycloak/data/import/twinship-realm.json:ro
+    networks:
+      - twinship_network
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '\"status\": \"UP\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 30s
+
   # GraphDB triplestore
   graphdb:
     image: ontotext/graphdb:10.8.12
@@ -36,14 +64,30 @@ services:
       - "7200:7200"
     volumes:
       - graphdb_home:/opt/graphdb/home
+      - ./graphdb/graphdb.properties:/opt/graphdb/home/conf/graphdb.properties:ro
     networks:
       - twinship_network
+    depends_on:
+      keycloak:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:7200/rest/repositories || exit 1"]
+      test: ["CMD-SHELL", "curl -sfo /dev/null -w '%{http_code}' http://localhost:7200/rest/repositories | grep -qE '^(200|401|403)$'"]
       interval: 10s
       timeout: 5s
       retries: 12
       start_period: 30s
+
+  # One-shot init container: enables GraphDB security after first boot
+  graphdb-init:
+    image: curlimages/curl:latest
+    container_name: twinship_graphdb_init
+    entrypoint: ["sh", "-c", "echo 'Waiting for GraphDB...' && until curl -sf http://graphdb:7200/rest/repositories > /dev/null 2>&1; do sleep 2; done && echo 'Enabling security...' && curl -s -X POST -H 'Content-Type: application/json' -d 'true' http://graphdb:7200/rest/security && echo ' Done.'"]
+    networks:
+      - twinship_network
+    depends_on:
+      graphdb:
+        condition: service_healthy
+    restart: "no"
 
   # User code container (gRPC server)
   user_code:

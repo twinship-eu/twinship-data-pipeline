@@ -7,6 +7,7 @@ from pyshacl import validate
 from rdflib import Graph
 
 from dagster_pipeline.resources.graphdb import GraphDBClient, graphdb_client
+from dagster_pipeline.resources.keycloak import KeycloakTokenProvider, keycloak_token_provider
 
 
 class ShaclValidator(ConfigurableResource):
@@ -44,4 +45,11 @@ class ShaclValidator(ConfigurableResource):
 # Default resource instance
 shacl_validator = ShaclValidator()
 
-__all__ = ["GraphDBClient", "ShaclValidator", "graphdb_client", "shacl_validator"]
+__all__ = [
+    "GraphDBClient",
+    "KeycloakTokenProvider",
+    "ShaclValidator",
+    "graphdb_client",
+    "keycloak_token_provider",
+    "shacl_validator",
+]
