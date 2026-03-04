@@ -63,6 +63,27 @@ class ShaclConfig(Config):
     fail_on_validation_error: bool = True
 
 
+# Ontology files to import into each per-vessel repo (paths relative to GraphDB import dir)
+ONTOLOGY_SERVER_FILES = [
+    "ontology/external/IDO_20240503.ttl",
+    "ontology/external/PAV-simplified.ttl",
+    "ontology/external/SCHEMA_QUDT-simplified.ttl",
+    "ontology/vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl",
+    "ontology/vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl",
+    "ontology/external/vesselai/vesselAI_ontology_v2.owl",
+    "ontology/external/vesselai/modules/main.ttl",
+    "ontology/external/vesselai/modules/contextualInformation.ttl",
+    "ontology/external/vesselai/modules/events.ttl",
+    "ontology/external/vesselai/modules/trajectories_module.ttl",
+    "ontology/external/vesselai/modules/vesselCharacteristics.ttl",
+    "ontology/twinship-base.ttl",
+    "ontology/modules/vessel.ttl",
+    "ontology/modules/weatherconditions.ttl",
+    "ontology/modules/draft_time_mode.ttl",
+    "ontology/twinship-core.ttl",
+]
+
+
 # =============================================================================
 # Extraction Assets
 # =============================================================================
@@ -341,6 +362,12 @@ def graphdb_upload(
 
     if graphdb_client.clear_before_upload:
         graphdb_client.clear_repository(repo_id=repo_id)
+
+    # Import ontology files so RDFS+ reasoning works on vessel data
+    context.log.info(f"Importing ontology into '{repo_id}'...")
+    graphdb_client.import_server_files(ONTOLOGY_SERVER_FILES, repo_id=repo_id)
+    graphdb_client.wait_for_import(repo_id=repo_id)
+    context.log.info(f"Ontology import complete for '{repo_id}'")
 
     g = Graph()
     g.parse(ttl_path, format="turtle")

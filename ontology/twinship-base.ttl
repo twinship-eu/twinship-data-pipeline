@@ -1,0 +1,209 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+# #################################################################
+# #
+# #    Ontology
+# #
+# #################################################################
+
+<https://twin-ship.eu/twinship/base> a owl:Ontology ;
+    rdfs:label "TwinShip Ontology" ;
+    pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
+    pav:lastUpdateOn "2026-03-03T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.0.4" ;
+    rdfs:comment """Base/foundation ontology for TwinShip. Defines core classes, properties, and patterns that all TwinShip modules extend. This includes the base TwinShip physical object class, property hierarchies, and fundamental object properties. Domain-specific classes are defined in separate modules (vessel, weatherconditions).
+
+Modeling Approach - Restriction-Based Design:
+
+The TwinShip ontology follows a restriction-based modeling approach in OWL, which is the recommended practice for precise ontological engineering. This means we use OWL class restrictions (owl:Restriction with owl:someValuesFrom, owl:allValuesFrom, etc.) to define which properties apply to which classes, rather than using simple rdfs:domain and rdfs:range assertions.
+
+Why Restrictions Instead of Domain/Range?
+
+The restriction-based approach provides several advantages:
+- Precise Semantics: Restrictions allow us to state that instances of a class CAN have certain properties, without forcing classification on any entity that happens to use those properties.
+- Avoids Unintended Inferences: Using rdfs:domain would cause any entity using a property to be automatically inferred as a member of the domain class, which is often not desired and can lead to incorrect reasoning results.
+- Flexible Modeling: Multiple classes can use the same property with different constraints without interference.
+- OWL Best Practice: This approach aligns with OWL 2 design patterns and enables proper use of reasoners.
+
+Visualization and Documentation:
+
+Most ontology visualization and documentation tools (including WIDOCO and WebVOWL) were designed primarily for RDFS-style ontologies and provide limited support for OWL restriction patterns. They expect simple rdfs:domain and rdfs:range assertions to generate property connection diagrams and to determine which properties are associated with which classes.
+
+To address this limitation while maintaining correct OWL semantics in our source files, we maintain two versions:
+
+1. Source Version (This File): Uses proper OWL restrictions throughout. This is the authoritative version used for reasoning, querying, and semantic operations.
+
+2. Visualization Version (Auto-Generated): A script automatically generates a simplified version that extracts domain and range information from the restriction patterns and adds explicit rdfs:domain and rdfs:range assertions. This version is used solely as input to WIDOCO and WebVOWL to produce human-readable documentation and interactive visualizations.
+
+The visualization version is regenerated whenever the source ontology changes, ensuring documentation stays synchronized with the authoritative OWL model.""" ;
+    owl:imports <http://purl.org/pav/>,
+        <http://qudt.org/vocab/quantitykind/>,
+        <http://qudt.org/vocab/unit/>,
+        <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0>,
+        <http://www.vesselAI-project.eu/vesselai> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/base/0.0.4> .
+
+# #################################################################
+# #
+# #    IDO Extensions and Annotations
+# #
+# #################################################################
+
+ido:Object rdfs:subClassOf [ a owl:Restriction ;
+            owl:onProperty ido:hasPart ;
+            owl:someValuesFrom :TwinShipInanimatePhysicalObject ] .
+
+ido:containedBy a owl:ObjectProperty ;
+    rdfs:comment "Relates an object to another object that contains it (inverse of contains)." .
+
+ido:contains a owl:ObjectProperty ;
+    rdfs:comment "Relates an object to another object that it contains (inverse of containedBy)." .
+
+ido:directlyConnectedTo a owl:ObjectProperty ;
+    rdfs:label "directly connected to" ;
+    rdfs:comment "Relates two inanimate physical objects that are directly connected." ;
+    rdfs:domain ido:InanimatePhysicalObject ;
+    rdfs:range ido:InanimatePhysicalObject .
+
+# #################################################################
+# #
+# #    XSD Extensions
+# #
+# #################################################################
+
+xsd:gYear a rdfs:Datatype .
+
+# #################################################################
+# #
+# #    Annotation Properties
+# #
+# #################################################################
+
+# OWL Annotation Properties
+owl:maxQualifiedCardinality a owl:AnnotationProperty .
+
+owl:minQualifiedCardinality a owl:AnnotationProperty .
+
+# SKOS Annotation Properties
+skos:notation a owl:AnnotationProperty ;
+    rdfs:label "notation" ;
+    rdfs:comment "A notation, such as a code or identifier, used to uniquely identify a concept." ;
+    rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> .
+
+skos:altLabel a owl:AnnotationProperty ;
+    rdfs:label "alternative label" ;
+    rdfs:comment "An alternative lexical label for a resource." ;
+    rdfs:isDefinedBy <http://www.w3.org/2004/02/skos/core> .
+
+# #################################################################
+# #
+# #    Base Classes
+# #
+# #################################################################
+
+:TwinShipInanimatePhysicalObject a owl:Class ;
+    rdfs:label "TwinShip Inanimate Physical Object" ;
+    rdfs:comment "Base class for all physical objects in the TwinShip ontology. Subclass of IDO InanimatePhysicalObject. All vessel systems, components, and physical entities extend this class." ;
+    rdfs:subClassOf ido:InanimatePhysicalObject .
+
+:EnergySystem a owl:Class ;
+    rdfs:label "Energy System" ;
+    rdfs:comment "A system that manages or distributes energy on a vessel (e.g., PMS, shaft generators, electrical distribution)." ;
+    rdfs:subClassOf :TwinShipInanimatePhysicalObject .
+
+:MechanicalConfiguration a owl:Class ;
+    rdfs:label "Mechanical Configuration" ;
+    rdfs:comment "Classifies the mechanical configuration or arrangement of an engine (e.g., inline, V-type, opposed). Used alongside stroke type classifications." ;
+    rdfs:subClassOf :TwinShipInanimatePhysicalObject .
+
+# #################################################################
+# #
+# #    Organizational Classes
+# #
+# #################################################################
+
+:TwinShipSystem a owl:Class ;
+    rdfs:label "TwinShip System" ;
+    rdfs:comment "Base class for all systems in the TwinShip ontology. Subclass of IDO System." ;
+    rdfs:subClassOf ido:System .
+
+:Fleet a owl:Class ;
+    rdfs:label "Fleet" ;
+    rdfs:comment "A collection of ships operated by the same organization." ;
+    rdfs:subClassOf :TwinShipSystem .
+
+:TwinShipOrganization a owl:Class ;
+    rdfs:label "TwinShip Organization" ;
+    rdfs:comment "Base class for all organizations in the TwinShip ontology. Subclass of IDO Organization." ;
+    rdfs:subClassOf ido:Organization .
+
+:Organization a owl:Class ;
+    rdfs:label "Organization" ;
+    rdfs:comment "An organized group of people with a particular purpose, such as a shipping company or vessel operator." ;
+    rdfs:subClassOf :TwinShipOrganization .
+
+# #################################################################
+# #
+# #    System Classes
+# #
+# #################################################################
+
+:Pms a owl:Class ;
+    rdfs:label "PMS" ;
+    rdfs:comment "Power Management System - manages electrical power distribution on a vessel." ;
+    rdfs:subClassOf :EnergySystem .
+
+# #################################################################
+# #
+# #    Object Properties
+# #
+# #################################################################
+
+:twinshipObjectProperties a owl:ObjectProperty ;
+    rdfs:label "twinship object properties" ;
+    rdfs:comment "Parent property for all TwinShip-specific object properties." .
+
+:componentOf a owl:ObjectProperty ;
+    rdfs:label "component of" ;
+    rdfs:comment "Relates a component to the ship or system it is part of." ;
+    rdfs:subPropertyOf ido:partOf ;
+    owl:inverseOf :hasComponent .
+
+:hasComponent a owl:ObjectProperty ;
+    rdfs:label "has component" ;
+    rdfs:comment "Relates a ship or system to a component that is part of it." ;
+    rdfs:subPropertyOf ido:hasPart .
+
+:ownedBy a owl:ObjectProperty ;
+    rdfs:label "owned by" ;
+    rdfs:comment "Relates an entity to its owner (typically an Organization)." ;
+    rdfs:subPropertyOf :twinshipObjectProperties .
+
+# #################################################################
+# #
+# #    Datatype Properties
+# #
+# #################################################################
+
+:TwinShipDataProperties a owl:DatatypeProperty ;
+    rdfs:label "TwinShip Data Properties" ;
+    rdfs:comment "Parent property for all TwinShip-specific datatype properties. All measurement and data properties should be subproperties of this." .
+
+# #################################################################
+# #
+# #    Restrictions
+# #
+# #################################################################
+
+[] a owl:Restriction ;
+    owl:onProperty ido:directlyConnectedTo ;
+    owl:someValuesFrom :TwinShipInanimatePhysicalObject .

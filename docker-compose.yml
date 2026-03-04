@@ -60,11 +60,14 @@ services:
   graphdb:
     image: ontotext/graphdb:10.8.12
     container_name: twinship_graphdb
+    environment:
+      GDB_JAVA_OPTS: "-Xms1g -Xmx2g"
     ports:
       - "7200:7200"
     volumes:
       - graphdb_home:/opt/graphdb/home
       - ./graphdb/graphdb.properties:/opt/graphdb/home/conf/graphdb.properties:ro
+      - ./ontology:/root/graphdb-import/ontology:ro
     networks:
       - twinship_network
     depends_on:
@@ -77,11 +80,13 @@ services:
       retries: 12
       start_period: 30s
 
-  # One-shot init container: enables GraphDB security after first boot
+  # One-shot init container: creates ontology repo, imports files, enables security
   graphdb-init:
     image: curlimages/curl:latest
     container_name: twinship_graphdb_init
-    entrypoint: ["sh", "-c", "echo 'Waiting for GraphDB...' && until curl -sf http://graphdb:7200/rest/repositories > /dev/null 2>&1; do sleep 2; done && echo 'Enabling security...' && curl -s -X POST -H 'Content-Type: application/json' -d 'true' http://graphdb:7200/rest/security && echo ' Done.'"]
+    entrypoint: ["sh", "/scripts/init.sh"]
+    volumes:
+      - ./graphdb/init.sh:/scripts/init.sh:ro
     networks:
       - twinship_network
     depends_on:

@@ -1,0 +1,215 @@
+@prefix constant: <http://qudt.org/vocab/constant/> .
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix mc: <http://www.linkedmodel.org/owl/schema/core#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix qkdv: <http://qudt.org/vocab/dimensionvector/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vaem: <http://www.linkedmodel.org/schema/vaem#> .
+@prefix voag: <http://voag.linkedmodel.org/schema/voag#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+
+<http://qudt.org/vocab/quantitykind/> rdf:type owl:Ontology ;
+                             owl:versionIRI <http://qudt.org/simplified/vocab/quantitykind/> ;
+                             owl:imports <http://qudt.org/schema/qudt/> .
+
+
+quantitykind:Force
+  a qudt:QuantityKind ;
+  dcterms:description "\"Force\" is an influence that causes mass to accelerate. It may be experienced as a lift, a push, or a pull. Force is defined by Newton's Second Law as \\(F = m \\times a \\), where \\(F\\) is force, \\(m\\) is mass and \\(a\\) is acceleration. Net force is mathematically equal to the time rate of change of the momentum of the body on which it acts. Since momentum is a vector quantity (has both a magnitude and direction), force also is a vector quantity."^^qudt:LatexString ;
+  qudt:applicableUnit unit:CentiN ;
+  qudt:applicableUnit unit:DYN ;
+  qudt:applicableUnit unit:DeciN ;
+  qudt:applicableUnit unit:GM_F ;
+  qudt:applicableUnit unit:KIP_F ;
+  qudt:applicableUnit unit:KiloGM_F ;
+  qudt:applicableUnit unit:KiloLB_F ;
+  qudt:applicableUnit unit:KiloN ;
+  qudt:applicableUnit unit:KiloP ;
+  qudt:applicableUnit unit:KiloPOND ;
+  qudt:applicableUnit unit:LB_F ;
+  qudt:applicableUnit unit:MegaLB_F ;
+  qudt:applicableUnit unit:MegaN ;
+  qudt:applicableUnit unit:MicroN ;
+  qudt:applicableUnit unit:MilliN ;
+  qudt:applicableUnit unit:N ;
+  qudt:applicableUnit unit:OZ_F ;
+  qudt:applicableUnit unit:PDL ;
+  qudt:applicableUnit unit:PlanckForce ;
+  qudt:applicableUnit unit:TON_F_US ;
+  qudt:dbpediaMatch "http://dbpedia.org/resource/Force"^^xsd:anyURI ;
+  qudt:hasDimensionVector qkdv:A0E0L1I0M1H0T-2D0 ;
+  qudt:informativeReference "http://en.wikipedia.org/wiki/Force"^^xsd:anyURI ;
+  qudt:isoNormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=43012"^^xsd:anyURI ;
+  qudt:latexDefinition "\\(F = \\frac{dp}{dt}\\), where \\(F\\) is the resultant force acting on a body, \\(p\\) is momentum of a body, and \\(t\\) is time."^^qudt:LatexString ;
+  qudt:symbol "F" ;
+  qudt:url "http://en.wikipedia.org/wiki/Force"^^xsd:anyURI ;
+  rdfs:label "Daya"@ms ;
+  rdfs:label "Kraft"@de ;
+  rdfs:label "Síla"@cs ;
+  rdfs:label "erő"@hu ;
+  rdfs:label "force"@en ;
+  rdfs:label "force"@fr ;
+  rdfs:label "forza"@it ;
+  rdfs:label "força"@pt ;
+  rdfs:label "forță"@ro ;
+  rdfs:label "fuerza"@es ;
+  rdfs:label "kuvvet"@tr ;
+  rdfs:label "sila"@sl ;
+  rdfs:label "siła"@pl ;
+  rdfs:label "vis"@la ;
+  rdfs:label "Δύναμη"@el ;
+  rdfs:label "Сила"@ru ;
+  rdfs:label "сила"@bg ;
+  rdfs:label "כוח"@he ;
+  rdfs:label "نیرو"@fa ;
+  rdfs:label "وحدة القوة في نظام متر كيلوغرام ثانية"@ar ;
+  rdfs:label "बल"@hi ;
+  rdfs:label "भार"@hi ;
+  rdfs:label "力"@ja ;
+  rdfs:label "力"@zh ;
+.     
+
+quantitykind:Power
+  a qudt:QuantityKind ;
+  dcterms:description "Power is the rate at which work is performed or energy is transmitted, or the amount of energy required or expended for a given unit of time. As a rate of change of work done or the energy of a subsystem, power is: \\(P = W/t\\), where \\(P\\) is power, \\(W\\) is work and {t} is time."^^qudt:LatexString ;
+  qudt:applicableUnit unit:BAR-L-PER-SEC ;
+  qudt:applicableUnit unit:BAR-M3-PER-SEC ;
+  qudt:applicableUnit unit:BTU_IT-PER-HR ;
+  qudt:applicableUnit unit:BTU_IT-PER-SEC ;
+  qudt:applicableUnit unit:ERG-PER-SEC ;
+  qudt:applicableUnit unit:FT-LB_F-PER-HR ;
+  qudt:applicableUnit unit:FT-LB_F-PER-MIN ;
+  qudt:applicableUnit unit:FT-LB_F-PER-SEC ;
+  qudt:applicableUnit unit:GigaW ;
+  qudt:applicableUnit unit:HP ;
+  qudt:applicableUnit unit:HP_Boiler ;
+  qudt:applicableUnit unit:HP_Brake ;
+  qudt:applicableUnit unit:HP_Electric ;
+  qudt:applicableUnit unit:HP_Metric ;
+  qudt:applicableUnit unit:J-PER-HR ;
+  qudt:applicableUnit unit:J-PER-SEC ;
+  qudt:applicableUnit unit:KiloBTU_IT-PER-HR ;
+  qudt:applicableUnit unit:KiloCAL-PER-MIN ;
+  qudt:applicableUnit unit:KiloCAL-PER-SEC ;
+  qudt:applicableUnit unit:KiloW ;
+  qudt:applicableUnit unit:MegaBTU_IT-PER-HR ;
+  qudt:applicableUnit unit:MegaJ-PER-SEC ;
+  qudt:applicableUnit unit:MegaPA-L-PER-SEC ;
+  qudt:applicableUnit unit:MegaPA-M3-PER-SEC ;
+  qudt:applicableUnit unit:MegaW ;
+  qudt:applicableUnit unit:MicroW ;
+  qudt:applicableUnit unit:MilliBAR-L-PER-SEC ;
+  qudt:applicableUnit unit:MilliBAR-M3-PER-SEC ;
+  qudt:applicableUnit unit:MilliW ;
+  qudt:applicableUnit unit:NanoW ;
+  qudt:applicableUnit unit:PA-L-PER-SEC ;
+  qudt:applicableUnit unit:PA-M3-PER-SEC ;
+  qudt:applicableUnit unit:PSI-IN3-PER-SEC ;
+  qudt:applicableUnit unit:PSI-M3-PER-SEC ;
+  qudt:applicableUnit unit:PSI-YD3-PER-SEC ;
+  qudt:applicableUnit unit:PicoW ;
+  qudt:applicableUnit unit:PlanckPower ;
+  qudt:applicableUnit unit:THM_US-PER-HR ;
+  qudt:applicableUnit unit:TON_FG ;
+  qudt:applicableUnit unit:TeraW ;
+  qudt:applicableUnit unit:W ;
+  qudt:dbpediaMatch "http://dbpedia.org/resource/Power"^^xsd:anyURI ;
+  qudt:hasDimensionVector qkdv:A0E0L2I0M1H0T-3D0 ;
+  qudt:informativeReference "http://en.wikipedia.org/wiki/Power"^^xsd:anyURI ;
+  qudt:isoNormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=31889"^^xsd:anyURI ;
+  qudt:latexDefinition "\\(P = F \\cdot v\\), where \\(F\\) is force and \\(v\\) is velocity."^^qudt:LatexString ;
+  qudt:symbol "P" ;
+  qudt:symbol "p" ;
+  qudt:url "http://en.wikipedia.org/wiki/Power_%28physics%29"^^xsd:anyURI ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Kuasa"@ms ;
+  rdfs:label "Leistung"@de ;
+  rdfs:label "Výkon"@cs ;
+  rdfs:label "flux energetic"@ro ;
+  rdfs:label "güç"@tr ;
+  rdfs:label "moc"@pl ;
+  rdfs:label "moč"@sl ;
+  rdfs:label "potencia"@es ;
+  rdfs:label "potentia"@la ;
+  rdfs:label "potenza"@it ;
+  rdfs:label "potência"@pt ;
+  rdfs:label "power"@en ;
+  rdfs:label "puissance"@fr ;
+  rdfs:label "putere"@ro ;
+  rdfs:label "strumień promieniowania"@pl ;
+  rdfs:label "teljesítmény , hőáramlás"@hu ;
+  rdfs:label "ısı akış oranı"@tr ;
+  rdfs:label "Ισχύς"@el ;
+  rdfs:label "Мощност"@bg ;
+  rdfs:label "Мощность"@ru ;
+  rdfs:label "הספק"@he ;
+  rdfs:label "القدرة"@ar ;
+  rdfs:label "توان، نرخ جریان گرما"@fa ;
+  rdfs:label "विकिरणी बहाव"@hi ;
+  rdfs:label "शक्ति"@hi ;
+  rdfs:label "功率、热流"@zh ;
+  rdfs:label "電力・仕事率"@ja ;
+.
+
+quantitykind:ComplexPower
+  a qudt:QuantityKind ;
+  dcterms:description "\"Complex Power\", under sinusoidal conditions, is the product of the phasor \\(U\\) representing the voltage between the terminals of a linear two-terminal element or two-terminal circuit and the complex conjugate of the phasor \\(I\\) representing the electric current in the element or circuit."^^qudt:LatexString ;
+  qudt:applicableUnit unit:KiloV-A ;
+  qudt:applicableUnit unit:MegaV-A ;
+  qudt:applicableUnit unit:V-A ;
+  qudt:expression "\\(complex-power\\)"^^qudt:LatexString ;
+  qudt:hasDimensionVector qkdv:A0E0L2I0M1H0T-3D0 ;
+  qudt:informativeReference "http://www.electropedia.org/iev/iev.nsf/display?openform&ievref=131-11-39"^^xsd:anyURI ;
+  qudt:informativeReference "http://www.iso.org/iso/home/store/catalogue_tc/catalogue_detail.htm?csnumber=31891"^^xsd:anyURI ;
+  qudt:latexDefinition "\\(\\underline{S} = \\underline{U}\\underline{I^*}\\), where \\(\\underline{U}\\) is voltage phasor and \\(\\underline{I^*}\\) is the complex conjugate of the current phasor."^^qudt:LatexString ;
+  qudt:latexSymbol "\\(\\underline{S}\\)"^^qudt:LatexString ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Complex Power"@en ;
+  rdfs:seeAlso quantitykind:ElectricCurrentPhasor ;
+  rdfs:seeAlso quantitykind:VoltagePhasor ;
+  skos:broader quantitykind:ElectricPower ;
+.
+
+quantitykind:Energy
+  a qudt:QuantityKind ;
+  qudt:applicableUnit unit:GigaW-HR ;
+  qudt:dbpediaMatch "http://dbpedia.org/resource/Energy"^^xsd:anyURI ;
+  qudt:hasDimensionVector qkdv:A0E0L2I0M1H0T-2D0 ;
+  qudt:isoNormativeReference "http://www.iso.org/iso/catalogue_detail?csnumber=31890"^^xsd:anyURI ;
+  qudt:plainTextDescription "Energy is the quantity characterizing the ability of a system to do work." ;
+  qudt:symbol "E" ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Energie"@cs ;
+  rdfs:label "Energie"@de ;
+  rdfs:label "Tenaga"@ms ;
+  rdfs:label "energia , munka , hő"@hu ;
+  rdfs:label "energia"@es ;
+  rdfs:label "energia"@it ;
+  rdfs:label "energia"@la ;
+  rdfs:label "energia"@pl ;
+  rdfs:label "energia"@pt ;
+  rdfs:label "energie"@ro ;
+  rdfs:label "energija"@sl ;
+  rdfs:label "energy"@en ;
+  rdfs:label "enerji"@tr ;
+  rdfs:label "énergie"@fr ;
+  rdfs:label "Έργο - Ενέργεια"@el ;
+  rdfs:label "Енергия"@bg ;
+  rdfs:label "Энергия"@ru ;
+  rdfs:label "אנרגיה ועבודה"@he ;
+  rdfs:label "الطاقة"@ar ;
+  rdfs:label "انرژی"@fa ;
+  rdfs:label "ऊर्जा"@hi ;
+  rdfs:label "エネルギー"@ja ;
+  rdfs:label "能量"@zh ;
+  
+.
