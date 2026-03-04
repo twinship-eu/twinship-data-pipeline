@@ -20,6 +20,8 @@ def get_twinship_fuel_uri(fuel_type: str) -> URIRef | None:
         "HFO": TWINSHIP.HFO,
         "MGO": TWINSHIP.MGO,
         "MDO": TWINSHIP.MDO,
+        "AMM": TWINSHIP.AMM,
+        "BF": TWINSHIP.BF,
     }
     return fuel_map.get(fuel_type)
 

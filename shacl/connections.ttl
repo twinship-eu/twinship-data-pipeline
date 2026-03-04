@@ -38,7 +38,18 @@ tws:KnownTypeShape a sh:NodeShape ;
                     tws:Maneuvering,
                     tws:ShaftGeneratorSystem, tws:RGShaftGenerator,
                     tws:Boiler,
-                    tws:Fuel
+                    tws:Fuel,
+                    tws:GenSetSystem, tws:DieselElectricConfiguration, tws:AC, tws:DC, tws:ESD,
+                    tws:EnergyStorageSystem, tws:BidirectionalConverterSystem,
+                    tws:SCR, tws:EmissionReduction,
+                    tws:AUXLOAD, tws:ShipServices, tws:HotelLoad,
+                    tws:OSP,
+                    tws:FrequencyConverterSystem, tws:ElectricMotorSystem, tws:ElectricMotorShaft,
+                    tws:GateRudder,
+                    tws:BowThruster, tws:Bow,
+                    tws:WindAssistedPropulsionSystem, tws:SuctionSail,
+                    tws:AirLubricationSystem, tws:DynamicWing,
+                    tws:FuelCellSystem
                 ))
             }
         """ ;
@@ -55,6 +66,21 @@ tws:ConnectionSymmetryShape a sh:NodeShape ;
             WHERE {
                 $this ido:directlyConnectedTo ?other .
                 FILTER NOT EXISTS { ?other ido:directlyConnectedTo $this }
+            }
+        """ ;
+    ] .
+
+# Symmetry check: if A connectedTo B, then B must connectedTo A
+tws:ConnectedToSymmetryShape a sh:NodeShape ;
+    sh:targetSubjectsOf ido:connectedTo ;
+    sh:sparql [
+        sh:message "Symmetry violation: {$this} is connectedTo {?other} but not vice versa" ;
+        sh:prefixes tws:PrefixDeclarations ;
+        sh:select """
+            SELECT $this ?other
+            WHERE {
+                $this ido:connectedTo ?other .
+                FILTER NOT EXISTS { ?other ido:connectedTo $this }
             }
         """ ;
     ] .
@@ -98,11 +124,11 @@ tws:GearboxPropellerChainShape a sh:NodeShape ;
         """ ;
     ] .
 
-# Every PMS must be connected to at least one auxiliary engine
+# Every PMS must be connected to at least one auxiliary engine or genset
 tws:PmsConnectivityShape a sh:NodeShape ;
     sh:targetClass tws:Pms ;
     sh:sparql [
-        sh:message "PMS {$this} is not connected to any auxiliary engine" ;
+        sh:message "PMS {$this} is not connected to any auxiliary engine or genset" ;
         sh:prefixes tws:PrefixDeclarations ;
         sh:select """
             SELECT $this
@@ -111,6 +137,10 @@ tws:PmsConnectivityShape a sh:NodeShape ;
                 FILTER NOT EXISTS {
                     $this ido:directlyConnectedTo ?ae .
                     ?ae a tws:AuxiliaryEngineSystem .
+                }
+                FILTER NOT EXISTS {
+                    $this ido:connectedTo ?gs .
+                    ?gs a tws:GenSetSystem .
                 }
             }
         """ ;
