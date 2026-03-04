@@ -56,12 +56,17 @@ tws:VesselSystemShape a sh:NodeShape ;
         sh:datatype xsd:double ;
         sh:message "Depth of water must be a number" ;
     ] ;
-    # Structural: vessel must have at least one main engine
+    # Structural: vessel must have at least one main engine or genset
     sh:property [
         sh:path [ sh:inversePath ido:partOf ] ;
-        sh:qualifiedValueShape [ sh:class tws:MainEngineSystem ] ;
+        sh:qualifiedValueShape [
+            sh:or (
+                [ sh:class tws:MainEngineSystem ]
+                [ sh:class tws:GenSetSystem ]
+            )
+        ] ;
         sh:qualifiedMinCount 1 ;
-        sh:message "Vessel must have at least one main engine" ;
+        sh:message "Vessel must have at least one main engine or genset" ;
     ] ;
     # Structural: vessel must have at least one propeller (CPP or FPP)
     sh:property [
