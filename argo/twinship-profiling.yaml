@@ -7,7 +7,7 @@ metadata:
 spec:
   entrypoint: twinship-pipeline
   # Override SIM-PIPE's default parallelism=1 so per-vessel steps run in parallel
-  parallelism: 3
+  parallelism: 4
   templates:
     # =========================================================================
     # DAG: pipeline structure
@@ -50,6 +50,16 @@ spec:
               artifacts:
                 - name: spreadsheet-data
                   from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
+          - name: extract-futuristic-vessel
+            template: extract-vessel-step
+            dependencies: [extract-spreadsheet]
+            arguments:
+              parameters:
+                - name: vessel
+                  value: futuristic-vessel
+              artifacts:
+                - name: spreadsheet-data
+                  from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
 
           # Step 3: Harmonise to RDF (parallel per vessel)
           - name: harmonise-grimaldi
@@ -88,6 +98,18 @@ spec:
                   from: "{{tasks.extract-stena-tanker.outputs.artifacts.vessel-json}}"
                 - name: validated-json
                   from: "{{tasks.extract-stena-tanker.outputs.artifacts.validated-json}}"
+          - name: harmonise-futuristic-vessel
+            template: harmonise-vessel-step
+            dependencies: [extract-futuristic-vessel]
+            arguments:
+              parameters:
+                - name: vessel
+                  value: futuristic-vessel
+              artifacts:
+                - name: vessel-json
+                  from: "{{tasks.extract-futuristic-vessel.outputs.artifacts.vessel-json}}"
+                - name: validated-json
+                  from: "{{tasks.extract-futuristic-vessel.outputs.artifacts.validated-json}}"
 
           # Step 4: SHACL validate + write TTL (parallel per vessel)
           - name: validate-grimaldi
@@ -120,6 +142,16 @@ spec:
               artifacts:
                 - name: vessel-rdf
                   from: "{{tasks.harmonise-stena-tanker.outputs.artifacts.vessel-rdf}}"
+          - name: validate-futuristic-vessel
+            template: validate-vessel-step
+            dependencies: [harmonise-futuristic-vessel]
+            arguments:
+              parameters:
+                - name: vessel
+                  value: futuristic-vessel
+              artifacts:
+                - name: vessel-rdf
+                  from: "{{tasks.harmonise-futuristic-vessel.outputs.artifacts.vessel-rdf}}"
 
 
     # =========================================================================
