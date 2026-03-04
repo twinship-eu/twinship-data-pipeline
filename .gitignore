@@ -34,6 +34,7 @@ logs/
 output/
 *.ttl
 !shacl/*.ttl
+!ontology/**/*.ttl
 
 # Environment
 .env

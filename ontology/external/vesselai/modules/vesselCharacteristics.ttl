@@ -1,0 +1,318 @@
+
+@prefix : <http://www.vesselAI-project.eu/ontology#> .
+
+############### 
+## vessel types
+	:Vessel rdfs:subClassOf :MovingObject .
+    :Anchor_Handling_Fire_Fighting rdfs:subClassOf :Special_Craft .
+    :Anchor_Handling_Salvage_Tug rdfs:subClassOf :Tug_Vessel .
+    :Anchor_Handling_Vessel rdfs:subClassOf :Special_Craft .
+    :AntiPollution_Vessel rdfs:subClassOf :Vessel .
+    :Articulated_Pusher_Tug rdfs:subClassOf :Tug_Vessel .
+    :Asphalt_Bitumen_Tanker rdfs:subClassOf :Tanker .
+    :Backhoe_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Barge rdfs:subClassOf :Cargo_Vessel .
+    :Barge_Carrier rdfs:subClassOf :Special_Craft .
+    :Bucket_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Bucket_Dredger_Pontoon rdfs:subClassOf :Dredger_Vessel .
+    :Bucket_Hopper_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Bucket_Ladder_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Bucket_Wheel_Suction_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :BulkCarrier rdfs:subClassOf :Vessel ; rdfs:comment "Bulk carrier means a ship which is constructed generally with single deck, top-side tanks and hopper side tanks in cargo spaces, and is intended primarily to carry dry cargo in bulk, and includes such types as ore carriers and combination carriers. (SOLAS IX/1.6). Bulk carrier means a ship which is intended primarily to carry dry cargo in bulk, including such types as ore carriers and combination carriers. (SOLAS XII/1.1)" .
+    :Bulk_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Bulk_Carrier_With_Vehicle_Deck rdfs:subClassOf :Cargo_Vessel .
+    :Bulk_Storage_Barge rdfs:subClassOf :Cargo_Vessel .
+    :Bulker rdfs:subClassOf :Cargo_Vessel .
+    :Bunker rdfs:subClassOf :Vessel ;
+        rdfs:comment "A bunker is generally applied to the storage of petroleum products in tanks, and the practice and business of refueling ships. Bunkering operations are located at seaports, and they include the storage of bunker (ship) fuels and the provision of the fuel to vessels. Bunkering includes the shipboard logistics of loading fuel and distributing it among available bunkers (on-board fuel tanks)." .
+    
+    :Bunkering_Tanker rdfs:subClassOf :Tanker .
+    :Buoy-Laying_Vessel rdfs:subClassOf :Special_Craft .
+    :Cable_Layer rdfs:subClassOf :Special_Craft .
+    :Cabu_Carrier rdfs:subClassOf :Cargo_Vessel .
+
+    :CargoHazard_A_Major rdfs:subClassOf :Cargo_Vessel .
+	:CargoHazard_B rdfs:subClassOf :Cargo_Vessel .
+    :CargoHazard_C_Minor rdfs:subClassOf :Cargo_Vessel .
+    :CargoHazard_D_Recognizable rdfs:subClassOf :Cargo_Vessel .
+
+    :TankerHazard_A_Major rdfs:subClassOf :Tanker .
+    :TankerHazard_B rdfs:subClassOf :Tanker .
+    :TankerHazard_C_Minor rdfs:subClassOf :Tanker .
+    :TankerHazard_D_Recognizable rdfs:subClassOf :Tanker .
+
+    :Lng_Tanker rdfs:subClassOf :TankerHazard_D_Recognizable .
+    :Lpg_Tanker rdfs:subClassOf :TankerHazard_D_Recognizable .
+    :Gas_Carrier rdfs:subClassOf :TankerHazard_D_Recognizable .
+
+    :Cargo_Barge rdfs:subClassOf :Cargo_Vessel .
+    :Cargo_Containership rdfs:subClassOf :Cargo_Vessel .
+    :Cargo_Vessel rdfs:subClassOf :Vessel .
+    :Cement_Barge rdfs:subClassOf :Cargo_Vessel .
+    :Cement_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Chemical_Tanker rdfs:subClassOf :Tanker .
+    :Co2_Tanker rdfs:subClassOf :Tanker .
+
+    :Combat_Vessel rdfs:subClassOf :Military_Ops .
+    :Command_Vessel rdfs:subClassOf :Military_Ops .
+    :Construction_Support_Vessel rdfs:subClassOf :Special_Craft .
+    :Container_Ship rdfs:subClassOf :Cargo_Vessel .
+    :Crane_Barge rdfs:subClassOf :Special_Craft .
+    :Crane_Jack_Up rdfs:subClassOf :Special_Craft .
+    :Crane_Ship rdfs:subClassOf :Special_Craft .
+    :Crew_Boat rdfs:subClassOf :Port_Tender .
+    :Crude_Oil_Tanker rdfs:subClassOf :Tanker .
+    :Cutter_Suction_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Cutter_Suction_Hopper_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Deck_Cargo_Pontoon rdfs:subClassOf :Cargo_Vessel .
+    :Deck_Cargo_Ship rdfs:subClassOf :Cargo_Vessel .
+    :Desalination_Pontoon rdfs:subClassOf :Special_Craft .
+    :Dive_Vessel rdfs:subClassOf :Vessel .
+    :Diving_Support_Platform rdfs:subClassOf :Special_Craft .
+    :Diving_Support_Vessel rdfs:subClassOf :Dive_Vessel .
+    :Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Dredger_Vessel rdfs:subClassOf :Vessel .
+    :Dredging_Pontoon rdfs:subClassOf :Dredger_Vessel .
+    :Drill_Barge rdfs:subClassOf :Dredger_Vessel .
+    :Drill_Ship rdfs:subClassOf :Dredger_Vessel .
+    :Drilling_Jack_Up rdfs:subClassOf :Dredger_Vessel .
+    :Edible_Oil_Tanker rdfs:subClassOf :Tanker .
+    :Exhibition_Ship rdfs:subClassOf :Pleasure_Craft .
+    :Factory_Trawler rdfs:subClassOf :Fishing_Vessel .
+    :Ferry rdfs:subClassOf :Passenger_Vessel .
+    :Fire_Fighting_Supply_Vessel rdfs:subClassOf :Special_Craft .
+    :Fire_Fighting_Tractor_Tug rdfs:subClassOf :Special_Craft .
+    :Fire_Fighting_Vessel rdfs:subClassOf :Special_Craft .
+    :Fish_Carrier rdfs:subClassOf :Fishing_Vessel .
+    :Fish_Factory rdfs:subClassOf :Fishing_Vessel .
+    :Fish_Storage_Barge rdfs:subClassOf :Fishing_Vessel .
+    :Fishery_Patrol_Vessel rdfs:subClassOf :Fishing_Vessel .
+    :Fishery_Protection_Research rdfs:subClassOf :Fishing_Vessel .
+    :Fishery_Research_Vessel rdfs:subClassOf :Fishing_Vessel .
+    :Fishery_Support_Vessel rdfs:subClassOf :Fishing_Vessel .
+    :Fishing_Vessel rdfs:subClassOf :Vessel ; rdfs:comment "A fishing vessel is a vessel used for catching fish, whales, seals, walrus or other living resources of the sea. (SOLAS I/2). Fishing vessel means any vessel used commercially for catching fish, whales, seals, walrus or other living resources of the sea. (SFV 1993 article 2)" .
+    :Floating_Crane rdfs:subClassOf :Special_Craft .
+    :Floating_Hotel rdfs:subClassOf :Passenger_Vessel .
+    :Floating_Hotel_Restaurant rdfs:subClassOf :Pleasure_Craft .
+    :Floating_Linkspan rdfs:subClassOf :Special_Craft .
+    :Floating_Sheerleg rdfs:subClassOf :Special_Craft .
+    :Floating_Storage_Production rdfs:subClassOf :Special_Craft .
+    :Fruit_Juice_Tanker rdfs:subClassOf :Tanker .
+    :Gas_Carrier rdfs:subClassOf :Tanker .
+    :GeneralCargo rdfs:subClassOf :Vessel ; rdfs:comment "General cargo ship: A ship with a multi-deck or single-deck hull designed primarily for the carriage of general cargo. (MEPC.1/Circ.681 Annex)" .
+    :General_Cargo rdfs:subClassOf :Cargo_Vessel .
+    :Grab_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Grab_Dredger_Pontoon rdfs:subClassOf :Dredger_Vessel .
+    :Grab_Hopper_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Grain_Elevating_Pontoon rdfs:subClassOf :Special_Craft .
+    :Heavy_Lift_Vessel rdfs:subClassOf :Special_Craft .
+    :Heavy_Load_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :HighSpeed rdfs:subClassOf :Vessel ; rdfs:comment "High-speed craft is a craft capable of a maximum speed, in metres per second (m/s), equal to or exceeding 3.7 times the one-sixth power of the volume of displacement corresponding to the design waterline (m³), excluding craft the hull of which is supported completely clear above the water surface in non-displacement mode by aerodynamic forces generated by ground effect. (SOLAS X/1.2, HSC Code 2000 para 1.4.30)" .
+    :Hopper_Barge rdfs:subClassOf :Cargo_Vessel .
+    :Hopper_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Hospital_Ship rdfs:subClassOf :Medical_Trans .
+    :Houseboat rdfs:subClassOf :Passenger_Vessel .
+    :Hovercraft rdfs:subClassOf :HighSpeed .
+    :Hydrofoil rdfs:subClassOf :HighSpeed .
+    :Icebreaker rdfs:subClassOf :Tug_Vessel .
+    :Incinerator rdfs:subClassOf :Special_Craft .
+    :Inland_Cargo rdfs:subClassOf :Cargo_Vessel .
+    :Inland_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Inland_Ferry rdfs:subClassOf :Passenger_Vessel .
+    :Inland_Passengers_Ship rdfs:subClassOf :Passenger_Vessel .
+    :Inland_Ro-Ro_Cargo_Ship rdfs:subClassOf :Cargo_Vessel .
+    :Inland_Supply_Vessel rdfs:subClassOf :Special_Craft .
+    :Inland_Tanker rdfs:subClassOf :Tanker .
+    :Inland_Tug rdfs:subClassOf :Tug_Vessel .
+    :Jack_Up_Barge rdfs:subClassOf :Special_Craft .
+    :Jacket_Launching_Pontoon rdfs:subClassOf :Special_Craft .
+    :Kelp_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Landing_Craft rdfs:subClassOf :Special_Craft .
+    :Law_Enforce rdfs:subClassOf :Vessel .
+    :Limestone_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Livestock_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Local_Vessel rdfs:subClassOf :Vessel .
+    :Logistics_Naval_Vessel rdfs:subClassOf :Military_Ops .
+    :Lpg_Chemical_Tanker rdfs:subClassOf :Tanker .
+    :Lpg_Tanker rdfs:subClassOf :Tanker .
+    :Maintenance_Vessel rdfs:subClassOf :Special_Craft .
+    :Medical_Trans rdfs:subClassOf :Vessel .
+    :Military_Ops rdfs:subClassOf :Vessel .
+    :Mine_Hunter rdfs:subClassOf :Military_Ops .
+    :Minesweeper rdfs:subClassOf :Military_Ops .
+    :Mining_Vessel rdfs:subClassOf :Special_Craft .
+    :Mission_Ship rdfs:subClassOf :Special_Craft .
+    :MobileOffshoreDrillingUnit rdfs:subClassOf :Vessel ; rdfs:comment "Mobile offshore drilling unit (MODU) means a vessel capable of engaging in drilling operations for the exploration for or exploitation of resources beneath the sea-bed such as liquid or gaseous hydrocarbons, sulphur or salt. (SOLAS IX/1, MODU Code 2009 para 1.3.40)" .
+    :Mooring_Vessel rdfs:subClassOf :Special_Craft .
+    :Motor_Hopper rdfs:subClassOf :Special_Craft .
+    :Multi-Purpose_Vessel rdfs:subClassOf :Special_Craft .
+    :Multi_Purpose_Offshore_Vessel rdfs:subClassOf :Special_Craft .
+    :Museum_Ship rdfs:subClassOf :Pleasure_Craft .
+    :Naval_Auxiliary_Tug rdfs:subClassOf :Military_Ops .
+
+    
+    :Naval_Naval_Auxiliary_Vessel rdfs:subClassOf :Military_Ops .
+    :Naval_Patrol_Vessel rdfs:subClassOf :Military_Ops .
+    :Naval_Research_Vessel rdfs:subClassOf :Military_Ops .
+    :Naval_Salvage_Vessel rdfs:subClassOf :Military_Ops .
+    :NuclearShip rdfs:subClassOf :Vessel ; rdfs:comment "A nuclear ship is a ship provided with a nuclear power plant. (SOLAS I/2)" .
+    :Nuclear_Fuel_Carrier rdfs:subClassOf :Special_Craft .
+    :Obo_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Offshore_Construction_Jack_Up rdfs:subClassOf :Special_Craft .
+    :Offshore_Safety_Vessel rdfs:subClassOf :SAR_Vessel .
+    :Offshore_Supply_Ship rdfs:subClassOf :Special_Craft .
+    :Oil_Chemical_Tanker rdfs:subClassOf :Tanker .
+    :Oil_Products_Tanker rdfs:subClassOf :Tanker .
+    :Ore_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Ore_Oil_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Paddle_Ship rdfs:subClassOf :Special_Craft .
+    :Pallet_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Passenger_Cargo_Ship rdfs:subClassOf :Cargo_Vessel .
+    :Passenger_Vessel rdfs:subClassOf :Vessel .
+    :Passengers_Landing_Craft rdfs:subClassOf :Passenger_Vessel .
+    :Passengers_Ship rdfs:subClassOf :Passenger_Vessel ; rdfs:comment "A passenger ship is a ship which carries more than twelve passengers. (SOLAS I/2)" .
+    :Patrol_Vessel rdfs:subClassOf :Law_Enforce .
+    :Pearl_Shells_Carrier rdfs:subClassOf :Special_Craft .
+    :Pile_Driving_Vessel rdfs:subClassOf :Special_Craft .
+    :Pilot_Ship rdfs:subClassOf :Port_Tender .
+    :Pilot_Vessel rdfs:subClassOf :Vessel .
+    :Pipe_Burying_Vessel rdfs:subClassOf :Special_Craft .
+    :Pipe_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Pipe_Layer rdfs:subClassOf :Special_Craft .
+    :Pipe_Layer_Platform rdfs:subClassOf :Special_Craft .
+    :Pipelay_Crane_Vessel rdfs:subClassOf :Special_Craft .
+    :Platform rdfs:subClassOf :Special_Craft .
+    :Pleasure_Craft rdfs:subClassOf :Vessel .
+    :Pollution_Control_Vessel rdfs:subClassOf :AntiPollution_Vessel .
+    :Port_Tender rdfs:subClassOf :Vessel .
+    :Powder_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Power_Station_Vessel rdfs:subClassOf :Special_Craft .
+    :Production_Testing_Vessel rdfs:subClassOf :Special_Craft .
+    :Pumping_Platform rdfs:subClassOf :Special_Craft .
+    :Pusher_Tug rdfs:subClassOf :Tug_Vessel .
+    :Radar_Platform rdfs:subClassOf :Special_Craft .
+    :Radar_Vessel rdfs:subClassOf :Military_Ops .
+    :Radio_Ship rdfs:subClassOf :Special_Craft .
+    :Rail_Vehicles_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Reefer rdfs:subClassOf :Cargo_Vessel .
+    :Reefer_Containership rdfs:subClassOf :Cargo_Vessel .
+    :Repair_Ship rdfs:subClassOf :Special_Craft .
+    :Replenishment_Vessel rdfs:subClassOf :Special_Craft .
+    :Research_Survey_Vessel rdfs:subClassOf :Special_Craft .
+    :Ro-Ro_Cargo rdfs:subClassOf :Cargo_Vessel .
+    :Ro-Ro_Container_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Ro-Ro_Passenger_Ship rdfs:subClassOf :Passenger_Vessel .
+    :SAR_Vessel rdfs:subClassOf :Vessel .
+    :Sailing_Vessel rdfs:subClassOf :Sailing_Vessel ; rdfs:subClassOf :Vessel .
+    :Salvage_Rescue_Vessel rdfs:subClassOf :SAR_Vessel .
+    :Sand_Suction_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Sealer rdfs:subClassOf :Special_Craft .
+    :Self_Discharging_Bulk_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Shuttle_Tanker rdfs:subClassOf :Tanker .
+    :Sludge_Carrier rdfs:subClassOf :Special_Craft .
+    :Special_Craft rdfs:subClassOf :Vessel .
+    :Special_Vessel rdfs:subClassOf :Special_Craft ; rdfs:comment "Special purpose ship (SPS) means a mechanically self-propelled ship which by reason of its function carries on board more than 12 special personnel. (SPS Code para 1.3.12)" .
+    :Standby_Safety_Vessel rdfs:subClassOf :SAR_Vessel .
+    :Steam_Supply_Pontoon rdfs:subClassOf :Special_Craft .
+    :Stone_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Suction_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Suction_Dredger_Pontoon rdfs:subClassOf :Dredger_Vessel .
+    :Suction_Hopper_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Supply_Jack_Up rdfs:subClassOf :Special_Craft .
+    :Supply_Tender rdfs:subClassOf :Port_Tender .
+    :Supply_Vessel rdfs:subClassOf :Special_Craft .
+    :Support_Jack_Up rdfs:subClassOf :Special_Craft .
+    :Support_Vessel rdfs:subClassOf :Special_Craft .
+    :Tank-Cleaning_Vessel rdfs:subClassOf :Special_Craft .
+    :Tank_Barge rdfs:subClassOf :Tanker .
+    :Tanker rdfs:subClassOf :Vessel ; rdfs:comment "Oil tanker means a ship constructed or adapted primarily to carry oil in bulk in its cargo spaces and includes combination carriers, any &quot;NLS tanker&quot; as defined in Annex II of the present Convention and any gas carrier as defined in regulation 3.20 of chapter II-1 of SOLAS 74 (as amended), when carrying a cargo or part cargo of oil in bulk. (MARPOL Annex I reg. 1.5)" .
+    :TankerHazard_A_Major rdfs:subClassOf :Tanker .
+    :TankerHazard_B rdfs:subClassOf :Tanker .
+    :TankerHazard_C_Minor rdfs:subClassOf :Tanker .
+    :Tender rdfs:subClassOf :Port_Tender .
+    :Theatre_Vessel rdfs:subClassOf :Pleasure_Craft .
+    :Timber_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Torpedo_Recovery_Vessel rdfs:subClassOf :Military_Ops .
+    :Towing_Pushing rdfs:subClassOf :Tug_Vessel .
+    :Towing_Vessel rdfs:subClassOf :Tug_Vessel .
+    :Tractor_Tug rdfs:subClassOf :Tug_Vessel .
+    :Trailing_Suction_Dredger rdfs:subClassOf :Dredger_Vessel .
+    :Trailing_Suction_Hopper_Dredge rdfs:subClassOf :Dredger_Vessel .
+    :Training_Ship rdfs:subClassOf :Special_Craft .
+    :Trans_Shipment_Barge rdfs:subClassOf :Cargo_Vessel .
+    :Trans_Shipment_Vessel rdfs:subClassOf :Special_Craft .
+    :Trawler rdfs:subClassOf :Fishing_Vessel .
+    :Trenching_Support_Vessel rdfs:subClassOf :Special_Craft .
+    :Troopship rdfs:subClassOf :Military_Ops .
+    :Tug rdfs:subClassOf :Tug_Vessel .
+    :Tug_Fire_Fighting_Vessel rdfs:subClassOf :Tug_Vessel .
+    :Tug_Ice_Breaker rdfs:subClassOf :Tug_Vessel .
+    :Tug_Pilot_Ship rdfs:subClassOf :Tug_Vessel .
+    :Tug_Supply_Vessel rdfs:subClassOf :Tug_Vessel .
+    :Tug_Support rdfs:subClassOf :Tug_Vessel .
+    :Tug_Tender rdfs:subClassOf :Tug_Vessel .
+    :Tug_Vessel rdfs:subClassOf :Vessel .
+    :TyphoonHarborPort rdfs:subClassOf :Port ; rdfs:comment "Typhoon Harbor port. See Pub150bk.pdf" .
+    :Undefined_Vessel rdfs:subClassOf :Vessel .
+    :Utility_Vessel rdfs:subClassOf :Special_Craft .
+    :Vegetable_Animal_Oil_Tanker rdfs:subClassOf :Cargo_Vessel .
+    :Vehicle_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Vehicles_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :VesselType rdfs:subClassOf :Set .
+    :WIG_Vessel rdfs:subClassOf :Vessel .
+    :Waste_Disposal_Vessel rdfs:subClassOf :Special_Craft .
+    :Water_Jet_Dredging_Pontoon rdfs:subClassOf :Dredger_Vessel .
+    :Water_Tanker rdfs:subClassOf :Tanker .
+    :Well_Stimulation_Vessel rdfs:subClassOf :Special_Craft .
+    :Whale_Factory rdfs:subClassOf :Special_Craft .
+    :Whaler rdfs:subClassOf :Special_Craft .
+    :Wine_Tanker rdfs:subClassOf :Tanker .
+    :Wing_In_Ground_Effect_Vessel rdfs:subClassOf :WIG_Vessel .
+    :Wood_Chips_Carrier rdfs:subClassOf :Cargo_Vessel .
+    :Work_Pontoon rdfs:subClassOf :Special_Craft .
+    :Work_Vessel rdfs:subClassOf :Special_Craft .
+    :Yacht rdfs:subClassOf :Pleasure_Craft .
+    :blacklisted rdfs:subClassOf :Vessel ; rdfs:comment "A blacklisted vessel" .
+
+
+	:hasLength rdfs:domain :MovingObject ; rdfs:range xsd:string .
+	:hasWidth rdfs:domain :MovingObject ; rdfs:range xsd:string .
+	:hasHeight rdfs:domain :MovingObject ; rdfs:range xsd:string .
+
+	:MMSIinstalledOnVessel rdfs:domain :Transcoder ; rdfs:range :Vessel .
+	:hasCode rdfs:domain :Transcoder ; rdfs:range xsd:string .
+	:hasIMO rdfs:domain :Vessel ; rdfs:range xsd:string .
+	:hasCallsign rdfs:domain :Vessel ; rdfs:range xsd:string .
+	:hasGrossTn rdfs:domain :Vessel ; rdfs:range xsd:string .
+	:hasDeadWeight rdfs:domain :Vessel ; rdfs:range xsd:string .
+	:hasActualHeight rdfs:domain :Vessel ; rdfs:range xsd:string .
+	:hasCountryFlag rdfs:domain :Vessel ; rdfs:range :Country .
+	:hasBuiltDate rdfs:range xsd:string .
+
+### Cargo
+	:Cargo rdfs:subClassOf dul:Object ; rdfs:comment "The type of cargo loaded on a vessel. " .
+	:DangerousGoods rdfs:subClassOf :Cargo ; rdfs:comment "Dangerous goods are subject to transport, workplace, storage, consumer and environment protection regulations, to prevent accidents to persons, property or the environment, to other goods or to the means of transport employed. " .
+
+	:Explosive_Goods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 1 dangerous goods." .
+	:GasesGoods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 2 dangerous goods." .
+	:FlammableGas rdfs:subClassOf :GasesGoods .
+	:ToxicGas rdfs:subClassOf :GasesGoods .
+	:NonFlammableNonToxicGas rdfs:subClassOf :GasesGoods .
+	:NonFlammableNonToxicGas owl:disjointWith :FlammableGas .
+	:NonFlammableNonToxicGas owl:disjointWith :ToxicGas .
+	:FlammableLiquidGoods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 3 dangerous goods." .
+	:DangerousSolidsGoods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 4 dangerous goods." .
+	:FlammableSolid rdfs:subClassOf :DangerousSolidsGoods .
+	:CombustibleSubstance rdfs:subClassOf :DangerousSolidsGoods ; rdfs:comment "Spontaneously combustible substance" .
+	:SolidFlammableOnWater rdfs:subClassOf :DangerousSolidsGoods ; rdfs:comment "Substance which emits flammable gas in contact with water" .
+	:OxidizersOrOrganicPeroxides rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 5 dangerous goods." .
+	:OxidisingSubstance rdfs:subClassOf :OxidizersOrOrganicPeroxides .
+	:OrganicPeroxide rdfs:subClassOf :OxidizersOrOrganicPeroxides .
+	:ToxicOrInfectiousSubstances rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 6 dangerous goods." .
+	:ToxicSubstance rdfs:subClassOf :ToxicOrInfectiousSubstances .
+	:InfectiousSubstance rdfs:subClassOf :ToxicOrInfectiousSubstances .
+	:RadioactiveMaterialGoods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 7 dangerous goods." .
+	:CorrosiveSubstancesGoods rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 8 dangerous goods." .
+	:MiscellaneousDangerousSubstances rdfs:subClassOf :DangerousGoods ; rdfs:comment "UN Class 9 dangerous goods." .
+
+

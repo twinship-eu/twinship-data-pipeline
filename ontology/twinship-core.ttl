@@ -1,0 +1,53 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://twin-ship.eu/twinship/core> a owl:Ontology ;
+    dcterms:title "TwinShip Ontology"@en ;
+    dcterms:description """Complete TwinShip ontology for digital twins of ships. This is an aggregate ontology that imports the base foundation (twinship-base) plus all domain modules. Use this ontology to get the complete TwinShip conceptual model including vessels and weather. For modular development, import twinship-base and specific modules instead.
+
+## Modeling Approach - Restriction-Based Design
+
+The TwinShip ontology follows a restriction-based modeling approach using OWL class restrictions (owl:Restriction with owl:someValuesFrom, etc.) rather than simple rdfs:domain and rdfs:range assertions. This is the recommended OWL engineering practice as it provides:
+
+- **Precise Semantics**: Restrictions state that instances of a class CAN have certain properties, without forcing classification
+- **Avoids Unintended Inferences**: Using rdfs:domain would cause any entity using a property to be automatically classified as a member of the domain class
+- **Flexible Modeling**: Multiple classes can use the same property with different constraints
+- **OWL Best Practice**: Aligns with OWL 2 design patterns and enables proper use of reasoners
+
+## Visualization and Documentation
+
+Most ontology visualization and documentation tools (WIDOCO, WebVOWL) were designed for RDFS-style ontologies and provide limited support for OWL restriction patterns. They expect simple rdfs:domain and rdfs:range assertions to generate diagrams.
+
+To address this limitation while maintaining correct OWL semantics, we maintain two versions:
+
+1. **Source Version** (in model/ folder): Uses proper OWL restrictions - this is the authoritative version for reasoning and semantic operations
+2. **Visualization Version** (auto-generated): A simplified version with explicit rdfs:domain/rdfs:range assertions extracted from restrictions, used solely for documentation generation
+
+Both versions are kept synchronized through automated scripts."""@en ;
+    rdfs:label "TwinShip Core Ontology (Complete)" ;
+    pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
+    pav:lastUpdateOn "2026-03-03T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.0.4" ;
+    rdfs:comment """Complete TwinShip ontology for digital twins of ships. This is an aggregate ontology that imports the base foundation (twinship-base) plus all domain modules. Use this ontology to get the complete TwinShip conceptual model including vessels and weather. For modular development, import twinship-base and specific modules instead.
+
+Modeling Approach Note:
+
+The TwinShip ontology follows a restriction-based modeling approach using OWL class restrictions rather than simple rdfs:domain and rdfs:range assertions. This is the recommended OWL engineering practice as it provides precise semantics and avoids unintended inferences that would occur with rdfs:domain (where any entity using a property would automatically be classified as a member of the domain class).
+
+Since most documentation and visualization tools (WIDOCO, WebVOWL) provide limited support for rendering OWL restrictions, we maintain two versions:
+
+1. Source Ontology (This File): Uses proper OWL restrictions - this is the authoritative version for reasoning and semantic operations.
+
+2. Visualization Version (Auto-Generated): A simplified version with explicit rdfs:domain/rdfs:range assertions extracted from restrictions, used solely for generating documentation and diagrams.
+
+Both versions are kept synchronized through automated scripts. See twinship-base for detailed explanation of this modeling practice.""" ;
+    owl:imports 
+        <https://twin-ship.eu/twinship/vessel>,
+        <https://twin-ship.eu/twinship/weatherconditions> ,
+        <https://twin-ship.eu/twinship/draft-time-mode> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/core/0.0.4> .
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <!-- TwinShip Ontologies -->
+    <uri id="TwinShip Base" name="https://twin-ship.eu/twinship/base" uri="twinship-base.ttl"/>
+    <uri id="TwinShip Base Version" name="https://twin-ship.eu/twinship/base/0.0.4" uri="twinship-base.ttl"/>
+    <uri id="TwinShip Core" name="https://twin-ship.eu/twinship/core" uri="twinship-core.ttl"/>
+    <uri id="TwinShip Core Version" name="https://twin-ship.eu/twinship/core/0.0.4" uri="twinship-core.ttl"/>
+    <uri id="TwinShip Vessel Module" name="https://twin-ship.eu/twinship/vessel" uri="modules/vessel.ttl"/>
+    <uri id="TwinShip Vessel Module Version" name="https://twin-ship.eu/twinship/vessel/0.0.4" uri="modules/vessel.ttl"/>
+    <uri id="TwinShip WeatherConditions Module" name="https://twin-ship.eu/twinship/weatherconditions" uri="modules/weatherconditions.ttl"/>
+    <uri id="TwinShip WeatherConditions Module Version" name="https://twin-ship.eu/twinship/weatherconditions/0.0.4" uri="modules/weatherconditions.ttl"/>
+    <uri id="TwinShip DraftTimeMode Module" name="https://twin-ship.eu/twinship/draft-time-mode" uri="modules/draft_time_mode.ttl"/>
+    <uri id="TwinShip DraftTimeMode Module Version" name="https://twin-ship.eu/twinship/draft_time_mode/0.0.4" uri="modules/draft_time_mode.ttl"/>
+    
+    <!-- External Ontologies -->
+    <uri id="QUDT Schema" name="http://qudt.org/schema/qudt/" uri="external/SCHEMA_QUDT-simplified.ttl"/>
+    <uri id="QUDT Quantity Kinds" name="http://qudt.org/vocab/quantitykind/" uri="vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl"/>
+    <uri id="QUDT Units" name="http://qudt.org/vocab/unit/" uri="vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl"/>
+    <uri id="PAV" name="http://purl.org/pav/" uri="external/PAV-simplified.ttl"/>
+    <uri id="IDO" name="http://rds.posccaesar.org/ontology/lis14/ont/core/1.0" uri="external/IDO_20240503.ttl"/>
+    <uri id="IDO Base" name="http://rds.posccaesar.org/ontology/lis14/ont/core" uri="external/IDO_20240503.ttl"/>
+    <uri id="VesselAI" name="http://www.vesselAI-project.eu/vesselai" uri="external/vesselai/vesselAI_ontology_v2.owl"/>
+    
+    <group id="Folder Repository, directory=, recursive=true, Auto-Update=true, version=2" prefer="public" xml:base="">
+        <uri id="Automatically generated entry, Timestamp=1770135896276" name="http://www.vesselAI-project.eu/vesselai" uri="external/vesselai/vesselAI_ontology_v2.owl"/>
+    </group>
+</catalog>
