@@ -1,0 +1,179 @@
+@base <http://www.vesselAI-project.eu/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix : <http://www.vesselAI-project.eu/ontology#> .
+@prefix dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+
+### Class hierarchy
+
+	:MovingObject rdfs:subClassOf dul:Agent ; rdfs:comment "A moving object in the domain" .
+	:Trajectory rdfs:subClassOf dul:Region .
+	:ActualTrajectory rdfs:subClassOf :Trajectory .
+	:IntendedTrajectory rdfs:subClassOf :Trajectory ; rdfs:comment "A reported trajectory that an Agent intents to follow" .
+
+	:RegulatedTrajectory rdfs:subClassOf :Trajectory .
+	:SyntheticTrajectory rdfs:subClassOf :Trajectory .
+	:OpenTrajectory rdfs:subClassOf :ActualTrajectory .
+	:ClosedTrajectory rdfs:subClassOf :ActualTrajectory .
+	:DangerousTrajectory rdfs:subClassOf :Trajectory ; rdfs:comment "A trajectory of a vessel can be considered as dangerous for various reasons, varying from simply its load to more sophisticated data analysis based on its type, speed and region of activity" .
+	:DangerousGoodsTransport rdfs:subClassOf :DangerousTrajectory ; rdfs:comment "A dangerous trajectory that has at least one trajectory part associated with dangerous goods" .
+	:DangerousActivityTrajectory rdfs:subClassOf :DangerousTrajectory ; rdfs:comment "A dangerous trajectory that has at least one trajectory part associated with dangerous activity" .
+	:transports rdfs:domain :TrajectoryPart ; rdfs:range :Cargo .
+
+### DangerousGoodsTransport owl:equivalentClass [:hasPart min 1 [:transports some DangerousGoods]]
+	:DangerousGoodsTransport rdf:type owl:Class ;
+		owl:equivalentClass [ rdf:type owl:Restriction ;
+			owl:onProperty :hasPart ;
+			owl:minQualifiedCardinality "1"^^xsd:nonNegativeInteger ;
+		    owl:onClass [ rdf:type owl:Restriction ;
+				owl:onProperty :transports ;
+				owl:someValuesFrom :DangerousGoods
+			]
+		] .
+
+	:refersTo rdfs:domain dul:InformationEntity ; rdfs:range dul:Entity .
+	:hasReportingPeriod rdfs:domain dul:InformationEntity ; rdfs:range time:TemporalEntity .
+## additional information about reports can be provided using the data property :hasDescription (domain dul:Entity).
+
+	:CO2_emissionReport rdfs:subClassOf dul:InformationEntity .
+	:reportedFuelConsumption rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Total fuel consumption [m tonnes] over the reported time period" .
+	:reportedFuelConsumption rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Total fuel consumption [m tonnes] over the reported time period" .
+	:reportedFuelConsumptionOnLaden rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Fuel consumptions assigned to On laden [m tonnes] over the reported time period".
+	:reportedCO2emissions rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Total CO2 emissions [m tonnes] over the reported time period".
+	:reportedCO2emissionsBetweenPorts rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions from all voyages between ports under a MS jurisdiction [m tonnes] over the reported time period".
+	:reportedCO2emissionsDepartedFromPorts rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions from all voyages which departed from ports under a MS jurisdiction [m tonnes] over the reported time period".
+	:reportedCO2emissionsToPorts rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions from all voyages to ports under a MS jurisdiction [m tonnes] over the reported time period".
+	:reportedCO2emissionsInPorts rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions which occurred within ports under a MS jurisdiction at berth [m tonnes] over the reported time period".
+	:reportedCO2emissionsDuringPassengerTransport rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions assigned to Passenger transport [m tonnes] over the reported time period".
+	:reportedCO2emissionsDuringFreightTransport rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions assigned to Freight transport [m tonnes] over the reported time period".
+	:reportedCO2emissionsOnLaden rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions assigned to On laden [m tonnes] over the reported time period".
+	:reportedAnnualTimeAtSea rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual Total time spent at sea [hours] over the reported time period".
+	:reportedAnnualAvgFuelConsumption rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per distance [kg / n mile] over the reported time period".
+	:reportedAnnualAvgFuelConsumptionPerWorkMass rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per transport work (mass) [g / m tonnes x n miles] over the reported time period".
+	:reportedAnnualAvgFuelConsumptionPerWorkVolume rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per transport work (volume) [g / m3 x n miles] over the reported time period".
+	:reportedAnnualAvgFuelConsumptionPerWorkDWT rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per transport work (dwt) [g / dwt carried x n miles] over the reported time period".
+	:reportedAnnualAvgFuelConsumptionPerWorkPAX rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per transport work (pax) [g / pax x n miles] over the reported time period".
+	:reportedAnnualAvgFuelConsumptionPerWorkFreight rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average Fuel consumption per transport work (freight) [g / m tonnes x n miles] over the reported time period".
+	:reportedAnnualCO2emissionPerDistance rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per distance [kg CO2 / n mile] over the reported time period".
+	:reportedAnnualCO2emissionPerWorkMass rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per transport work (mass) [g CO2 / m tonnes x n miles] over the reported time period".
+	:reportedAnnualCO2emissionPerWorkVolume rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per transport work (volume) [g CO2 / m3 x n miles] over the reported time period".
+	:reportedAnnualCO2emissionPerWorkDWT rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per transport work (dwt) [g CO2 / dwt carried x n miles] over the reported time period".
+	:reportedAnnualCO2emissionPerWorkPAX rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per transport work (pax) [g CO2 / pax x n miles] over the reported time period".
+	:reportedAnnualCO2emissionPerWorkFreight rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Annual average CO2 emissions per transport work (freight) [g CO2 / m tonnes x n miles] over the reported time period".
+	:reportedDistanceThroughIce rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Distance through ice [n miles] over the reported time period".
+	:reportedTimeThroughIce rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Total time spent at sea through ice [hours] over the reported time period".
+	:reportedFuelConsumptionPerDistance rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Fuel consumption per distance on laden voyages [kg / n mile] over the reported time period".
+	:reportedFuelConsumptionPerWorkMass rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Fuel consumption per transport work (mass) on laden voyages [g / m tonnes x n miles] over the reported time period".
+	:reportedFuelConsumptionPerWorkVolume rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Fuel consumption per transport work (volume) on laden voyages [g / m3 x n miles] over the reported time period".
+	:reportedFuelConsumptionPerWorkDWT rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Fuel consumption per transport work (dwt) on laden voyages [g / dwt carried x n miles] over the reported time period".
+	:reportedFuelConsumptionPerWorkPAX rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Fuel consumption per transport work (pax) on laden voyages [g / pax x n miles] over the reported time period".
+	:reportedFuelConsumptionPerWorkFreight rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "Fuel consumption per transport work (freight) on laden voyages [g / m tonnes x n miles] over the reported time period".
+	:reportedCO2emissionOnLaden rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions per distance on laden voyages [kg CO2 / n mile] over the reported time period".
+	:reportedCO2emissionPerWorkMass rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "CO2 emissions per transport work (mass) on laden voyages [g CO2 / m tonnes x n miles] over the reported time period".
+	:reportedCO2emissionPerWorkVolume rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ;
+		rdfs:comment "CO2 emissions per transport work (volume) on laden voyages [g CO2 / m3 x n miles] over the reported time period".
+	:reportedCO2emissionPerWorkDWT rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions per transport work (dwt) on laden voyages [g CO2 / dwt carried x n miles] over the reported time period".
+	:reportedCO2emissionPerWorkPAX rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions per transport work (pax) on laden voyages [g CO2 / pax x n miles] over the reported time period".
+	:reportedCO2emissionPerWorkFreight rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "CO2 emissions per transport work (freight) on laden voyages [g CO2 / m tonnes x n miles] over the reported time period".
+	:reportedAvgDensityOfCargo rdfs:domain :CO2_emissionReport ; rdfs:range xsd:string ; 
+		rdfs:comment "Average density of the cargo transported [m tonnes / m3] over the reported time period".
+
+## we use trajectoryCluster dul:hasPart trajectory to define the elements of a trajectory cluster
+## CO2_emissionReport (inherits dul:InformationEntity) hasReportingPeriod time:TemporalEntity
+## MooringReport (inherits dul:InformationEntity) hasReportingPeriod time:TemporalEntity
+
+:MooringReport rdfs:subClassOf dul:InformationEntity ; rdfs:comment "The mooring report class is a subclass of dul:InformationEntity and it is associated with time:TemporalEntity for the reference time of the report. Each company may have a different format for mooring reports" .
+
+
+:TrajectoryCluster rdfs:subClassOf dul:Region .
+:TrajectoryPart rdfs:subClassOf dul:Region .
+:Node rdfs:subClassOf :TrajectoryPart .
+:RawPosition rdfs:subClassOf :TrajectoryPart .
+:Segment rdfs:subClassOf :TrajectoryPart .
+
+:Transcoder rdf:type rdfs:Class .
+:hasTrajectory rdfs:domain :Vessel ; rdfs:range :Trajectory .
+
+### Object Properties
+:occurs rdfs:domain :Event .
+:occurs rdfs:range :TrajectoryPart.
+:affectedBy rdfs:domain dul:Entity .
+:affectedBy rdfs:range :Event .
+:affects rdfs:domain :Event .
+:affects rdfs:range dul:Entity .
+:affects rdfs:inverseOf :affectedBy .
+dul:hasPart rdfs:domain dul:Entity .
+dul:hasPart rdfs:range dul:Entity .
+dul:isPartOf rdfs:domain dul:Entity .
+dul:isPartOf rdfs:range dul:Entity .
+dul:hasPart rdfs:inverseOf dul:isPartOf .
+dul:precedes rdfs:domain dul:Entity .
+dul:precedes rdfs:range dul:Entity .
+dul:precedes rdfs:inverseOf dul:follows .
+:hasGeometry rdfs:subPropertyOf dul:hasConstituent .
+:hasTemporalFeature rdfs:subPropertyOf dul:hasConstituent .
+:hasPart rdfs:subPropertyOf dul:hasPart .
+:comprises rdfs:subPropertyOf :hasPart .
+:hasStart rdfs:subPropertyOf :comprises .
+:hasEnd rdfs:subPropertyOf :comprises .
+:ofMovingObject rdfs:range :MovingObject .
+
+### Added from AIS sources
+:hasCode rdfs:domain :Transcoder ; rdfs:range xsd:string ; rdfs:comment "The transcoder's code (MMSI)" .
+:hasGeometry rdfs:domain dul:Region ; rdfs:range ogc:Geometry .
+:hasTemporalFeature rdfs:domain :TrajectoryPart ; rdfs:range time:TemporalEntity .
+:hasSpeedOverGround rdfs:domain :TrajectoryPart ; rdfs:range xsd:string .
+:hasCourseOverGround rdfs:domain :TrajectoryPart ; rdfs:range xsd:string . 
+:hasHeading rdfs:domain :TrajectoryPart ; rdfs:range xsd:string . 
+:hasNavigationalStatus rdfs:domain :TrajectoryPart ; rdfs:range xsd:string . 
+:hasWeatherCondition rdfs:domain :TrajectoryPart ; rdfs:range :WeatherCondition .
+:hasDangerousLoad rdfs:domain :Trajectory ; rdfs:range xsd:string .
+
+### Comments ###
+:Trajectory rdfs:comment "A trajectory built upon the actual (raw or aggregated) sequence of positions of the moving object" .
+:ActualTrajectory rdfs:comment "A trajectory built upon the actual (raw or aggregated) sequence of positions of the moving object" .
+:IntendedTrajectory rdfs:comment "A sub-class of intended trajectory, which is reported in a FM_FlightPlan" .
+:RegulatedTrajectory rdfs:comment "A trajectory that has been regulated" .
+:SyntheticTrajectory rdfs:comment "A trajectory that is constructed by a simulation process. This is not necessary an intended trajectory, while intended trajectories can be produced from simulation processes. A major dofference from intended trajectory, is that simulation and generation of synthetic trajectories can be refer to both past and future temporal periods, while intended trajectory refers to only future time periods." .
+
+:OpenTrajectory rdfs:comment "A Trajectory where the final destination is not yet met." .
+:ClosedTrajectory rdfs:comment "A Trajectory where the destination is reached." .

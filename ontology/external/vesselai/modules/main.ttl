@@ -1,0 +1,22 @@
+@base <http://www.vesselAI-project.eu/ontology#> .
+@prefix : <http://www.vesselAI-project.eu/ontology#> .
+@prefix dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#>.
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <https://www.w3.org/2001/XMLSchema.xsd> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+rdf:Ontology owl:imports <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+rdf:Ontology owl:imports <http://www.opengis.net/ont/geosparql#> .
+rdf:Ontology owl:imports <http://www.w3.org/2006/time#> .
+
+rdf:Ontology owl:imports <file:trajectories_module.ttl> .
+rdf:Ontology owl:imports <file:vesselCharacteristics.ttl> .
+rdf:Ontology owl:imports <file:contextualInformation.ttl> .
+rdf:Ontology owl:imports <file:events.ttl> .
+
+:Set rdfs:subClassOf dul:Set .
+:hasDescription rdfs:domain dul:Entity ; rdfs:range xsd:string .
+

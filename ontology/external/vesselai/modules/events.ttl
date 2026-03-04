@@ -1,0 +1,447 @@
+rdf:Ontology owl:imports <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+rdf:Ontology owl:imports <http://www.opengis.net/ont/geosparql#> .
+
+@prefix : <http://www.vesselAI-project.eu/ontology#> .
+@prefix ogc: <http://www.opengis.net/ont/geosparql#> .
+@prefix time: <http://www.w3.org/2006/time#> .
+@prefix dul: <http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#> .
+
+:occursAt rdfs:domain :Event ; rdfs:range :TrajectoryPart .
+
+:triggers rdfs:domain :TrajectoryPart ; rdfs:range :Event .
+
+:hasReferencePosition rdfs:domain :Event ; rdfs:range ogc:Geometry .
+
+:hasReferenceTime rdfs:domain :Event ; rdfs:range time:TemporalEntity .
+
+:triggers rdfs:domain :Event ; rdfs:range :Event .
+## we can use :affects to relate :Event with :Entity (or any subclass such as :TrajectoryPart)
+
+
+:Mean_sea_level_pressure_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:10_metre_U_wind_component_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:10_metre_V_wind_component_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:2_metre_temperature_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:2_metre_dewpoint_temperature_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:Total_precipitation_surface_1_Hour_Accumulation rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:Sea_surface_temperature_surface rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:Mean_wave_direction_msl rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:Mean_wave_period_msl rdfs:domain :WeatherCondition ; rdfs:range xsd:string . 
+:hasTimeStart rdfs:domain time:TemporalEntity ; rdfs:range xsd:string .
+:hasTimeEnd rdfs:domain time:TemporalEntity ; rdfs:range xsd:string .
+:TimeInterval rdfs:subClassOf time:TemporalEntity .
+
+:Event rdfs:subClassOf dul:Event ; rdfs:comment "A sub-class of Events that refer or affect moving objects in the maritime domain" .
+:Environmental rdfs:subClassOf :Event ; rdfs:comment "Environmental events affecting moving objects' behaviour" .
+:WeatherCondition rdfs:subClassOf :Environmental .
+:WeatherCondition rdfs:subClassOf :Dynamic ; rdfs:comment "A weather condition reported for an associated Region" .
+:LowLevel rdfs:subClassOf :Event ; rdfs:comment "A sub-class of event that can be identified only by the sensor' recordings" .
+:MaritimeLowLevelEvent rdfs:subClassOf :LowLevel .
+
+## WMO codes registry
+
+:hasWeatherPhenomena rdfs:domain :WeatherCondition ; rdfs:range :WeatherPhenomena ; rdfs:label "Significant weather phenomena" ; rdfs:seeAlso <http://www.wmo.int/pages/prog/www/WMOCodes/WMO306_vI1/VolumeI.1.html> ; rdfs:comment "This register provides terms that may be used to describe significant [recent], present and forecast weather - enumerating the set of meteorologically valid options defined in WMO No. 306 Vol 1 code-table 4678. Each term comprises one or more of the elements from code-table 4678: 'intensity or proximity', 'descriptor', 'precipitation', 'obscuration' and 'other'."@en ; owl:versionInfo 3 .
+
+<http://codes.wmo.int/306/4678/+RASN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/VCVA> a :WeatherPhenomena ; rdfs:label "Volcanic ash in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/+TSRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/UP> a :WeatherPhenomena ; rdfs:label "Unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/-DZRASN> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SS> a :WeatherPhenomena ; rdfs:label "Light sandstorm"@en . 
+<http://codes.wmo.int/306/4678/+RASGDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SNSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-FZDZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of freezing drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/SHGRSNRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/TSRAGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+TSGRSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+RASNDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-SHSNGS> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SG> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains"@en . 
+<http://codes.wmo.int/306/4678/+PLRADZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/DRSN> a :WeatherPhenomena ; rdfs:label "Low drifting snow"@en . 
+<http://codes.wmo.int/306/4678/TSRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+SHGSSNRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/RASGDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-SHSNRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-DS> a :WeatherPhenomena ; rdfs:label "Light duststorm"@en . 
+<http://codes.wmo.int/306/4678/+PLSNRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-RA> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/+TSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+SHRASNGS> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-TSGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/RASNDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+PLSGSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/-SNDZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHGR> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/PLRADZ> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-SNRAPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+SHRAGR> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-SNPLRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/PLSNRA> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+SGDZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/TSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-DZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-SN> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/RADZPL> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/PLSGSN> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/-RAPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-PLRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/+TSSNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/SHRAGR> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/+TSGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/SGDZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-DZSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSUP> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/+FZRADZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of freezing rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SGPLSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/TSSNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/-PLSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/TSGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+TSGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/-SNRASG> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+DZRAPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+RADZSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/+DZPLRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/FZRADZ> a :WeatherPhenomena ; rdfs:label "Precipitation of freezing rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/RADZSG> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SGRADZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+TSSNGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/SHRAGRSN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/SGPLSN> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/+DZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle"@en . 
+<http://codes.wmo.int/306/4678/-RASG> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+SNSGRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/TSSNGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/TSGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+TSRAGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+RAPLSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/-SGSNRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+SNRADZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/SGRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/PRFG> a :WeatherPhenomena ; rdfs:label "Partial fog (covering part of the aerodrome)"@en . 
+<http://codes.wmo.int/306/4678/RADZ> a :WeatherPhenomena ; rdfs:label "Precipitation of rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/DZRAPL> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/HZ> a :WeatherPhenomena ; rdfs:label "Haze"@en . 
+<http://codes.wmo.int/306/4678/DZPLRA> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/SNRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/SNSGRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/RAPLSN> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/+SGRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/SNRADZ> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/SS> a :WeatherPhenomena ; rdfs:label "Sandstorm"@en . 
+<http://codes.wmo.int/306/4678/SGSN> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/FZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of freezng rain"@en , "Precipitation of freezing rain"@en . 
+<http://codes.wmo.int/306/4678/+RADZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-DZSGRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/+DZRASG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+SNRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSSNGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-FZDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of freezing drizzle"@en . 
+<http://codes.wmo.int/306/4678/-RASGSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHGS> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-DZSNRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+FZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of freezng rain"@en . 
+<http://codes.wmo.int/306/4678/+SHRAGS> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+SGSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/DS> a :WeatherPhenomena ; rdfs:label "Duststorm"@en . 
+<http://codes.wmo.int/306/4678/BLDU> a :WeatherPhenomena ; rdfs:label "Blowing dust"@en . 
+<http://codes.wmo.int/306/4678/RA> a :WeatherPhenomena ; rdfs:label "Precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/DZPL> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/DZRASG> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-PLRASN> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHGRRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSGSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSSNRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/VCSH> a :WeatherPhenomena ; rdfs:label "Shower(s) in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-PLSNSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+TSSNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SHRAGS> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/VCSS> a :WeatherPhenomena ; rdfs:label "Sandstorm in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-TSRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-SHSN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/TSRASNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/+FC> a :WeatherPhenomena ; rdfs:label "Well-developed funnel cloud(s) (tornado or waterspout)" . 
+<http://codes.wmo.int/306/4678/+TSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+DZPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+SHRASN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/SN> a :WeatherPhenomena ; rdfs:label "Precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/VCBLDU> a :WeatherPhenomena ; rdfs:label "Blowing dust in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-SHGRSN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/TSSNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-DZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SHSNGSRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/TSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/SHSNGRRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+SHRAGRSN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/VCDS> a :WeatherPhenomena ; rdfs:label "Duststorm in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-SNSGPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SHRASN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/DZSG> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/DRDU> a :WeatherPhenomena ; rdfs:label "Low drifting dust"@en . 
+<http://codes.wmo.int/306/4678/+SNPLSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/FZFG> a :WeatherPhenomena ; rdfs:label "Freezing fog"@en . 
+<http://codes.wmo.int/306/4678/-TSRASNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/+SHSNGR> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/-SGPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/PLSG> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+SHGSRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-PLDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+DZSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+SGSNPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-TSGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-SNPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SNPLSG> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+PLSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-TSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/SHSNGR> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/FG> a :WeatherPhenomena ; rdfs:label "Fog"@en . 
+<http://codes.wmo.int/306/4678/-SHSNGRRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/SHGSRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSRAGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+SHGSSN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/SGSNPL> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-TSGRRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+RAPLDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+PLDZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/+SHGRSNRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+RASNPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-SHGSRASN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHSNRAGR> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-TSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/SHGSSN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/RADZSN> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/+SGRASN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/RAPLDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-RASN> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/PLDZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/TSGSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSSNRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/TSSNRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/SGDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/RASNPL> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-SNSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/VCFG> a :WeatherPhenomena ; rdfs:label "Fog in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-TSRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-RASGDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/TSRASNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SGRASN> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/SNDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SGDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/SHUP> a :WeatherPhenomena ; rdfs:label "Unidentified showery precipitation"@en , "Showery precipitation of unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/PO> a :WeatherPhenomena ; rdfs:label "Dust/sand whirls (dust devils)"@en . 
+<http://codes.wmo.int/306/4678/FZDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of freezing drizzle"@en . 
+<http://codes.wmo.int/306/4678/-RASNDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+RASNSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-PLRADZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SNDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+DZRASN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHRASNGR> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/+SHUP> a :WeatherPhenomena ; rdfs:label "Heavy unidentified showery precipitation"@en . 
+<http://codes.wmo.int/306/4678/-PLSNRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSGSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+FZDZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of freezing drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+FZDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of freezing drizzle"@en . 
+<http://codes.wmo.int/306/4678/+TSGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-RADZPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-PLSGSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/RASNSG> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/DZ> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle"@en . 
+<http://codes.wmo.int/306/4678/-TSRASNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+SHSNGS> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/DZRASN> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHRAGR> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/+SHSNRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/MIFG> a :WeatherPhenomena ; rdfs:label "Shallow fog"@en . 
+<http://codes.wmo.int/306/4678/FZDZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of freezing drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-SGDZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHRAGSSN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/SHGR> a :WeatherPhenomena ; rdfs:label "Showery precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/TSGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/BLSA> a :WeatherPhenomena ; rdfs:label "Blowing sand"@en . 
+<http://codes.wmo.int/306/4678/+TSGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/VCPO> a :WeatherPhenomena ; rdfs:label "Dust/sand whirls (dust devils) in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-SHGRRASN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+SNDZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/+PL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SHSNGS> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-TSSNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/TSRAGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/DZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-TSGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+SNRAPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SHSNRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+TSSNGRRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+SNPLRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/+SHGR> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/TSGRRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/RAPL> a :WeatherPhenomena ; rdfs:label "Precipitation of rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/TSGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/PLRA> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/VCBLSA> a :WeatherPhenomena ; rdfs:label "Blowing sand in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/SNDZRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/SHGSRASN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-RADZSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-FZRADZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of freezing rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/SHSNRAGR> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-SHSNRAGS> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/-SGPLSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/+DZRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/SNRAPL> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+TSGSRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+TSSNRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/DZSN> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+UP> a :WeatherPhenomena ; rdfs:label "Heavy unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/SNPLRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/DU> a :WeatherPhenomena ; rdfs:label "Dust"@en . 
+<http://codes.wmo.int/306/4678/+RAPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/TSUP> a :WeatherPhenomena ; rdfs:label "Thunderstorm with unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/+PLRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/-DZRAPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, rain and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/TSSNRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/PLSN> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/-DZPLRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, ice pellets and rain"@en . 
+<http://codes.wmo.int/306/4678/DRSA> a :WeatherPhenomena ; rdfs:label "Low drifting sand"@en . 
+<http://codes.wmo.int/306/4678/+SG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains"@en . 
+<http://codes.wmo.int/306/4678/+DZSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/-SNSGRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/-RAPLSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/+TSUP> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/-SNRADZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SNRASG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-TSGRSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/FC> a :WeatherPhenomena ; rdfs:label "Funnel cloud(s) (tornado or water-spout)"@en . 
+<http://codes.wmo.int/306/4678/+PLSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets and snow"@en . 
+<http://codes.wmo.int/306/4678/RASG> a :WeatherPhenomena ; rdfs:label "Precipitation of rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SGRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHGSSNRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+SGRADZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-RADZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-FZUP> a :WeatherPhenomena ; rdfs:label "Light unidentified freezing precipitation"@en . 
+<http://codes.wmo.int/306/4678/+SGSNRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHRASNGS> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SHRASNGR> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/SNRASG> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SNRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/TSGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/TSGSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+RASG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+TSRASNGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/-DZRASG> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle, rain and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SGSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/SGRADZ> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, rain and drizzle"@en . 
+<http://codes.wmo.int/306/4678/-PL> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SGSNRA> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHRAGS> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+TSGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of hail"@en . 
+<http://codes.wmo.int/306/4678/VCFC> a :WeatherPhenomena ; rdfs:label "Funnel cloud(s) (tornado or water-spout) in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/SHRAGSSN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+DZSGRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/SHGS> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+SHSNGRRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow, hail and rain"@en . 
+<http://codes.wmo.int/306/4678/TSSNGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/BR> a :WeatherPhenomena ; rdfs:label "Mist"@en . 
+<http://codes.wmo.int/306/4678/+TSRAGSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/SHGRRASN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/SHRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/+RASGSN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/-DZPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-TSSNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+TSGRRASN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+DZSNRA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of drizzle, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-UP> a :WeatherPhenomena ; rdfs:label "Light unidentified precipitation"@en . 
+<http://codes.wmo.int/306/4678/-TSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow and rain"@en . 
+<http://codes.wmo.int/306/4678/+SHGS> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/DZSGRA> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, snow grains and rain"@en . 
+<http://codes.wmo.int/306/4678/+SHGSRASN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow pellets/small hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+SHSNRAGR> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow, rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-SHRASN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+PLRASN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+SHRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/+SHGRRA> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/RASGSN> a :WeatherPhenomena ; rdfs:label "Precipitation of rain, snow grains and snow"@en . 
+<http://codes.wmo.int/306/4678/SHSNRAGS> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SHSN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/+PLSNSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/DZSNRA> a :WeatherPhenomena ; rdfs:label "Precipitation of drizzle, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/-SG> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains"@en . 
+<http://codes.wmo.int/306/4678/+RADZPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, drizzle and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+TSSNRAGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+TSRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-TSSNGSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/SHGRRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-SHGRSNRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/PLRASN> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-TSRAGRSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with light precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+SHSN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/+SHGRSN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/-SNPLSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow, ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/PLSNSG> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-DZSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SHSNGR> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow and hail"@en . 
+<http://codes.wmo.int/306/4678/TSRAGR> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain and hail"@en . 
+<http://codes.wmo.int/306/4678/-SHGSRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+SS> a :WeatherPhenomena ; rdfs:label "Heavy sandstorm"@en . 
+<http://codes.wmo.int/306/4678/TSGRSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/SQ> a :WeatherPhenomena ; rdfs:label "Squalls"@en . 
+<http://codes.wmo.int/306/4678/+SNSGPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow, snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-PLSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets and snow grains"@en . 
+<http://codes.wmo.int/306/4678/SHGSSNRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/BCFG> a :WeatherPhenomena ; rdfs:label "Patches of fog"@en . 
+<http://codes.wmo.int/306/4678/-SGSNPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SHGRSN> a :WeatherPhenomena ; rdfs:label "Showery precipitation of hail and snow"@en . 
+<http://codes.wmo.int/306/4678/SGPL> a :WeatherPhenomena ; rdfs:label "Precipitation of snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/+SHRASNGR> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain, snow and hail"@en . 
+<http://codes.wmo.int/306/4678/+TSGSSNRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow pellets/small hail, snow and rain"@en . 
+<http://codes.wmo.int/306/4678/PLDZ> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/TS> a :WeatherPhenomena ; rdfs:label "Thunderstorm"@en . 
+<http://codes.wmo.int/306/4678/SHRASNGS> a :WeatherPhenomena ; rdfs:label "Showery precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+RADZSG> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain, drizzle and snow grains"@en . 
+<http://codes.wmo.int/306/4678/-SHGSSN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/TSGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SNSGPL> a :WeatherPhenomena ; rdfs:label "Precipitation of snow, snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SNPL> a :WeatherPhenomena ; rdfs:label "Precipitation of snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-RADZSN> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, drizzle and snow"@en . 
+<http://codes.wmo.int/306/4678/+DS> a :WeatherPhenomena ; rdfs:label "Heavy duststorm"@en . 
+<http://codes.wmo.int/306/4678/+TSRASNGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain, snow and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+RA> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/+SGPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow grains and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/-RAPLDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/TSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/-PLDZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of ice pellets, drizzle and rain"@en . 
+<http://codes.wmo.int/306/4678/-RASNPL> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/SHSNGSRA> a :WeatherPhenomena ; rdfs:label "Showery precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/+PLDZ> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of ice pellets and drizzle"@en . 
+<http://codes.wmo.int/306/4678/+SHRAGSSN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of rain, snow pellets/small hail and snow"@en . 
+<http://codes.wmo.int/306/4678/+TSGS> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/+SNPL> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow and ice pellets"@en . 
+<http://codes.wmo.int/306/4678/VA> a :WeatherPhenomena ; rdfs:label "Volcanic ash"@en . 
+<http://codes.wmo.int/306/4678/+SHGRRASN> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of hail, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-SGRASN> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains, rain and snow"@en . 
+<http://codes.wmo.int/306/4678/+TSRA> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of rain"@en . 
+<http://codes.wmo.int/306/4678/SA> a :WeatherPhenomena ; rdfs:label "Sand"@en . 
+<http://codes.wmo.int/306/4678/+SN> a :WeatherPhenomena ; rdfs:label "Heavy precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/TSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/BLSN> a :WeatherPhenomena ; rdfs:label "Blowing snow"@en . 
+<http://codes.wmo.int/306/4678/PL> a :WeatherPhenomena ; rdfs:label "Precipitation of ice pellets"@en . 
+<http://codes.wmo.int/306/4678/VCTS> a :WeatherPhenomena ; rdfs:label "Thunderstorm in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/FZUP> a :WeatherPhenomena ; rdfs:label "Unidentified freezing precipitation"@en . 
+<http://codes.wmo.int/306/4678/-SGDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow grains and drizzle"@en . 
+<http://codes.wmo.int/306/4678/FU> a :WeatherPhenomena ; rdfs:label "Smoke"@en . 
+<http://codes.wmo.int/306/4678/RASN> a :WeatherPhenomena ; rdfs:label "Precipitation of rain and snow"@en . 
+<http://codes.wmo.int/306/4678/-FZRA> a :WeatherPhenomena ; rdfs:label "Light precipitation of freezng rain"@en . 
+<http://codes.wmo.int/306/4678/+SHSNRAGS> a :WeatherPhenomena ; rdfs:label "Heavy showery precipitation of snow, rain and snow pellets/small hail"@en . 
+<http://codes.wmo.int/306/4678/SNSG> a :WeatherPhenomena ; rdfs:label "Precipitation of snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+TSSN> a :WeatherPhenomena ; rdfs:label "Thunderstorm with heavy precipitation of snow"@en . 
+<http://codes.wmo.int/306/4678/-SHSNGSRA> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of snow, snow pellets/small hail and rain"@en . 
+<http://codes.wmo.int/306/4678/-SNDZ> a :WeatherPhenomena ; rdfs:label "Light precipitation of snow and drizzle"@en . 
+<http://codes.wmo.int/306/4678/VCBLSN> a :WeatherPhenomena ; rdfs:label "Blowing snow in the vicinity"@en . 
+<http://codes.wmo.int/306/4678/-RASNSG> a :WeatherPhenomena ; rdfs:label "Light precipitation of rain, snow and snow grains"@en . 
+<http://codes.wmo.int/306/4678/+FZUP> a :WeatherPhenomena ; rdfs:label "Heavy unidentified freezing precipitation"@en . 
+<http://codes.wmo.int/306/4678/-SHRAGRSN> a :WeatherPhenomena ; rdfs:label "Light showery precipitation of rain, hail and snow"@en . 
+<http://codes.wmo.int/306/4678/-SHUP> a :WeatherPhenomena ; rdfs:label "Light unidentified showery precipitation"@en .
+

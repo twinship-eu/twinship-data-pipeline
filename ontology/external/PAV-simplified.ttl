@@ -1,0 +1,107 @@
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+<http://purl.org/pav/> rdf:type owl:Ontology ;
+                        owl:versionIRI <http://purl.org/pav/simplified/> ;
+                        rdfs:label "PAV - Provenance, Authoring and Versioning (Simplified)" ;
+                        rdfs:comment "Simplified subset of PAV ontology for TwinShip provenance and versioning metadata." .
+
+#################################################################
+#    Annotation Properties
+#################################################################
+
+###  http://purl.org/pav/createdOn
+pav:createdOn
+  a owl:AnnotationProperty ;
+  rdfs:label "created on" ;
+  rdfs:comment "The date and time when the resource was created." ;
+  rdfs:range xsd:dateTime ;
+.
+
+###  http://purl.org/pav/createdBy
+pav:createdBy
+  a owl:AnnotationProperty ;
+  rdfs:label "created by" ;
+  rdfs:comment "The agent that created the resource." ;
+.
+
+###  http://purl.org/pav/authoredOn
+pav:authoredOn
+  a owl:AnnotationProperty ;
+  rdfs:label "authored on" ;
+  rdfs:comment "The date and time when the resource was authored." ;
+  rdfs:range xsd:dateTime ;
+.
+
+###  http://purl.org/pav/authoredBy
+pav:authoredBy
+  a owl:AnnotationProperty ;
+  rdfs:label "authored by" ;
+  rdfs:comment "The agent that authored the intellectual content of the resource." ;
+.
+
+###  http://purl.org/pav/lastUpdateOn
+pav:lastUpdateOn
+  a owl:AnnotationProperty ;
+  rdfs:label "last updated on" ;
+  rdfs:comment "The date and time when the resource was last updated." ;
+  rdfs:range xsd:dateTime ;
+.
+
+###  http://purl.org/pav/version
+pav:version
+  a owl:AnnotationProperty ;
+  rdfs:label "version" ;
+  rdfs:comment "The version identifier of the resource." ;
+  rdfs:range xsd:string ;
+.
+
+###  http://purl.org/pav/previousVersion
+pav:previousVersion
+  a owl:AnnotationProperty ;
+  rdfs:label "previous version" ;
+  rdfs:comment "The previous version of this resource." ;
+.
+
+###  http://purl.org/pav/derivedFrom
+pav:derivedFrom
+  a owl:AnnotationProperty ;
+  rdfs:label "derived from" ;
+  rdfs:comment "The original resource from which this resource was derived." ;
+.
+
+###  http://purl.org/pav/importedFrom
+pav:importedFrom
+  a owl:AnnotationProperty ;
+  rdfs:label "imported from" ;
+  rdfs:comment "The source from which this resource was imported." ;
+.
+
+###  http://purl.org/pav/providedBy
+pav:providedBy
+  a owl:AnnotationProperty ;
+  rdfs:label "provided by" ;
+  rdfs:comment "The organization or agent that provided the resource." ;
+.
+
+###  http://purl.org/pav/curatedOn
+pav:curatedOn
+  a owl:AnnotationProperty ;
+  rdfs:label "curated on" ;
+  rdfs:comment "The date and time when the resource was curated." ;
+  rdfs:range xsd:dateTime ;
+.
+
+###  http://purl.org/pav/curatedBy
+pav:curatedBy
+  a owl:AnnotationProperty ;
+  rdfs:label "curated by" ;
+  rdfs:comment "The agent that curated the resource." ;
+.
