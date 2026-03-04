@@ -29,7 +29,7 @@ from dagster_pipeline.assets.harmonisation import (
 from dagster_pipeline.resources import shacl_validator
 
 SHARED = Path("/tmp/pipeline")
-VESSELS = ["grimaldi", "stena-scandinavica", "stena-tanker"]
+VESSELS = ["grimaldi", "stena-scandinavica", "stena-tanker", "futuristic-vessel"]
 
 # Output dir on shared volume so TTL files persist across containers
 OUTPUT_DIR = str(SHARED / "output")
