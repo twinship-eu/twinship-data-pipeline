@@ -43,6 +43,7 @@ from twinship_harmonisation.low_level import (
 from twinship_harmonisation.mid_level import (
     twinship_emergency_generators_graph,
     twinship_propellers_graph,
+    twinship_provenance_graph,
     twinship_shaft_generators_graph,
     twinship_thrusters_graph,
 )
@@ -77,6 +78,9 @@ def harmonise_twinship_vessel(
     als: list[dict] | None = None,
     dynamic_wings: list[dict] | None = None,
     ammonia_fuel_cells: list[dict] | None = None,
+    # PAV provenance metadata (optional)
+    source_file: str | None = None,
+    pipeline_version: str | None = None,
 ) -> Graph:
     """Harmonise vessel data into TwinShip RDF triples.
 
@@ -99,6 +103,9 @@ def harmonise_twinship_vessel(
         draft_mid_stbd_max_m=vessel.get("draft_mid_stbd_max_m"),
         depth_of_water_max_m=vessel.get("depth_of_water_max_m"),
     )
+
+    # PAV provenance metadata
+    g += twinship_provenance_graph(vessel_uri, source_file, pipeline_version)
 
     is_futuristic = bool(gensets)
 

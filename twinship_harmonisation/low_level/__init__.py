@@ -42,12 +42,14 @@ from twinship_harmonisation.low_level.other_functions import (
 )
 from twinship_harmonisation.low_level.propeller_functions import create_twinship_propeller
 from twinship_harmonisation.low_level.vessel_functions import (
+    build_pav_provenance,
     create_twinship_uri,
     create_twinship_vessel,
     get_twinship_type_uri,
 )
 
 __all__ = [
+    "build_pav_provenance",
     "build_twinship_connection",
     "build_twinship_direct_connection",
     "build_twinship_fuel_consumption",
