@@ -239,8 +239,20 @@ def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict
         context.log.warning(f"No data for {namespace}, returning empty graph")
         return Graph()
 
+    # Determine source file based on vessel type
+    GITHUB_BASE = "https://github.com/twinship-eu/twinship-data-pipeline/blob/main/data"
+    is_futuristic = bool(validated_vessel_json.get("gensets"))
+    if is_futuristic:
+        source_file = f"{GITHUB_BASE}/RoRo%20Futuristic%20Vessel%20KG%20Working%20File.xlsx"
+    else:
+        source_file = f"{GITHUB_BASE}/TwinShip-table-schema-specification.xlsx"
+
     # Harmonise the extracted vessel data into RDF triples
-    g = harmonise_twinship_vessel(**validated_vessel_json)
+    g = harmonise_twinship_vessel(
+        **validated_vessel_json,
+        source_file=source_file,
+        pipeline_version="0.1.0",
+    )
 
     # Log the number of triples generated
     vessel_id = validated_vessel_json.get("vessel", {}).get("id", "unknown")
