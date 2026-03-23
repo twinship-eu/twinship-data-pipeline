@@ -1,9 +1,11 @@
 """Low-level functions for creating vessel-related RDF triples."""
 
+from datetime import UTC, datetime
+
 from rdflib import Graph, Literal, Namespace, URIRef
 from rdflib.namespace import RDF, RDFS, XSD
 
-from twinship_harmonisation.constants import TWINSHIP, TWINSHIP_IND
+from twinship_harmonisation.constants import PAV, TWINSHIP, TWINSHIP_IND
 
 
 def create_twinship_uri(entity_id: str, namespace: str) -> URIRef:
@@ -163,3 +165,37 @@ def create_twinship_vessel(
     add_optional_double(g, vessel_uri, TWINSHIP.twVesselDepthOfWaterMaxInM, depth_of_water_max_m)
 
     return vessel_uri, g
+
+
+def build_pav_provenance(
+    subject: URIRef,
+    created_by: str | None = None,
+    derived_from: str | None = None,
+    version: str | None = None,
+) -> Graph:
+    """Create PAV provenance triples for a subject.
+
+    Args:
+        subject: The URI to attach provenance metadata to.
+        created_by: URI identifying the tool/agent that created the data.
+        derived_from: URI identifying the source data.
+        version: Version string for the pipeline/tool.
+
+    Returns:
+        Graph with PAV provenance triples.
+    """
+    g = Graph()
+    g.add(
+        (
+            subject,
+            PAV.createdOn,
+            Literal(datetime.now(UTC).isoformat(), datatype=XSD.dateTime),
+        )
+    )
+    if created_by:
+        g.add((subject, PAV.createdBy, URIRef(created_by)))
+    if derived_from:
+        g.add((subject, PAV.derivedFrom, URIRef(derived_from)))
+    if version:
+        g.add((subject, PAV.version, Literal(version)))
+    return g
