@@ -20,6 +20,7 @@ from twinship_harmonisation.mid_level.propulsion import (
     build_twinship_gearbox,
     twinship_propellers_graph,
 )
+from twinship_harmonisation.mid_level.provenance import twinship_provenance_graph
 
 __all__ = [
     "build_twinship_auxiliary_engine",
@@ -29,6 +30,7 @@ __all__ = [
     "build_twinship_pms",
     "twinship_emergency_generators_graph",
     "twinship_propellers_graph",
+    "twinship_provenance_graph",
     "twinship_shaft_generators_graph",
     "twinship_thrusters_graph",
 ]
