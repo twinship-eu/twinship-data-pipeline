@@ -36,6 +36,10 @@ output/
 !shacl/*.ttl
 !ontology/**/*.ttl
 
+# Private data (vessel spreadsheet and extracted JSON)
+data/TwinShip-table-schema-specification.xlsx
+data/*.json
+
 # Environment
 .env
 .env.local
