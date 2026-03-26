@@ -20,6 +20,10 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
+## Data
+
+The repository includes the futuristic vessel spreadsheet. To run the pipeline for the conventional vessels (Grimaldi RoRo, Stena RoPax, Stena Tanker), place the `TwinShip-table-schema-specification.xlsx` file in the `data/` folder.
+
 ## Quick Start (Local)
 
 ```bash
