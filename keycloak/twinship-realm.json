@@ -7,10 +7,10 @@
       { "name": "ROLE_ADMIN", "description": "GraphDB administrator" },
       { "name": "ROLE_USER", "description": "Basic GraphDB user" },
       { "name": "ROLE_REPO_MANAGER", "description": "GraphDB repository manager" },
-      { "name": "READ_REPO_grimaldi", "description": "Read access to grimaldi repository" },
-      { "name": "WRITE_REPO_grimaldi", "description": "Write access to grimaldi repository" },
-      { "name": "READ_REPO_stena-scandinavica", "description": "Read access to stena-scandinavica repository" },
-      { "name": "WRITE_REPO_stena-scandinavica", "description": "Write access to stena-scandinavica repository" },
+      { "name": "READ_REPO_grimaldi-roro", "description": "Read access to grimaldi-roro repository" },
+      { "name": "WRITE_REPO_grimaldi-roro", "description": "Write access to grimaldi-roro repository" },
+      { "name": "READ_REPO_stena-ropax", "description": "Read access to stena-ropax repository" },
+      { "name": "WRITE_REPO_stena-ropax", "description": "Write access to stena-ropax repository" },
       { "name": "READ_REPO_stena-tanker", "description": "Read access to stena-tanker repository" },
       { "name": "WRITE_REPO_stena-tanker", "description": "Write access to stena-tanker repository" },
       { "name": "READ_REPO_futuristic-vessel", "description": "Read access to futuristic-vessel repository" },
@@ -78,34 +78,34 @@
   ],
   "users": [
     {
-      "username": "grimaldi-user",
+      "username": "grimaldi-roro-user",
       "enabled": true,
-      "email": "grimaldi@example.com",
+      "email": "grimaldi-roro@example.com",
       "firstName": "Grimaldi",
       "lastName": "User",
       "credentials": [
         {
           "type": "password",
-          "value": "grimaldi-password",
+          "value": "grimaldi-roro-password",
           "temporary": false
         }
       ],
-      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_grimaldi"]
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_grimaldi-roro"]
     },
     {
-      "username": "stena-scandinavica-user",
+      "username": "stena-ropax-user",
       "enabled": true,
-      "email": "stena-scandinavica@example.com",
-      "firstName": "Stena Scandinavica",
+      "email": "stena-ropax@example.com",
+      "firstName": "Stena RoPax",
       "lastName": "User",
       "credentials": [
         {
           "type": "password",
-          "value": "stena-scandinavica-password",
+          "value": "stena-ropax-password",
           "temporary": false
         }
       ],
-      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-scandinavica"]
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-ropax"]
     },
     {
       "username": "stena-tanker-user",
@@ -143,10 +143,10 @@
       "serviceAccountClientId": "dagster-pipeline",
       "realmRoles": [
         "ROLE_REPO_MANAGER",
-        "READ_REPO_grimaldi",
-        "WRITE_REPO_grimaldi",
-        "READ_REPO_stena-scandinavica",
-        "WRITE_REPO_stena-scandinavica",
+        "READ_REPO_grimaldi-roro",
+        "WRITE_REPO_grimaldi-roro",
+        "READ_REPO_stena-ropax",
+        "WRITE_REPO_stena-ropax",
         "READ_REPO_stena-tanker",
         "WRITE_REPO_stena-tanker",
         "READ_REPO_futuristic-vessel",

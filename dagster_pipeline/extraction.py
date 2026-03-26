@@ -1,7 +1,7 @@
 """TwinShip spreadsheet extraction utilities.
 
 This module handles parsing the TwinShip Excel spreadsheet and extracting
-vessel data for each operator (e.g., GRI (grimaldi), STL (stena line), STT (stena tanker)).
+vessel data for each operator (e.g., GRI (grimaldi-roro), STL (stena-ropax), STT (stena-tanker)).
 
 Usage:
     sheets = load_spreadsheet_sheets("path/to/spreadsheet.xlsx")
