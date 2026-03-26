@@ -7,9 +7,9 @@ while passing data between Argo containers.
 
 Usage:
     python runner.py extract-spreadsheet
-    python runner.py extract-vessel grimaldi
-    python runner.py harmonise-vessel grimaldi
-    python runner.py validate-vessel grimaldi
+    python runner.py extract-vessel grimaldi-roro
+    python runner.py harmonise-vessel grimaldi-roro
+    python runner.py validate-vessel grimaldi-roro
 """
 
 import pickle
@@ -29,7 +29,7 @@ from dagster_pipeline.assets.harmonisation import (
 from dagster_pipeline.resources import shacl_validator
 
 SHARED = Path("/tmp/pipeline")
-VESSELS = ["grimaldi", "stena-scandinavica", "stena-tanker", "futuristic-vessel"]
+VESSELS = ["grimaldi-roro", "stena-ropax", "stena-tanker", "futuristic-vessel"]
 
 # Output dir on shared volume so TTL files persist across containers
 OUTPUT_DIR = str(SHARED / "output")
@@ -161,7 +161,7 @@ STEPS = {
 if __name__ == "__main__":
     # Parse command-line arguments
     step = sys.argv[1]
-    # Some steps require a vessel name as a partition key argument (e.g. "grimaldi"), others ignore it
+    # Some steps require a vessel name as a partition key argument (e.g. "grimaldi-roro"), others ignore it
     vessel = sys.argv[2] if len(sys.argv) > 2 else ""
 
     if step not in STEPS:

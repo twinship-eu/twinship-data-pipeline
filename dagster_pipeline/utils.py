@@ -7,8 +7,8 @@ import pandas as pd
 # Known operator mappings: prefix -> namespace
 # Should ideally be updated when new operators are added to the dataset.
 KNOWN_OPERATORS = {
-    "GRI": "grimaldi",
-    "STL": "stena-scandinavica",
+    "GRI": "grimaldi-roro",
+    "STL": "stena-ropax",
     "STT": "stena-tanker",
     "FV": "futuristic-vessel",
 }
@@ -58,7 +58,7 @@ def parse_types(type_string: str | None) -> list[str]:
 
 
 def prefix_to_namespace(prefix: str) -> str:
-    """Convert operator prefix to namespace (GRI -> grimaldi)."""
+    """Convert operator prefix to namespace (GRI -> grimaldi-roro)."""
     return KNOWN_OPERATORS.get(prefix.upper(), prefix.lower())
 
 

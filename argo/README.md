@@ -182,8 +182,8 @@ The workflow runs 11 steps as a DAG:
 
 ```
 extract-spreadsheet
-    ├── extract-grimaldi ── harmonise-grimaldi ── validate-grimaldi ──┐
-    ├── extract-stena-scandinavica ── harmonise-... ── validate-... ──┼── combine-graphs
+    ├── extract-grimaldi-roro ── harmonise-grimaldi-roro ── validate-grimaldi-roro ──┐
+    ├── extract-stena-ropax ── harmonise-... ── validate-... ──┼── combine-graphs
     └── extract-stena-tanker ── harmonise-... ── validate-... ───────┘
 ```
 

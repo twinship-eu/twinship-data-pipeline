@@ -20,23 +20,23 @@ spec:
             template: extract-spreadsheet-step
 
           # Step 2: Extract vessel JSON (parallel per vessel)
-          - name: extract-grimaldi
+          - name: extract-grimaldi-roro
             template: extract-vessel-step
             dependencies: [extract-spreadsheet]
             arguments:
               parameters:
                 - name: vessel
-                  value: grimaldi
+                  value: grimaldi-roro
               artifacts:
                 - name: spreadsheet-data
                   from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
-          - name: extract-stena-scandinavica
+          - name: extract-stena-ropax
             template: extract-vessel-step
             dependencies: [extract-spreadsheet]
             arguments:
               parameters:
                 - name: vessel
-                  value: stena-scandinavica
+                  value: stena-ropax
               artifacts:
                 - name: spreadsheet-data
                   from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
@@ -62,30 +62,30 @@ spec:
                   from: "{{tasks.extract-spreadsheet.outputs.artifacts.spreadsheet-data}}"
 
           # Step 3: Harmonise to RDF (parallel per vessel)
-          - name: harmonise-grimaldi
+          - name: harmonise-grimaldi-roro
             template: harmonise-vessel-step
-            dependencies: [extract-grimaldi]
+            dependencies: [extract-grimaldi-roro]
             arguments:
               parameters:
                 - name: vessel
-                  value: grimaldi
+                  value: grimaldi-roro
               artifacts:
                 - name: vessel-json
-                  from: "{{tasks.extract-grimaldi.outputs.artifacts.vessel-json}}"
+                  from: "{{tasks.extract-grimaldi-roro.outputs.artifacts.vessel-json}}"
                 - name: validated-json
-                  from: "{{tasks.extract-grimaldi.outputs.artifacts.validated-json}}"
-          - name: harmonise-stena-scandinavica
+                  from: "{{tasks.extract-grimaldi-roro.outputs.artifacts.validated-json}}"
+          - name: harmonise-stena-ropax
             template: harmonise-vessel-step
-            dependencies: [extract-stena-scandinavica]
+            dependencies: [extract-stena-ropax]
             arguments:
               parameters:
                 - name: vessel
-                  value: stena-scandinavica
+                  value: stena-ropax
               artifacts:
                 - name: vessel-json
-                  from: "{{tasks.extract-stena-scandinavica.outputs.artifacts.vessel-json}}"
+                  from: "{{tasks.extract-stena-ropax.outputs.artifacts.vessel-json}}"
                 - name: validated-json
-                  from: "{{tasks.extract-stena-scandinavica.outputs.artifacts.validated-json}}"
+                  from: "{{tasks.extract-stena-ropax.outputs.artifacts.validated-json}}"
           - name: harmonise-stena-tanker
             template: harmonise-vessel-step
             dependencies: [extract-stena-tanker]
@@ -112,26 +112,26 @@ spec:
                   from: "{{tasks.extract-futuristic-vessel.outputs.artifacts.validated-json}}"
 
           # Step 4: SHACL validate + write TTL (parallel per vessel)
-          - name: validate-grimaldi
+          - name: validate-grimaldi-roro
             template: validate-vessel-step
-            dependencies: [harmonise-grimaldi]
+            dependencies: [harmonise-grimaldi-roro]
             arguments:
               parameters:
                 - name: vessel
-                  value: grimaldi
+                  value: grimaldi-roro
               artifacts:
                 - name: vessel-rdf
-                  from: "{{tasks.harmonise-grimaldi.outputs.artifacts.vessel-rdf}}"
-          - name: validate-stena-scandinavica
+                  from: "{{tasks.harmonise-grimaldi-roro.outputs.artifacts.vessel-rdf}}"
+          - name: validate-stena-ropax
             template: validate-vessel-step
-            dependencies: [harmonise-stena-scandinavica]
+            dependencies: [harmonise-stena-ropax]
             arguments:
               parameters:
                 - name: vessel
-                  value: stena-scandinavica
+                  value: stena-ropax
               artifacts:
                 - name: vessel-rdf
-                  from: "{{tasks.harmonise-stena-scandinavica.outputs.artifacts.vessel-rdf}}"
+                  from: "{{tasks.harmonise-stena-ropax.outputs.artifacts.vessel-rdf}}"
           - name: validate-stena-tanker
             template: validate-vessel-step
             dependencies: [harmonise-stena-tanker]
