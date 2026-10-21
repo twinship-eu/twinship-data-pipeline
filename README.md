@@ -165,6 +165,13 @@ uv add <package>        # runtime dependency
 uv add --dev <package>  # dev-only dependency
 ```
 
-## License
+## Licence
 
-[CC-BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+This repository has two licences. [`REUSE.toml`](REUSE.toml) gives the authoritative file-level mapping ([REUSE](https://reuse.software/) specification).
+
+- **Code** (pipeline, deployment configuration, and tests): [MIT](LICENSE).
+- **Data and models** (the synthetic Futuristic Vessel data in `data/`, the SHACL shapes in `shacl/`, and the TwinShip ontology copy in `ontology/`): [CC BY 4.0](LICENSES/CC-BY-4.0.txt).
+- **Third-party ontologies** in `ontology/external/` and `ontology/vocabularies/` keep their own licences: IDO (ISO 15926-14) is [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt) (POSC Caesar Association), QUDT is CC BY 4.0 (QUDT.org), and PAV is [Apache 2.0](LICENSES/Apache-2.0.txt).
+- **Pilot-vessel data** are not part of this repository and are not covered by these licences.
+
+The authoritative TwinShip ontology is published at [twinship-eu/twinship-ontology](https://github.com/twinship-eu/twinship-ontology).
