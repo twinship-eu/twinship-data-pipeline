@@ -11,6 +11,7 @@ Pipeline structure:
 7. sparql_summary - SPARQL summary tables queried from all vessel repositories
 """
 
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -69,25 +70,18 @@ class ShaclConfig(Config):
     fail_on_validation_error: bool = True
 
 
-# Ontology files to import into each per-vessel repo (paths relative to GraphDB import dir)
-ONTOLOGY_SERVER_FILES = [
-    "ontology/external/IDO_20240503.ttl",
-    "ontology/external/PAV-simplified.ttl",
-    "ontology/external/SCHEMA_QUDT-simplified.ttl",
-    "ontology/vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl",
-    "ontology/vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl",
-    "ontology/external/vesselai/vesselAI_ontology_v2.owl",
-    "ontology/external/vesselai/modules/main.ttl",
-    "ontology/external/vesselai/modules/contextualInformation.ttl",
-    "ontology/external/vesselai/modules/events.ttl",
-    "ontology/external/vesselai/modules/trajectories_module.ttl",
-    "ontology/external/vesselai/modules/vesselCharacteristics.ttl",
-    "ontology/twinship-base.ttl",
-    "ontology/modules/vessel.ttl",
-    "ontology/modules/weatherconditions.ttl",
-    "ontology/modules/draft_time_mode.ttl",
-    "ontology/twinship-core.ttl",
-]
+ONTOLOGY_CATALOG = Path(__file__).resolve().parents[2] / "ontology" / "catalog-v001.xml"
+CATALOG_NS = "urn:oasis:names:tc:entity:xmlns:xml:catalog"
+
+
+def ontology_server_files(catalog: Path = ONTOLOGY_CATALOG) -> list[str]:
+    """Ontology files to import into each per-vessel repo, read from the ontology catalog.
+
+    Paths are relative to the GraphDB import dir, where ontology/ is mounted.
+    graphdb/init.sh derives the same list from the same catalog.
+    """
+    uris = (e.get("uri") for e in ET.parse(catalog).getroot().iter(f"{{{CATALOG_NS}}}uri"))
+    return sorted({f"ontology/{uri}" for uri in uris})
 
 
 # =============================================================================
@@ -398,7 +392,7 @@ def graphdb_upload(
 
     # Import ontology files so RDFS+ reasoning works on vessel data
     context.log.info(f"Importing ontology into '{repo_id}'...")
-    graphdb_client.import_server_files(ONTOLOGY_SERVER_FILES, repo_id=repo_id)
+    graphdb_client.import_server_files(ontology_server_files(), repo_id=repo_id)
     graphdb_client.wait_for_import(repo_id=repo_id)
     context.log.info(f"Ontology import complete for '{repo_id}'")
 
