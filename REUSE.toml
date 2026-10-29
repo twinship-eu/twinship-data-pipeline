@@ -51,6 +51,18 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = "2025-2026 TwinShip Consortium"
 SPDX-License-Identifier = "CC-BY-4.0"
 
+# Futuristic vessel voyage time series: TwinShip simulation output with weather
+# columns (Hs, Tp, th_wave, Uw, th_wind) sampled from a Copernicus hindcast.
+[[annotations]]
+path = "data/RoRo Futuristic Vessel Voyages.dat"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2025-2026 TwinShip Consortium",
+    "Generated using E.U. Copernicus Marine Service Information",
+    "Contains modified Copernicus Climate Change Service information 2024",
+]
+SPDX-License-Identifier = "CC-BY-4.0"
+
 # Third-party: ISO 15926-14 / IDO (POSC Caesar Association)
 [[annotations]]
 path = "ontology/external/IDO_20240503.ttl"
