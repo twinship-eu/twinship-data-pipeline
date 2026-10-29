@@ -22,7 +22,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 ## Data
 
-The repository includes the futuristic vessel spreadsheet. To run the pipeline for the conventional vessels (Grimaldi RoRo, Stena RoPax, Stena Tanker), place the `TwinShip-table-schema-specification.xlsx` file in the `data/` folder.
+The repository includes the futuristic vessel data in `data/`. To run the pipeline on other input files, set `TWINSHIP_VESSEL_DATA_DIR` in `.env` to the folder that holds them. When the variable is unset or empty, `data/` is used.
 
 ## Quick Start (Local)
 

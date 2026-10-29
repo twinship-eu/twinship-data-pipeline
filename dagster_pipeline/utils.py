@@ -1,8 +1,20 @@
 """General utility functions for the TwinShip pipeline."""
 
+import os
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+
+def vessel_data_dir() -> Path:
+    """Folder to read vessel input files from.
+
+    TWINSHIP_VESSEL_DATA_DIR (absolute, or relative to the working directory),
+    or data/ when the variable is unset or empty.
+    """
+    return Path(os.environ.get("TWINSHIP_VESSEL_DATA_DIR") or "data")
+
 
 # Known operator mappings: prefix -> namespace
 # Should ideally be updated when new operators are added to the dataset.

@@ -35,6 +35,7 @@ from dagster_pipeline.futuristic_extraction import (
     load_futuristic_sheets,
 )
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
+from dagster_pipeline.utils import vessel_data_dir
 from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
 
@@ -53,7 +54,8 @@ vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 class SpreadsheetConfig(Config):
     """Configuration for spreadsheet asset."""
 
-    spreadsheet_path: str = "data/TwinShip-table-schema-specification.xlsx"
+    # Optional; only processed when the file exists.
+    spreadsheet_path: str = str(vessel_data_dir() / "TwinShip-table-schema-specification.xlsx")
     futuristic_spreadsheet_path: str = "data/RoRo Futuristic Vessel KG Working File.xlsx"
 
 
@@ -96,17 +98,17 @@ def ontology_server_files(catalog: Path = ONTOLOGY_CATALOG) -> list[str]:
 )
 def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) -> dict:
     """Load all sheets from both TwinShip spreadsheets and discover vessels."""
-    # Load conventional spreadsheet
+    # Load conventional spreadsheet if it exists (kept outside the repository)
     spreadsheet_path = Path(config.spreadsheet_path)
-    if not spreadsheet_path.exists():
-        raise FileNotFoundError(f"Spreadsheet not found: {spreadsheet_path}")
-
-    sheets = load_spreadsheet_sheets(str(spreadsheet_path))
-    for name, df in sheets.items():
-        context.log.info(f"Loaded {name}: {len(df)} rows")
-
-    # Discover conventional vessels
-    vessels = discover_vessels_from_sheets(sheets)
+    sheets: dict = {}
+    vessels: dict = {}
+    if spreadsheet_path.exists():
+        sheets = load_spreadsheet_sheets(str(spreadsheet_path))
+        for name, df in sheets.items():
+            context.log.info(f"Loaded {name}: {len(df)} rows")
+        vessels = discover_vessels_from_sheets(sheets)
+    else:
+        context.log.info(f"Spreadsheet not found at {spreadsheet_path}, skipping its vessels")
 
     # Load futuristic spreadsheet if it exists
     fv_path = Path(config.futuristic_spreadsheet_path)
