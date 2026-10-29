@@ -56,7 +56,7 @@
       "name": "Dagster Pipeline Service Account",
       "enabled": true,
       "publicClient": false,
-      "secret": "dagster-pipeline-secret",
+      "secret": "__DAGSTER_CLIENT_SECRET__",
       "serviceAccountsEnabled": true,
       "standardFlowEnabled": false,
       "directAccessGrantsEnabled": false,
@@ -86,7 +86,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "grimaldi-roro-password",
+          "value": "__GRIMALDI_RORO_PASSWORD__",
           "temporary": false
         }
       ],
@@ -101,7 +101,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "stena-ropax-password",
+          "value": "__STENA_ROPAX_PASSWORD__",
           "temporary": false
         }
       ],
@@ -116,7 +116,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "stena-tanker-password",
+          "value": "__STENA_TANKER_PASSWORD__",
           "temporary": false
         }
       ],
@@ -131,7 +131,7 @@
       "credentials": [
         {
           "type": "password",
-          "value": "futuristic-vessel-password",
+          "value": "__FUTURISTIC_VESSEL_PASSWORD__",
           "temporary": false
         }
       ],

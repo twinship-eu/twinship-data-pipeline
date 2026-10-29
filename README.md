@@ -44,6 +44,13 @@ You can also manually materialise assets from the UI.
 
 ## Quick Start (Docker Compose)
 
+**Secrets:** copy the example environment file and fill in values (see [Secrets and configuration](#secrets-and-configuration-env) below). This step is optional for a quick disposable local setup (sensible `local-dev-*` defaults are built in), but recommended for anything longer-lived:
+
+```bash
+cp .env.example .env
+# then edit .env
+```
+
 **Host entry required:** GraphDB authenticates via Keycloak using the Docker-internal hostname `keycloak`. Your browser must be able to resolve it:
 
 ```bash
@@ -142,6 +149,17 @@ GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS=3
 GRAPHDB_USERNAME=
 GRAPHDB_PASSWORD=
 ```
+
+### Secrets and configuration (.env)
+
+No credentials are committed to this repository. `docker-compose.yml`, `keycloak/twinship-realm.json.template`, and `graphdb/graphdb.properties` all source secrets and deployment-specific values from a local `.env` file (gitignored), rather than hardcoding them:
+
+- **`.env.example`** is tracked in git and lists every required variable with a placeholder value. Copy it to `.env` and fill in real values before running Docker Compose.
+- **Docker Compose** reads `.env` automatically and substitutes `${VAR}` references in `docker-compose.yml` (e.g. `KEYCLOAK_ADMIN_PASSWORD`, `KEYCLOAK_CLIENT_SECRET`). Each of these also has a `local-dev-*` fallback (e.g. `${KEYCLOAK_ADMIN_PASSWORD:-local-dev-admin-password}`), so the stack still runs without a `.env` file for a quick disposable local setup — but any shared or longer-lived deployment should set real values in `.env` rather than relying on these fallbacks.
+- **`keycloak/twinship-realm.json.template`** holds placeholder tokens (e.g. `__DAGSTER_CLIENT_SECRET__`) instead of literal secrets. The Keycloak container's entrypoint (`keycloak/render-realm.sh`) substitutes these from its environment and writes the real `twinship-realm.json` before Keycloak imports it — Keycloak's `--import-realm` does not expand placeholders in the JSON file itself, so this rendering step is required.
+- **`graphdb/graphdb.properties`** no longer hardcodes `graphdb.auth.openid.issuer`, since it's deployment-specific (e.g. different between local and hosted setups). It's instead injected as a JVM system property via `GDB_JAVA_OPTS` in `docker-compose.yml`, sourced from `GRAPHDB_OIDC_ISSUER` in `.env`.
+
+When adding a new secret or deployment-specific value, add it to `.env.example` with a placeholder, wire it into `docker-compose.yml`/the realm template/`graphdb.properties` as appropriate, and document it here.
 
 ### Tests
 

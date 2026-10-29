@@ -1,5 +1,5 @@
 x-graphdb-env: &graphdb-env
-  GRAPHDB_BASE_URL: http://graphdb:7200
+  GRAPHDB_BASE_URL: ${GRAPHDB_BASE_URL:-http://graphdb:7200}
   GRAPHDB_REPOSITORY_ID: twinship
   GRAPHDB_REPOSITORY_TITLE: TwinShip Data Repository
   GRAPHDB_CLEAR_BEFORE_UPLOAD: "true"
@@ -8,10 +8,10 @@ x-graphdb-env: &graphdb-env
   GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS: "3"
   GRAPHDB_USERNAME: ""
   GRAPHDB_PASSWORD: ""
-  KEYCLOAK_SERVER_URL: http://keycloak:8080
+  KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL:-http://keycloak:8080}
   KEYCLOAK_REALM: twinship
   KEYCLOAK_CLIENT_ID: dagster-pipeline
-  KEYCLOAK_CLIENT_SECRET: dagster-pipeline-secret
+  KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-local-dev-dagster-client-secret}
 
 services:
   # PostgreSQL for Dagster storage
@@ -36,17 +36,27 @@ services:
   keycloak:
     image: quay.io/keycloak/keycloak:26.2
     container_name: twinship_keycloak
-    command: start-dev --import-realm --health-enabled=true
+    # The entrypoint renders twinship-realm.json from its template (substituting
+    # the secrets below) before handing off to the command below. See
+    # keycloak/render-realm.sh.
+    entrypoint: ["bash", "/opt/keycloak/render/render-realm.sh"]
+    command: ["start-dev", "--import-realm", "--health-enabled=true"]
     ports:
-      - "8080:8080"
+      - "${KEYCLOAK_PORT:-8080}:8080"
     environment:
-      KEYCLOAK_ADMIN: admin
-      KEYCLOAK_ADMIN_PASSWORD: admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USERNAME:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-local-dev-admin-password}
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:-local-dev-dagster-client-secret}
+      KEYCLOAK_GRIMALDI_RORO_PASSWORD: ${KEYCLOAK_GRIMALDI_RORO_PASSWORD:-local-dev-grimaldi-roro-password}
+      KEYCLOAK_STENA_ROPAX_PASSWORD: ${KEYCLOAK_STENA_ROPAX_PASSWORD:-local-dev-stena-ropax-password}
+      KEYCLOAK_STENA_TANKER_PASSWORD: ${KEYCLOAK_STENA_TANKER_PASSWORD:-local-dev-stena-tanker-password}
+      KEYCLOAK_FUTURISTIC_VESSEL_PASSWORD: ${KEYCLOAK_FUTURISTIC_VESSEL_PASSWORD:-local-dev-futuristic-vessel-password}
       KC_HOSTNAME: keycloak
       KC_HOSTNAME_PORT: "8080"
       KC_HOSTNAME_STRICT: "false"
     volumes:
-      - ./keycloak/twinship-realm.json:/opt/keycloak/data/import/twinship-realm.json:ro
+      - ./keycloak/twinship-realm.json.template:/opt/keycloak/render/twinship-realm.json.template:ro
+      - ./keycloak/render-realm.sh:/opt/keycloak/render/render-realm.sh:ro
     networks:
       - twinship_network
     healthcheck:
@@ -61,9 +71,12 @@ services:
     image: ontotext/graphdb:10.8.12
     container_name: twinship_graphdb
     environment:
-      GDB_JAVA_OPTS: "-Xms1g -Xmx2g"
+      # graphdb.auth.openid.issuer is deployment-specific and therefore not
+      # set in graphdb/graphdb.properties; it's injected here as a JVM system
+      # property instead (see GRAPHDB_OIDC_ISSUER in .env).
+      GDB_JAVA_OPTS: "-Dgraphdb.auth.openid.issuer=${GRAPHDB_OIDC_ISSUER:-http://keycloak:8080/realms/twinship} -Xms1g -Xmx2g"
     ports:
-      - "7200:7200"
+      - "${GRAPHDB_PORT:-7200}:7200"
     volumes:
       - graphdb_home:/opt/graphdb/home
       - ./graphdb/graphdb.properties:/opt/graphdb/home/conf/graphdb.properties:ro
@@ -139,7 +152,7 @@ services:
       - -w
       - workspace.yaml
     ports:
-      - "3000:3000"
+      - "${DAGSTER_WEBSERVER_PORT:-3000}:3000"
     environment:
       DAGSTER_HOME: /app
       DAGSTER_POSTGRES_USER: dagster
