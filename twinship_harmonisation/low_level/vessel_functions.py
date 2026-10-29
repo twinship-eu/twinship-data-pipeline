@@ -114,6 +114,24 @@ def add_optional_integer(
         g.add((subject, predicate, Literal(int(value), datatype=XSD.integer)))
 
 
+def add_optional_code(
+    g: Graph,
+    subject: URIRef,
+    predicate: URIRef,
+    value: int | str | None,
+) -> None:
+    """Add an integer code triple (e.g. a 0/1 mode) if value parses as an integer.
+
+    Anything else, such as the '[0,1]' list of allowed codes found in some
+    source cells, is not a value and is omitted.
+    """
+    try:
+        code = int(value)
+    except (ValueError, TypeError):
+        return
+    g.add((subject, predicate, Literal(code, datatype=XSD.integer)))
+
+
 def add_optional_string(
     g: Graph,
     subject: URIRef,

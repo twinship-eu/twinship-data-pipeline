@@ -9,6 +9,7 @@ from rdflib.namespace import RDF, RDFS, XSD
 
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
+    add_optional_code,
     add_optional_double,
     create_twinship_uri,
     get_twinship_type_uri,
@@ -80,12 +81,7 @@ def create_twinship_genset(
     add_optional_double(g, uri, TWINSHIP.twFuelConsumptionTotalInMT, fuel_consumption_total_mt)
     add_optional_double(g, uri, TWINSHIP.twPowerPropulsionTotalInKw, power_propulsion_total_kw)
 
-    if common_fuel_mode is not None:
-        try:
-            mode_int = int(common_fuel_mode)
-        except (ValueError, TypeError):
-            mode_int = -1
-        g.add((uri, TWINSHIP.twCommonFuelMode, Literal(mode_int, datatype=XSD.integer)))
+    add_optional_code(g, uri, TWINSHIP.twCommonFuelMode, common_fuel_mode)
 
     # Generator-specific properties
     add_optional_double(g, uri, TWINSHIP.twGeneratorVoltageInV, generator_voltage_v)
