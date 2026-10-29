@@ -44,6 +44,9 @@ data/*.json
 .env
 .env.local
 
+# Local-only files (private data, backups, credentials)
+local/
+
 # Linting
 .ruff_cache/
 

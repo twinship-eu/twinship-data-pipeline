@@ -1,0 +1,75 @@
+version = 1
+SPDX-PackageName = "twinship-data-pipeline"
+SPDX-PackageSupplier = "TwinShip Consortium"
+SPDX-PackageDownloadLocation = "https://github.com/twinship-eu/twinship-data-pipeline"
+
+# Later [[annotations]] blocks take precedence over earlier ones for the same file,
+# so general rules come first and third-party files last.
+
+# Code and deployment
+[[annotations]]
+path = [
+    "dagster_pipeline/**",
+    "twinship_harmonisation/**",
+    "tests/**",
+    "argo/**",
+    "k8s/**",
+    "keycloak/**",
+    "graphdb/**",
+    "Dockerfile",
+    "Dockerfile.dagster",
+    "docker-compose.yml",
+    "dagster.yaml",
+    "dagster-docker.yaml",
+    "workspace.yaml",
+    "pyproject.toml",
+    "uv.lock",
+    ".github/**",
+    ".pre-commit-config.yaml",
+    ".python-version",
+    ".gitignore",
+    "README.md",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 TwinShip Consortium"
+SPDX-License-Identifier = "MIT"
+
+# Synthetic data, SHACL shapes and TwinShip ontology copy
+[[annotations]]
+path = [
+    "data/**",
+    "shacl/**",
+    "ontology/*.ttl",
+    "ontology/catalog-v001.xml",
+    "ontology/README.md",
+    "ontology/modules/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 TwinShip Consortium"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Third-party: ISO 15926-14 / IDO (POSC Caesar Association)
+[[annotations]]
+path = "ontology/external/IDO_20240503.ttl"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "POSC Caesar Association"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Third-party: simplified subsets derived from QUDT
+[[annotations]]
+path = [
+    "ontology/external/SCHEMA_QUDT-simplified.ttl",
+    "ontology/vocabularies/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "QUDT.org"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Third-party: simplified subset of the PAV ontology (https://github.com/pav-ontology/pav)
+[[annotations]]
+path = "ontology/external/PAV-simplified.ttl"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Paolo Ciccarese, Stian Soiland-Reyes and PAV contributors"
+SPDX-License-Identifier = "Apache-2.0"
+
+# Not covered on purpose (licence undetermined): ontology/external/vesselai/**
