@@ -31,6 +31,7 @@ Workflow:
 
 from dagster import Definitions
 
+from dagster_pipeline.assets.futuristic_voyages import futuristic_voyage_upload
 from dagster_pipeline.assets.harmonisation import (
     extracted_vessel_json,
     graphdb_upload,
@@ -65,6 +66,7 @@ defs = Definitions(
         # Output
         sparql_summary,
         graphdb_upload,
+        futuristic_voyage_upload,
     ],
     jobs=[full_pipeline_job, extraction_job, harmonisation_job, output_job, spreadsheet_job],
     sensors=[vessel_discovery_sensor],

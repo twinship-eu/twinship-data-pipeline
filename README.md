@@ -176,7 +176,8 @@ When adding a new secret or deployment-specific value, add it to `.env.example` 
 ### Tests
 
 ```bash
-uv run pytest
+uv run pytest                  # data/ only; tests that need other input files are skipped
+uv run --env-file .env pytest  # also uses the folder set in TWINSHIP_VESSEL_DATA_DIR
 ```
 
 ### Linting and formatting
@@ -201,6 +202,7 @@ This repository has two licences. [`REUSE.toml`](REUSE.toml) gives the authorita
 
 - **Code** (pipeline, deployment configuration, and tests): [MIT](LICENSE).
 - **Data and models** (the synthetic Futuristic Vessel data in `data/`, the SHACL shapes in `shacl/`, and the TwinShip ontology copy in `ontology/`): [CC BY 4.0](LICENSES/CC-BY-4.0.txt).
+- **Futuristic vessel voyage data** (`data/RoRo Futuristic Vessel Voyages.dat`): CC BY 4.0. The weather columns (wave height, period and direction; wind speed and direction) are sampled from a Copernicus hindcast. Attribution: *Generated using E.U. Copernicus Marine Service Information. Contains modified Copernicus Climate Change Service information 2024.* Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
 - **Third-party ontologies** in `ontology/external/` and `ontology/vocabularies/` keep their own licences: IDO (ISO 15926-14) is [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt) (POSC Caesar Association), QUDT is CC BY 4.0 (QUDT.org), and PAV is [Apache 2.0](LICENSES/Apache-2.0.txt).
 - **Pilot-vessel data** are not part of this repository and are not covered by these licences.
 
