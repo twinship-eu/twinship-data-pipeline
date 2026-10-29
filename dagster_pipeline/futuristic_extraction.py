@@ -122,12 +122,12 @@ def extract_futuristic_vessel(
         "id": f"{prefix}-RR-1",
         "label": "FUTURISTIC RORO VESSEL",
         "type": "RoRo",
-        "displacement_max_mt": -1.0,
-        "draft_aft_max_m": -1.0,
-        "draft_for_max_m": -1.0,
-        "draft_mid_port_max_m": -1.0,
-        "draft_mid_stbd_max_m": -1.0,
-        "depth_of_water_max_m": -1.0,
+        "displacement_max_mt": None,
+        "draft_aft_max_m": None,
+        "draft_for_max_m": None,
+        "draft_mid_port_max_m": None,
+        "draft_mid_stbd_max_m": None,
+        "depth_of_water_max_m": None,
     }
 
     gensets = _extract_gensets(sheets, prefix)

@@ -33,7 +33,7 @@ logs/
 # Output
 output/
 *.ttl
-!shacl/*.ttl
+!shacl/**/*.ttl
 !ontology/**/*.ttl
 
 # Private data (vessel spreadsheet and extracted JSON)

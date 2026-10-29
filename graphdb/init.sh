@@ -12,6 +12,7 @@ set -e
 GRAPHDB_URL="${GRAPHDB_URL:-http://graphdb:7200}"
 ONTOLOGY_REPO="${ONTOLOGY_REPO:-twinship-ontology}"
 ONTOLOGY_RULESET="${ONTOLOGY_RULESET:-rdfsplus-optimized}"
+ONTOLOGY_CATALOG="${ONTOLOGY_CATALOG:-/scripts/catalog-v001.xml}"
 
 # --- helpers ----------------------------------------------------------------
 
@@ -68,28 +69,14 @@ REPOEOF
 import_ontology_files() {
     echo "Importing ontology files into '${ONTOLOGY_REPO}'..."
 
+    # Every file mapped in the ontology catalog (same list as ontology_server_files()
+    # in dagster_pipeline/assets/harmonisation.py)
+    files=$(grep -o ' uri="[^"]*"' "${ONTOLOGY_CATALOG}" \
+        | sed 's/ uri="\(.*\)"/"ontology\/\1"/' | sort -u | paste -sd, -)
+
     curl -sf -X POST "${GRAPHDB_URL}/rest/repositories/${ONTOLOGY_REPO}/import/server" \
         -H "Content-Type: application/json" \
-        -d '{
-            "fileNames": [
-                "ontology/external/IDO_20240503.ttl",
-                "ontology/external/PAV-simplified.ttl",
-                "ontology/external/SCHEMA_QUDT-simplified.ttl",
-                "ontology/vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl",
-                "ontology/vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl",
-                "ontology/external/vesselai/vesselAI_ontology_v2.owl",
-                "ontology/external/vesselai/modules/main.ttl",
-                "ontology/external/vesselai/modules/contextualInformation.ttl",
-                "ontology/external/vesselai/modules/events.ttl",
-                "ontology/external/vesselai/modules/trajectories_module.ttl",
-                "ontology/external/vesselai/modules/vesselCharacteristics.ttl",
-                "ontology/twinship-base.ttl",
-                "ontology/modules/vessel.ttl",
-                "ontology/modules/weatherconditions.ttl",
-                "ontology/modules/draft_time_mode.ttl",
-                "ontology/twinship-core.ttl"
-            ]
-        }'
+        -d "{\"fileNames\": [${files}]}"
 
     echo "Import request submitted."
 }

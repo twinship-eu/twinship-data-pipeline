@@ -1,10 +1,12 @@
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix twsh: <https://twin-ship.eu/twinship/shapes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
 # Shape for fuel consumption relationships
-tws:FuelConsumerShape a sh:NodeShape ;
+twsh:FuelConsumerShape a sh:NodeShape ;
     sh:targetSubjectsOf tws:consume ;
     sh:property [
         sh:path tws:consume ;
@@ -14,20 +16,19 @@ tws:FuelConsumerShape a sh:NodeShape ;
     ] .
 
 # Shape for Fuel individuals
-tws:FuelShape a sh:NodeShape ;
+twsh:FuelShape a sh:NodeShape ;
     sh:targetClass tws:Fuel ;
     sh:property [
         sh:path rdfs:label ;
         sh:minCount 1 ;
-        sh:maxCount 1 ;
-        sh:datatype xsd:string ;
-        sh:message "Fuel must have exactly one label" ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:uniqueLang true ;
+        sh:message "Fuel must have a label (string or language-tagged string), at most one per language" ;
     ] ;
     sh:property [
         sh:path tws:twFuelDensityGrav15DegCKgPerLitre ;
-        sh:minCount 0 ;
         sh:maxCount 1 ;
         sh:datatype xsd:double ;
         sh:minExclusive 0 ;
-        sh:message "Fuel density must be a positive number" ;
+        sh:message "Fuel density must be a single positive number" ;
     ] .

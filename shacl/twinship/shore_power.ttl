@@ -1,0 +1,29 @@
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix twsh: <https://twin-ship.eu/twinship/shapes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Shape for OSP (On-Shore Power)
+twsh:OSPShape a sh:NodeShape ;
+    sh:targetClass tws:OSP ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:qualifiedValueShape [ sh:class tws:VesselSystem ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Shore power must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:uniqueLang true ;
+        sh:message "Shore power label must be a string or language-tagged string, at most one per language" ;
+    ] ;
+    sh:property [
+        sh:path tws:twOSPPowerInKWh ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Shore power capacity must be a single number" ;
+    ] .

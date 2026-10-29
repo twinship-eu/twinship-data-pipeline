@@ -1,0 +1,889 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix quantitykind: <http://qudt.org/vocab/quantitykind/> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+
+# #################################################################
+# #
+# #    Ontology
+# #
+# #################################################################
+
+<https://twin-ship.eu/twinship/qudt-vocabulary> a owl:Ontology ;
+    rdfs:label "TwinShip QUDT Quantity Vocabulary" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
+    rdfs:comment """QUDT quantity and unit family classes for the TwinShip ontology.
+
+Modeling approach (Nexus advanced pattern):
+  For each quantity kind used in TwinShip, this file defines:
+    - TwinShipQuantityKindFor[X]  — subClassOf qudt:QuantityKind
+    - TwinShipUnitFor[X]          — subClassOf qudt:Unit
+    - TwinShipQuantityValue[X]    — subClassOf qudt:QuantityValue
+    - TwinShipQuantity[X]         — subClassOf qudt:Quantity (with kind/value restrictions)
+    - hasQuantity[X]              — owl:ObjectProperty, subPropertyOf qudt:hasQuantity
+  QUDT unit and quantitykind individuals are typed as members of the family classes.
+
+  This file is imported by twinship-base.ttl and therefore available to all domain
+  modules automatically. Domain modules (vessel.ttl, operational-context.ttl,
+  weather-conditions.ttl) add owl:someValuesFrom restrictions on the hasQuantity[X]
+  properties directly to their domain classes.
+
+Coexistence with XSD data properties:
+  The tw-prefixed owl:DatatypeProperty declarations (rdfs:range xsd:double / xsd:decimal)
+  in the domain modules are retained unchanged. They provide efficient SPARQL query access
+  to literal values. The QUDT object properties here provide semantic grounding, unit
+  disambiguation, and standards alignment.""" ;
+    owl:imports <http://qudt.org/schema/qudt/>,
+        <http://qudt.org/vocab/quantitykind/>,
+        <http://qudt.org/vocab/unit/> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/qudt-vocabulary/0.1.2> .
+
+
+# #################################################################
+# #
+# #    1. POWER (kW)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForPower a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Power" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForPower a owl:Class ;
+    rdfs:label "TwinShip Unit For Power" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValuePower a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Power" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityPower a owl:Class ;
+    rdfs:label "TwinShip Quantity Power" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForPower ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValuePower ] .
+
+:hasQuantityPower a owl:ObjectProperty ;
+    rdfs:label "has quantity power" ;
+    rdfs:comment "Relates a TwinShip physical object or process to a QUDT power quantity (watts, kilowatts, megawatts)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityPower .
+
+quantitykind:Power a :TwinShipQuantityKindForPower .
+unit:KiloW a :TwinShipUnitForPower .
+unit:MegaW a :TwinShipUnitForPower .
+
+
+# #################################################################
+# #
+# #    2. ENERGY (kWh, MWh)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Energy" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForEnergy a owl:Class ;
+    rdfs:label "TwinShip Unit For Energy" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Energy" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Energy" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForEnergy ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueEnergy ] .
+
+:hasQuantityEnergy a owl:ObjectProperty ;
+    rdfs:label "has quantity energy" ;
+    rdfs:comment "Relates a TwinShip physical object or process to a QUDT energy quantity (kilowatt-hours, megawatt-hours)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityEnergy .
+
+quantitykind:Energy a :TwinShipQuantityKindForEnergy .
+unit:KiloW-HR a :TwinShipUnitForEnergy .
+unit:MegaW-HR a :TwinShipUnitForEnergy .
+unit:GigaW-HR a :TwinShipUnitForEnergy .
+
+
+# #################################################################
+# #
+# #    3. ROTATIONAL VELOCITY (rpm)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForRotationalVelocity a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Rotational Velocity" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForRotationalVelocity a owl:Class ;
+    rdfs:label "TwinShip Unit For Rotational Velocity" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueRotationalVelocity a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Rotational Velocity" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityRotationalVelocity a owl:Class ;
+    rdfs:label "TwinShip Quantity Rotational Velocity" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForRotationalVelocity ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueRotationalVelocity ] .
+
+:hasQuantityRotationalVelocity a owl:ObjectProperty ;
+    rdfs:label "has quantity rotational velocity" ;
+    rdfs:comment "Relates a TwinShip rotating component to a QUDT rotational velocity quantity (revolutions per minute)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityRotationalVelocity .
+
+quantitykind:RotationalVelocity a :TwinShipQuantityKindForRotationalVelocity .
+unit:REV-PER-MIN a :TwinShipUnitForRotationalVelocity .
+
+
+# #################################################################
+# #
+# #    4. SPEED (knots)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForSpeed a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Speed" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForSpeed a owl:Class ;
+    rdfs:label "TwinShip Unit For Speed" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueSpeed a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Speed" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantitySpeed a owl:Class ;
+    rdfs:label "TwinShip Quantity Speed" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForSpeed ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueSpeed ] .
+
+:hasQuantitySpeed a owl:ObjectProperty ;
+    rdfs:label "has quantity speed" ;
+    rdfs:comment "Relates a TwinShip vessel or voyage context to a QUDT speed quantity (knots)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantitySpeed .
+
+quantitykind:Speed a :TwinShipQuantityKindForSpeed .
+unit:KN a :TwinShipUnitForSpeed .
+
+
+# #################################################################
+# #
+# #    5. MASS (kg, metric tons)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForMass a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Mass" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForMass a owl:Class ;
+    rdfs:label "TwinShip Unit For Mass" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueMass a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Mass" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityMass a owl:Class ;
+    rdfs:label "TwinShip Quantity Mass" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForMass ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueMass ] .
+
+:hasQuantityMass a owl:ObjectProperty ;
+    rdfs:label "has quantity mass" ;
+    rdfs:comment "Relates a TwinShip physical object or process to a QUDT mass quantity (kilograms, metric tons)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityMass .
+
+quantitykind:Mass a :TwinShipQuantityKindForMass .
+unit:KiloGM a :TwinShipUnitForMass .
+unit:TONNE a :TwinShipUnitForMass .
+
+
+# #################################################################
+# #
+# #    6. MASS FLOW RATE (kg/hr, t/hr)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForMassFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Mass Flow Rate" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForMassFlowRate a owl:Class ;
+    rdfs:label "TwinShip Unit For Mass Flow Rate" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueMassFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Mass Flow Rate" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityMassFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Mass Flow Rate" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForMassFlowRate ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueMassFlowRate ] .
+
+:hasQuantityMassFlowRate a owl:ObjectProperty ;
+    rdfs:label "has quantity mass flow rate" ;
+    rdfs:comment "Relates a TwinShip engine, thruster, or fuel system to a QUDT mass flow rate quantity (kilograms per hour, metric tons per hour)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityMassFlowRate .
+
+quantitykind:MassFlowRate a :TwinShipQuantityKindForMassFlowRate .
+unit:KiloGM-PER-HR a :TwinShipUnitForMassFlowRate .
+unit:TONNE-PER-HR a :TwinShipUnitForMassFlowRate .
+
+
+# #################################################################
+# #
+# #    7. MASS DENSITY (kg/L)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForMassDensity a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Mass Density" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForMassDensity a owl:Class ;
+    rdfs:label "TwinShip Unit For Mass Density" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueMassDensity a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Mass Density" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityMassDensity a owl:Class ;
+    rdfs:label "TwinShip Quantity Mass Density" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForMassDensity ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueMassDensity ] .
+
+:hasQuantityMassDensity a owl:ObjectProperty ;
+    rdfs:label "has quantity mass density" ;
+    rdfs:comment "Relates a TwinShip fuel to a QUDT mass density quantity (kilograms per litre)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityMassDensity .
+
+quantitykind:MassDensity a :TwinShipQuantityKindForMassDensity .
+unit:KiloGM-PER-L a :TwinShipUnitForMassDensity .
+
+
+# #################################################################
+# #
+# #    8. MASS RATIO (g/kg — emission factors)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForMassRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Mass Ratio" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForMassRatio a owl:Class ;
+    rdfs:label "TwinShip Unit For Mass Ratio" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueMassRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Mass Ratio" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityMassRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Mass Ratio" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForMassRatio ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueMassRatio ] .
+
+:hasQuantityMassRatio a owl:ObjectProperty ;
+    rdfs:label "has quantity mass ratio" ;
+    rdfs:comment "Relates a TwinShip fuel to a QUDT mass ratio quantity (grams per kilogram — used for emission factors)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityMassRatio .
+
+quantitykind:MassRatio a :TwinShipQuantityKindForMassRatio .
+unit:GM-PER-KiloGM a :TwinShipUnitForMassRatio .
+
+
+# #################################################################
+# #
+# #    9. SPECIFIC ENERGY (kJ/kg — lower heating value)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForSpecificEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Specific Energy" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForSpecificEnergy a owl:Class ;
+    rdfs:label "TwinShip Unit For Specific Energy" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueSpecificEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Specific Energy" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantitySpecificEnergy a owl:Class ;
+    rdfs:label "TwinShip Quantity Specific Energy" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForSpecificEnergy ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueSpecificEnergy ] .
+
+:hasQuantitySpecificEnergy a owl:ObjectProperty ;
+    rdfs:label "has quantity specific energy" ;
+    rdfs:comment "Relates a TwinShip fuel to a QUDT specific energy quantity (kilojoules per kilogram — lower heating value)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantitySpecificEnergy .
+
+quantitykind:SpecificEnergy a :TwinShipQuantityKindForSpecificEnergy .
+unit:KiloJ-PER-KiloGM a :TwinShipUnitForSpecificEnergy .
+
+
+# #################################################################
+# #
+# #    10. THERMODYNAMIC TEMPERATURE (°C)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForTemperature a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Temperature" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForTemperature a owl:Class ;
+    rdfs:label "TwinShip Unit For Temperature" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueTemperature a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Temperature" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityTemperature a owl:Class ;
+    rdfs:label "TwinShip Quantity Temperature" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForTemperature ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueTemperature ] .
+
+:hasQuantityTemperature a owl:ObjectProperty ;
+    rdfs:label "has quantity temperature" ;
+    rdfs:comment "Relates a TwinShip engine, fuel, or environment to a QUDT temperature quantity (degrees Celsius)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityTemperature .
+
+quantitykind:ThermodynamicTemperature a :TwinShipQuantityKindForTemperature .
+unit:DEG_C a :TwinShipUnitForTemperature .
+
+
+# #################################################################
+# #
+# #    11. LENGTH (m, mm)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForLength a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Length" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForLength a owl:Class ;
+    rdfs:label "TwinShip Unit For Length" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueLength a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Length" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityLength a owl:Class ;
+    rdfs:label "TwinShip Quantity Length" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForLength ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueLength ] .
+
+:hasQuantityLength a owl:ObjectProperty ;
+    rdfs:label "has quantity length" ;
+    rdfs:comment "Relates a TwinShip vessel, propeller, or loading condition to a QUDT length quantity (metres, millimetres)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityLength .
+
+quantitykind:Length a :TwinShipQuantityKindForLength .
+unit:M a :TwinShipUnitForLength .
+unit:MilliM a :TwinShipUnitForLength .
+unit:MI_N a :TwinShipUnitForLength .
+
+
+# #################################################################
+# #
+# #    12. ANGLE (degrees)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForAngle a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Angle" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForAngle a owl:Class ;
+    rdfs:label "TwinShip Unit For Angle" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueAngle a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Angle" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityAngle a owl:Class ;
+    rdfs:label "TwinShip Quantity Angle" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForAngle ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueAngle ] .
+
+:hasQuantityAngle a owl:ObjectProperty ;
+    rdfs:label "has quantity angle" ;
+    rdfs:comment "Relates a TwinShip propeller, rudder, or wind condition to a QUDT angle quantity (degrees)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityAngle .
+
+quantitykind:Angle a :TwinShipQuantityKindForAngle .
+unit:DEG a :TwinShipUnitForAngle .
+
+
+# #################################################################
+# #
+# #    13. PRESSURE (hPa)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForPressure a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Pressure" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForPressure a owl:Class ;
+    rdfs:label "TwinShip Unit For Pressure" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValuePressure a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Pressure" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityPressure a owl:Class ;
+    rdfs:label "TwinShip Quantity Pressure" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForPressure ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValuePressure ] .
+
+:hasQuantityPressure a owl:ObjectProperty ;
+    rdfs:label "has quantity pressure" ;
+    rdfs:comment "Relates a TwinShip engine system to a QUDT pressure quantity (hectopascals)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityPressure .
+
+quantitykind:Pressure a :TwinShipQuantityKindForPressure .
+unit:HectoPA a :TwinShipUnitForPressure .
+
+
+# #################################################################
+# #
+# #    14. VOLUME FLOW RATE (L/hr)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForVolumeFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Volume Flow Rate" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForVolumeFlowRate a owl:Class ;
+    rdfs:label "TwinShip Unit For Volume Flow Rate" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueVolumeFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Volume Flow Rate" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityVolumeFlowRate a owl:Class ;
+    rdfs:label "TwinShip Quantity Volume Flow Rate" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForVolumeFlowRate ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueVolumeFlowRate ] .
+
+:hasQuantityVolumeFlowRate a owl:ObjectProperty ;
+    rdfs:label "has quantity volume flow rate" ;
+    rdfs:comment "Relates a TwinShip engine or fuel system to a QUDT volume flow rate quantity (litres per hour)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityVolumeFlowRate .
+
+quantitykind:VolumeFlowRate a :TwinShipQuantityKindForVolumeFlowRate .
+unit:L-PER-HR a :TwinShipUnitForVolumeFlowRate .
+
+
+# #################################################################
+# #
+# #    15. VOLUME (m³)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForVolume a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Volume" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForVolume a owl:Class ;
+    rdfs:label "TwinShip Unit For Volume" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueVolume a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Volume" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityVolume a owl:Class ;
+    rdfs:label "TwinShip Quantity Volume" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForVolume ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueVolume ] .
+
+:hasQuantityVolume a owl:ObjectProperty ;
+    rdfs:label "has quantity volume" ;
+    rdfs:comment "Relates a TwinShip storage system, SCR, or fuel cell to a QUDT volume quantity (cubic metres)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityVolume .
+
+quantitykind:Volume a :TwinShipQuantityKindForVolume .
+unit:M3 a :TwinShipUnitForVolume .
+
+
+# #################################################################
+# #
+# #    16. TORQUE (kNm)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForTorque a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Torque" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForTorque a owl:Class ;
+    rdfs:label "TwinShip Unit For Torque" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueTorque a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Torque" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityTorque a owl:Class ;
+    rdfs:label "TwinShip Quantity Torque" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForTorque ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueTorque ] .
+
+:hasQuantityTorque a owl:ObjectProperty ;
+    rdfs:label "has quantity torque" ;
+    rdfs:comment "Relates a TwinShip shaft or gearbox to a QUDT torque quantity (kilonewton-metres)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityTorque .
+
+quantitykind:Torque a :TwinShipQuantityKindForTorque .
+unit:KiloN-M a :TwinShipUnitForTorque .
+
+
+# #################################################################
+# #
+# #    17. FORCE (kN)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForForce a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Force" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForForce a owl:Class ;
+    rdfs:label "TwinShip Unit For Force" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueForce a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Force" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityForce a owl:Class ;
+    rdfs:label "TwinShip Quantity Force" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForForce ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueForce ] .
+
+:hasQuantityForce a owl:ObjectProperty ;
+    rdfs:label "has quantity force" ;
+    rdfs:comment "Relates a TwinShip shaft or thruster to a QUDT force quantity (kilonewtons)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityForce .
+
+quantitykind:Force a :TwinShipQuantityKindForForce .
+unit:KiloN a :TwinShipUnitForForce .
+
+
+# #################################################################
+# #
+# #    18. ELECTRIC POTENTIAL (V)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForElectricPotential a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Electric Potential" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForElectricPotential a owl:Class ;
+    rdfs:label "TwinShip Unit For Electric Potential" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueElectricPotential a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Electric Potential" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityElectricPotential a owl:Class ;
+    rdfs:label "TwinShip Quantity Electric Potential" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForElectricPotential ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueElectricPotential ] .
+
+:hasQuantityElectricPotential a owl:ObjectProperty ;
+    rdfs:label "has quantity electric potential" ;
+    rdfs:comment "Relates a TwinShip electrical component to a QUDT electric potential quantity (volts)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityElectricPotential .
+
+quantitykind:ElectricPotential a :TwinShipQuantityKindForElectricPotential .
+unit:V a :TwinShipUnitForElectricPotential .
+
+
+# #################################################################
+# #
+# #    19. ELECTRIC CURRENT (A)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForElectricCurrent a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Electric Current" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForElectricCurrent a owl:Class ;
+    rdfs:label "TwinShip Unit For Electric Current" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueElectricCurrent a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Electric Current" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityElectricCurrent a owl:Class ;
+    rdfs:label "TwinShip Quantity Electric Current" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForElectricCurrent ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueElectricCurrent ] .
+
+:hasQuantityElectricCurrent a owl:ObjectProperty ;
+    rdfs:label "has quantity electric current" ;
+    rdfs:comment "Relates a TwinShip DC bus or energy storage converter to a QUDT electric current quantity (amperes)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityElectricCurrent .
+
+quantitykind:ElectricCurrent a :TwinShipQuantityKindForElectricCurrent .
+unit:A a :TwinShipUnitForElectricCurrent .
+
+
+# #################################################################
+# #
+# #    20. FREQUENCY (Hz)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForFrequency a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Frequency" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForFrequency a owl:Class ;
+    rdfs:label "TwinShip Unit For Frequency" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueFrequency a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Frequency" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityFrequency a owl:Class ;
+    rdfs:label "TwinShip Quantity Frequency" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForFrequency ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueFrequency ] .
+
+:hasQuantityFrequency a owl:ObjectProperty ;
+    rdfs:label "has quantity frequency" ;
+    rdfs:comment "Relates a TwinShip generator or frequency converter to a QUDT frequency quantity (hertz)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityFrequency .
+
+quantitykind:Frequency a :TwinShipQuantityKindForFrequency .
+unit:HZ a :TwinShipUnitForFrequency .
+
+
+# #################################################################
+# #
+# #    21. TIME (hours, minutes)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForTime a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Time" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForTime a owl:Class ;
+    rdfs:label "TwinShip Unit For Time" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueTime a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Time" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityTime a owl:Class ;
+    rdfs:label "TwinShip Quantity Time" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForTime ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueTime ] .
+
+:hasQuantityTime a owl:ObjectProperty ;
+    rdfs:label "has quantity time" ;
+    rdfs:comment "Relates a TwinShip voyage, voyage leg, or state profile to a QUDT time quantity (hours, minutes)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityTime .
+
+quantitykind:Time a :TwinShipQuantityKindForTime .
+unit:HR a :TwinShipUnitForTime .
+unit:MIN a :TwinShipUnitForTime .
+
+
+# #################################################################
+# #
+# #    22. DIMENSIONLESS RATIO (%)
+# #
+# #################################################################
+
+:TwinShipQuantityKindForRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Kind For Ratio" ;
+    rdfs:subClassOf qudt:QuantityKind .
+
+:TwinShipUnitForRatio a owl:Class ;
+    rdfs:label "TwinShip Unit For Ratio" ;
+    rdfs:subClassOf qudt:Unit .
+
+:TwinShipQuantityValueRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Value Ratio" ;
+    rdfs:subClassOf qudt:QuantityValue .
+
+:TwinShipQuantityRatio a owl:Class ;
+    rdfs:label "TwinShip Quantity Ratio" ;
+    rdfs:subClassOf qudt:Quantity ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:hasQuantityKind ;
+          owl:allValuesFrom :TwinShipQuantityKindForRatio ] ,
+        [ a owl:Restriction ;
+          owl:onProperty qudt:quantityValue ;
+          owl:allValuesFrom :TwinShipQuantityValueRatio ] .
+
+:hasQuantityRatio a owl:ObjectProperty ;
+    rdfs:label "has quantity ratio" ;
+    rdfs:comment "Relates a TwinShip system, fuel, or process to a QUDT dimensionless ratio or percentage (efficiency, sulphur content, state time-share)." ;
+    rdfs:subPropertyOf qudt:hasQuantity ;
+    rdfs:range :TwinShipQuantityRatio .
+
+quantitykind:DimensionlessRatio a :TwinShipQuantityKindForRatio .
+unit:PERCENT a :TwinShipUnitForRatio .
