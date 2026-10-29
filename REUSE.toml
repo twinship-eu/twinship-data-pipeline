@@ -16,6 +16,7 @@ path = [
     "k8s/**",
     "keycloak/**",
     "graphdb/**",
+    "scripts/**",
     "Dockerfile",
     "Dockerfile.dagster",
     "docker-compose.yml",
@@ -28,6 +29,7 @@ path = [
     ".pre-commit-config.yaml",
     ".python-version",
     ".gitignore",
+    ".env.example",
     "README.md",
 ]
 precedence = "aggregate"
@@ -42,6 +44,7 @@ path = [
     "ontology/*.ttl",
     "ontology/catalog-v001.xml",
     "ontology/README.md",
+    "ontology/VERSION",
     "ontology/modules/**",
 ]
 precedence = "aggregate"
@@ -71,5 +74,3 @@ path = "ontology/external/PAV-simplified.ttl"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "Paolo Ciccarese, Stian Soiland-Reyes and PAV contributors"
 SPDX-License-Identifier = "Apache-2.0"
-
-# Not covered on purpose (licence undetermined): ontology/external/vesselai/**

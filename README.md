@@ -100,6 +100,10 @@ twinship-data-pipeline/
 │   ├── resources/             # SHACL validator resource
 │   └── sensors.py             # Vessel discovery sensor
 ├── shacl/                     # SHACL shape files for validation
+│   ├── twinship/              # TwinShip shapes (synced copy, see ontology/VERSION)
+│   └── pipeline/              # Pipeline-specific shapes (connections, vessel)
+├── ontology/                  # TwinShip ontology (synced copy, see ontology/VERSION)
+├── scripts/                   # Maintenance scripts (ontology sync)
 ├── data/                      # Input spreadsheet
 ├── tests/                     # Unit tests
 ├── dagster.yaml               # Local dev config (SQLite)
@@ -132,6 +136,14 @@ print(g.serialize(format="turtle"))
 ```bash
 uv sync                        # install all dependencies
 uv run pre-commit install      # set up git hooks (auto-formats code on commit)
+```
+
+### Ontology version
+
+`ontology/` and `shacl/twinship/` are copies of the `model/` and `shapes/` directories of one [twinship-ontology](https://github.com/twinship-eu/twinship-ontology) release; the pinned ref and commit are in `ontology/VERSION`. Do not edit them by hand. Pipeline-specific shapes live in `shacl/pipeline/` and are not touched by the sync. To move to another release, with a twinship-ontology clone next to this repository (or `TWINSHIP_ONTOLOGY_PATH` set):
+
+```bash
+scripts/sync_ontology.sh v0.1.2
 ```
 
 ### GraphDB configuration

@@ -1,0 +1,79 @@
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix twsh: <https://twin-ship.eu/twinship/shapes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Shape for FrequencyConverterSystem
+twsh:FrequencyConverterSystemShape a sh:NodeShape ;
+    sh:targetClass tws:FrequencyConverterSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:qualifiedValueShape [ sh:class tws:VesselSystem ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Frequency converter must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:uniqueLang true ;
+        sh:message "Frequency converter label must be a string or language-tagged string, at most one per language" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMPowerInMWh ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "FC power must be a single number" ;
+    ] .
+
+# Shape for ElectricMotorSystem
+twsh:ElectricMotorSystemShape a sh:NodeShape ;
+    sh:targetClass tws:ElectricMotorSystem ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:qualifiedValueShape [ sh:class tws:VesselSystem ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Electric motor must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:uniqueLang true ;
+        sh:message "Electric motor label must be a string or language-tagged string, at most one per language" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMPowerInMWh ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Motor power must be a single number" ;
+    ] .
+
+# Shape for ElectricMotorShaft
+twsh:ElectricMotorShaftShape a sh:NodeShape ;
+    sh:targetClass tws:ElectricMotorShaft ;
+    sh:property [
+        sh:path ido:partOf ;
+        sh:qualifiedValueShape [ sh:class tws:VesselSystem ] ;
+        sh:qualifiedMinCount 1 ;
+        sh:message "Electric motor shaft must be part of a vessel" ;
+    ] ;
+    sh:property [
+        sh:path rdfs:label ;
+        sh:or ( [ sh:datatype xsd:string ] [ sh:datatype rdf:langString ] ) ;
+        sh:uniqueLang true ;
+        sh:message "Electric motor shaft label must be a string or language-tagged string, at most one per language" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMSHSpeedInRevPerMin ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Shaft speed must be a single number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEMSHTorqueInKN ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:double ;
+        sh:message "Shaft torque must be a single number" ;
+    ] .
