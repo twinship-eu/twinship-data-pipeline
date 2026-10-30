@@ -35,6 +35,7 @@ output/
 *.ttl
 !shacl/**/*.ttl
 !ontology/**/*.ttl
+!data/RoRo Futuristic Vessel Operational Modes.ttl
 
 # Private data (vessel spreadsheet and extracted JSON)
 data/TwinShip-table-schema-specification.xlsx

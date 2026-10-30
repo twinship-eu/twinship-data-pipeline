@@ -4,7 +4,7 @@ The futuristic vessel is a synthetic diesel-electric RoRo demonstrator. Its data
 
 ## Input files
 
-Both files are in `data/`.
+All three files are in `data/`.
 
 ### `RoRo Futuristic Vessel KG Working File.xlsx`
 
@@ -62,6 +62,18 @@ The file does not state its start time, time step, port positions or direction c
 | Ports | Rotterdam (NLRTM) 51.98 N 4.00 E, Immingham (GBIMM) 53.63 N 0.19 W | Approximate public positions |
 | Direction coding | 1 and 2 as in the table above | Confirmed by the data provider |
 
+### `RoRo Futuristic Vessel Operational Modes.ttl`
+
+Hand-written RDF with the vessel's operational modes, which the spreadsheet does not contain yet:
+
+- 4 **engine modes** per genset (`FV-GN-1` and `FV-GN-2`, linked with `tws:hasEngineMode`), each with lower and upper power bounds, and `tws:twEngineModeCount` on the gensets.
+- 4 **engine speed bins**, 3 **draft modes** and 3 **trim modes**: ordinal bins without numeric ranges.
+- `owl:AllDifferent` statements declaring the individuals in each group distinct.
+
+**All values are placeholders**: the mode count of 4 and all power bounds (0.0 kW) are not real data, and the bins have no ranges yet. Query results involving engine modes or bins only show the structure. The real values are to come from the statistical model (engine modes) and the engine-propeller combinator diagram (speed bins), ideally through the spreadsheet.
+
+`vessel_rdf_graph` adds the file to the futuristic vessel's graph, so it is validated with SHACL and stored in the `components` graph together with the components.
+
 ## How the voyages are built
 
 A crossing runs from a record with `dist_trav` = 0 to a record with `dist_rem` = 0. The file holds 266 complete crossings (133 in each direction) of 11 records each, 180 nm in total.
@@ -85,14 +97,14 @@ The pipeline loads everything into the repository `futuristic-vessel`, in three 
 | Named graph | Content | Written by |
 | --- | --- | --- |
 | `https://twin-ship.eu/graphs/futuristic-vessel/ontology` | The TwinShip ontology | `graphdb_upload` |
-| `https://twin-ship.eu/graphs/futuristic-vessel/components` | The vessel and its components | `graphdb_upload` |
+| `https://twin-ship.eu/graphs/futuristic-vessel/components` | The vessel and its components, and the operational modes (placeholders) | `graphdb_upload` |
 | `https://twin-ship.eu/graphs/futuristic-vessel/voyages` | Voyages, legs, waypoints, ports and weather | `futuristic_voyage_upload` |
 
 Individuals have IRIs under `https://twin-ship.eu/individuals/futuristic-vessel/`. The vessel is `…/FV-RR-1`, and voyage individuals are named `Voyage-0001`, `Voyage-0001-Leg01`, `Voyage-0001-WP01`, `Voyage-0001-Leg01-Wind` and so on, and `Port-NLRTM`, `Port-GBIMM`.
 
 Queries without `FROM` or `GRAPH` see all three graphs and the triples GraphDB infers. A query restricted with `FROM <graph>` loses the inferred triples unless it also adds `FROM <http://www.ontotext.com/implicit>`.
 
-The voyage data is about 60,000 triples, against about 200 for the components. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
+The voyage data is about 60,000 triples, against about 350 for the components and operational modes. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
 
 ## Visual graphs
 
@@ -101,7 +113,7 @@ The voyage data is about 60,000 triples, against about 200 for the components. K
 | Query | Shows |
 | --- | --- |
 | `01-components.rq` | The vessel, its components (`ido:partOf`) and how they connect (`ido:connectedTo`) |
-| `02-component-details.rq` | 01 plus component types (without the generic AC, DC and ESD), direct physical connections, fuels and where they connect. Technical values appear in the node details. |
+| `02-component-details.rq` | 01 plus component types (without the generic AC, DC and ESD), direct physical connections, fuels and where they connect, and the gensets' engine modes. Technical values appear in the node details. |
 | `03-voyages.rq` | A few voyages (default 3; change the `LIMIT`) with their ports and legs |
 | `04-voyage-weather.rq` | A voyage with its legs and each leg's wind and wave conditions (about 40 nodes per voyage) |
 
