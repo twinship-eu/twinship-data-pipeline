@@ -98,11 +98,17 @@ passwords come from `.env`:
 | Service | URL | Username | Password (`.env`) | Access |
 | --- | --- | --- | --- | --- |
 | GraphDB Workbench | <http://localhost:7200> | `<vessel>-user`, e.g. `futuristic-vessel-user` | `KEYCLOAK_<VESSEL>_PASSWORD`, e.g. `KEYCLOAK_FUTURISTIC_VESSEL_PASSWORD` | Read access to that vessel's repository |
+| GraphDB Workbench | <http://localhost:7200> | `twinship-developer` | `KEYCLOAK_DEVELOPER_PASSWORD` | Read and write access to all repositories |
 | Keycloak admin console | <http://localhost:8080> | `KEYCLOAK_ADMIN_USERNAME` | `KEYCLOAK_ADMIN_PASSWORD` | Manage users, roles and clients |
 | Dagster UI | <http://localhost:3000> | none | none | Run and inspect the pipeline |
 
 The pipeline itself logs in as the `dagster-pipeline` client (`KEYCLOAK_CLIENT_SECRET`), which
-can create and write all repositories. No user has GraphDB administrator rights (`ROLE_ADMIN`),
+can create and write all repositories.
+
+The vessel users are read-only: the Workbench does not let them edit queries in *Visual graph*
+configs or change data. Use `twinship-developer` for that. It is meant for local development;
+in a shared deployment, set a strong `KEYCLOAK_DEVELOPER_PASSWORD` or remove the user from the
+realm template. No user has GraphDB administrator rights (`ROLE_ADMIN`),
 so administrator functions in the Workbench (e.g. security settings) are not available.
 Changes to the realm template or the passwords in `.env` take effect when Keycloak is
 recreated (`docker compose up -d --force-recreate keycloak`).

@@ -31,6 +31,7 @@ sed \
   -e "s${D}__STENA_ROPAX_PASSWORD__${D}$(safe "$KEYCLOAK_STENA_ROPAX_PASSWORD")${D}g" \
   -e "s${D}__STENA_TANKER_PASSWORD__${D}$(safe "$KEYCLOAK_STENA_TANKER_PASSWORD")${D}g" \
   -e "s${D}__FUTURISTIC_VESSEL_PASSWORD__${D}$(safe "$KEYCLOAK_FUTURISTIC_VESSEL_PASSWORD")${D}g" \
+  -e "s${D}__DEVELOPER_PASSWORD__${D}$(safe "$KEYCLOAK_DEVELOPER_PASSWORD")${D}g" \
   "$TEMPLATE" > "$IMPORT_DIR/twinship-realm.json"
 
 exec /opt/keycloak/bin/kc.sh "$@"
