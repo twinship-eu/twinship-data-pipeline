@@ -138,6 +138,21 @@
       "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_futuristic-vessel"]
     },
     {
+      "username": "twinship-developer",
+      "enabled": true,
+      "email": "twinship-developer@example.com",
+      "firstName": "TwinShip",
+      "lastName": "Developer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__DEVELOPER_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "ROLE_REPO_MANAGER"]
+    },
+    {
       "username": "service-account-dagster-pipeline",
       "enabled": true,
       "serviceAccountClientId": "dagster-pipeline",
