@@ -50,6 +50,9 @@ vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 # Configuration Classes
 # =============================================================================
 
+# Hand-written operational modes of the futuristic vessel (placeholder values)
+FUTURISTIC_OPERATIONAL_MODES = Path("data/RoRo Futuristic Vessel Operational Modes.ttl")
+
 
 class SpreadsheetConfig(Config):
     """Configuration for spreadsheet asset."""
@@ -261,9 +264,21 @@ def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict
     # Log the number of triples generated
     vessel_id = validated_vessel_json.get("vessel", {}).get("id", "unknown")
     context.log.info(f"Generated {len(g)} triples for {namespace} ({vessel_id})")
+    metadata: dict[str, Any] = {}
+
+    # Futuristic vessel: add its operational modes (placeholder values, see the file header)
+    if is_futuristic and FUTURISTIC_OPERATIONAL_MODES.exists():
+        modes = Graph().parse(FUTURISTIC_OPERATIONAL_MODES, format="turtle")
+        g += modes
+        context.log.info(
+            f"Added {len(modes)} operational mode triples (placeholder values) "
+            f"from {FUTURISTIC_OPERATIONAL_MODES}"
+        )
+        metadata["operational_mode_triples"] = MetadataValue.int(len(modes))
 
     # Add metadata about the harmonised graph to the context for Dagster UI
-    context.add_output_metadata({"triple_count": MetadataValue.int(len(g))})
+    metadata["triple_count"] = MetadataValue.int(len(g))
+    context.add_output_metadata(metadata)
 
     return g
 
