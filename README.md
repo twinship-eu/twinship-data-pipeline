@@ -22,7 +22,7 @@ powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | ie
 
 ## Data
 
-The repository includes the futuristic vessel data in `data/`. To run the pipeline on other input files, set `TWINSHIP_VESSEL_DATA_DIR` in `.env` to the folder that holds them. When the variable is unset or empty, `data/` is used.
+The repository includes the futuristic vessel data in `data/`; [docs/futuristic-vessel.md](docs/futuristic-vessel.md) describes the files, how they are converted, where they end up in GraphDB, and example Visual Graph queries. To run the pipeline on other input files, set `TWINSHIP_VESSEL_DATA_DIR` in `.env` to the folder that holds them. When the variable is unset or empty, `data/` is used.
 
 ## Quick Start (Local)
 
@@ -234,8 +234,8 @@ uv add --dev <package>  # dev-only dependency
 This repository has two licences. [`REUSE.toml`](REUSE.toml) gives the authoritative file-level mapping ([REUSE](https://reuse.software/) specification).
 
 - **Code** (pipeline, deployment configuration, and tests): [MIT](LICENSE).
-- **Data and models** (the synthetic Futuristic Vessel data in `data/`, the SHACL shapes in `shacl/`, and the TwinShip ontology copy in `ontology/`): [CC BY 4.0](LICENSES/CC-BY-4.0.txt).
-- **Futuristic vessel voyage data** (`data/RoRo Futuristic Vessel Voyages.dat`): CC BY 4.0. The weather columns (wave height, period and direction; wind speed and direction) are sampled from a Copernicus hindcast. Attribution: *Generated using E.U. Copernicus Marine Service Information. Contains modified Copernicus Climate Change Service information 2024.* Neither the European Commission nor ECMWF is responsible for any use that may be made of the Copernicus information or data it contains.
+- **Data, models and documentation** (the synthetic Futuristic Vessel data in `data/`, the SHACL shapes in `shacl/`, the TwinShip ontology copy in `ontology/`, and `docs/`): [CC BY 4.0](LICENSES/CC-BY-4.0.txt).
+- **Futuristic vessel voyage data** (`data/RoRo Futuristic Vessel Voyages.dat`): CC BY 4.0. Its weather columns contain Copernicus information; see [Provenance and licence](docs/futuristic-vessel.md#provenance-and-licence) for the attribution.
 - **Third-party ontologies** in `ontology/external/` and `ontology/vocabularies/` keep their own licences: IDO (ISO 15926-14) is [CC BY-SA 4.0](LICENSES/CC-BY-SA-4.0.txt) (POSC Caesar Association), QUDT is CC BY 4.0 (QUDT.org), and PAV is [Apache 2.0](LICENSES/Apache-2.0.txt).
 - **Pilot-vessel data** are not part of this repository and are not covered by these licences.
 
