@@ -1,0 +1,62 @@
+PREFIX tw:   <https://twin-ship.eu/twinship#>
+PREFIX ido:  <http://rds.posccaesar.org/ontology/lis14/rdl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fv:   <https://twin-ship.eu/individuals/futuristic-vessel/>
+
+# Component details: the 01 overview plus what hangs off the components: their
+# types, direct (physical) connections, fuels consumed and where they connect, and
+# engine modes. The electrical-characteristic types AC, DC and ESD are left out
+# because they would become hubs joining unrelated components.
+# Technical data (power, capacity, propeller size, engine mode bounds, ...) is
+# returned as literals and appears in the node details panel, not as nodes.
+# FROM <explicit> keeps inferred super-properties and types out of the graph.
+CONSTRUCT {
+  ?vessel a ?vesselType .
+  ?c ido:partOf ?vessel ;
+     rdfs:label ?label ;
+     a ?type ;
+     ido:connectedTo ?other ;
+     ido:directlyConnectedTo ?direct ;
+     tw:consume ?fuel ;
+     tw:hasEngineMode ?mode ;
+     ?dataProp ?value .
+  ?other rdfs:label ?otherLabel .
+  ?direct rdfs:label ?directLabel .
+  ?fuel rdfs:label ?fuelLabel ;
+        ido:connectedTo ?fuelTarget ;
+        tw:twFuelLHVKJPerKg ?lhv .
+  ?mode a tw:EngineMode ;
+        rdfs:label ?modeLabel ;
+        ?modeProp ?modeValue .
+}
+FROM <http://www.ontotext.com/explicit>
+WHERE {
+  VALUES ?vessel { fv:FV-RR-1 }
+  ?c ido:partOf ?vessel .
+  OPTIONAL { ?vessel a ?vesselType }
+  OPTIONAL { ?c rdfs:label ?label }
+  OPTIONAL {
+    ?c a ?type .
+    FILTER(?type NOT IN (tw:AC, tw:DC, tw:ESD))
+  }
+  OPTIONAL { ?c ido:connectedTo ?other . OPTIONAL { ?other rdfs:label ?otherLabel } }
+  OPTIONAL { ?c ido:directlyConnectedTo ?direct . OPTIONAL { ?direct rdfs:label ?directLabel } }
+  OPTIONAL {
+    ?c ?dataProp ?value .
+    FILTER(isLiteral(?value) && STRSTARTS(STR(?dataProp), STR(tw:)))
+  }
+  OPTIONAL {
+    ?c tw:consume ?fuel .
+    OPTIONAL { ?fuel rdfs:label ?fuelLabel }
+    OPTIONAL { ?fuel ido:connectedTo ?fuelTarget }
+    OPTIONAL { ?fuel tw:twFuelLHVKJPerKg ?lhv }
+  }
+  OPTIONAL {
+    ?c tw:hasEngineMode ?mode .
+    OPTIONAL { ?mode rdfs:label ?modeLabel }
+    OPTIONAL {
+      ?mode ?modeProp ?modeValue .
+      FILTER(isLiteral(?modeValue) && STRSTARTS(STR(?modeProp), STR(tw:)))
+    }
+  }
+}

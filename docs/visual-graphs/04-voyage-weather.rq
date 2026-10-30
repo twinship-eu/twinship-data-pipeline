@@ -1,0 +1,51 @@
+PREFIX tw:   <https://twin-ship.eu/twinship#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fv:   <https://twin-ship.eu/individuals/futuristic-vessel/>
+
+# A few voyages with their legs and the weather (wind and waves) of each leg.
+# Each voyage adds ~40 nodes, so the default is small. Change the LIMIT to show more.
+CONSTRUCT {
+  ?vessel tw:hasVoyage ?voyage .
+  ?voyage a tw:Voyage ;
+          rdfs:label ?voyageLabel ;
+          tw:hasVoyageLeg ?leg .
+  ?leg a tw:VoyageLeg ;
+       tw:twMeanSpeedInKnots ?legSpeed ;
+       tw:hasWeatherCondition ?weather .
+  ?weather a tw:WeatherCondition ;
+           tw:hasWindCondition ?wind ;
+           tw:hasWaveCondition ?wave .
+  ?wind a tw:WindCondition ;
+        tw:twWindSpeedInKnots ?windSpeed ;
+        tw:twWindDirectionInDegrees ?windDir .
+  ?wave a tw:WaveCondition ;
+        tw:twSeaHeightInMeters ?seaHeight ;
+        tw:twSeaDirectionInDegrees ?seaDir .
+}
+WHERE {
+  {
+    SELECT ?vessel ?voyage WHERE {
+      VALUES ?vessel { fv:FV-RR-1 }
+      ?vessel tw:hasVoyage ?voyage .
+      ?voyage tw:twVoyageIdentifier ?id .
+    }
+    ORDER BY ?id
+    LIMIT 1
+  }
+  OPTIONAL { ?voyage rdfs:label ?voyageLabel }
+  ?voyage tw:hasVoyageLeg ?leg .
+  OPTIONAL { ?leg tw:twMeanSpeedInKnots ?legSpeed }
+  OPTIONAL {
+    ?leg tw:hasWeatherCondition ?weather .
+    OPTIONAL {
+      ?weather tw:hasWindCondition ?wind .
+      OPTIONAL { ?wind tw:twWindSpeedInKnots ?windSpeed }
+      OPTIONAL { ?wind tw:twWindDirectionInDegrees ?windDir }
+    }
+    OPTIONAL {
+      ?weather tw:hasWaveCondition ?wave .
+      OPTIONAL { ?wave tw:twSeaHeightInMeters ?seaHeight }
+      OPTIONAL { ?wave tw:twSeaDirectionInDegrees ?seaDir }
+    }
+  }
+}
