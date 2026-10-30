@@ -42,6 +42,10 @@ Open http://localhost:3000. The **vessel_discovery_sensor** starts automatically
 
 You can also manually materialise assets from the UI.
 
+The sensor only triggers runs for vessels it has not seen before. After changing code or input
+data, re-run a known vessel yourself: in the Dagster UI, select the vessel's partition and
+*Materialize all* (or launch the `full_pipeline` job for that partition).
+
 ## Quick Start (Docker Compose)
 
 **Secrets:** copy the example environment file and fill in values (see [Secrets and configuration](#secrets-and-configuration-env) below). This step is optional for a quick disposable local setup (sensible `local-dev-*` defaults are built in), but recommended for anything longer-lived:
@@ -69,14 +73,41 @@ docker compose up -d --build
 
 Open http://localhost:3000. The same sensor-driven workflow runs automatically.
 
-GraphDB is also started by Compose at http://localhost:7200 with repository defaults:
+GraphDB is also started by Compose at http://localhost:7200, with these repositories:
 
-- `GRAPHDB_REPOSITORY_ID=twinship`
-- `GRAPHDB_REPOSITORY_TITLE=TwinShip Data Repository`
+- `twinship-ontology`: the ontology only, created by `graphdb/init.sh` on first start.
+- One repository per vessel (e.g. `futuristic-vessel`), created by the pipeline.
 
-The `graphdb_upload` asset creates the repository if missing, clears it, and uploads
-the latest combined Turtle graph. The `sparql_summary` asset then runs SPARQL queries
-against GraphDB and shows result tables in Dagster metadata.
+Each vessel repository has named graphs under `https://twin-ship.eu/graphs/<vessel>/`:
+`ontology` (the imported ontology), `components` (the vessel and its components) and, for the
+futuristic vessel, `voyages`. The `graphdb_upload` asset creates the repository if missing and
+replaces the `ontology` and `components` graphs; `futuristic_voyage_upload` replaces the
+`voyages` graph. The `sparql_summary` asset then runs SPARQL queries against GraphDB and shows
+result tables in Dagster metadata.
+
+Queries without `FROM` or `GRAPH` see all graphs, including triples inferred by GraphDB. A
+query restricted with `FROM <graph>` does not see inferred triples unless it also adds
+`FROM <http://www.ontotext.com/implicit>`.
+
+### Logging in
+
+GraphDB accepts only Keycloak logins. The users are defined in
+`keycloak/twinship-realm.json.template`; their usernames are fixed there, and only the
+passwords come from `.env`:
+
+| Service | URL | Username | Password (`.env`) | Access |
+| --- | --- | --- | --- | --- |
+| GraphDB Workbench | <http://localhost:7200> | `<vessel>-user`, e.g. `futuristic-vessel-user` | `KEYCLOAK_<VESSEL>_PASSWORD`, e.g. `KEYCLOAK_FUTURISTIC_VESSEL_PASSWORD` | Read access to that vessel's repository |
+| Keycloak admin console | <http://localhost:8080> | `KEYCLOAK_ADMIN_USERNAME` | `KEYCLOAK_ADMIN_PASSWORD` | Manage users, roles and clients |
+| Dagster UI | <http://localhost:3000> | none | none | Run and inspect the pipeline |
+
+The pipeline itself logs in as the `dagster-pipeline` client (`KEYCLOAK_CLIENT_SECRET`), which
+can create and write all repositories. No user has GraphDB administrator rights (`ROLE_ADMIN`),
+so administrator functions in the Workbench (e.g. security settings) are not available.
+Changes to the realm template or the passwords in `.env` take effect when Keycloak is
+recreated (`docker compose up -d --force-recreate keycloak`).
+
+### Reset
 
 To reset all state (database, storage, outputs) and start fresh:
 
@@ -148,19 +179,21 @@ scripts/sync_ontology.sh v0.1.2
 
 ### GraphDB configuration
 
-`graphdb_upload` reads these environment variables (optional):
+The GraphDB assets read these environment variables (optional):
 
 ```bash
 GRAPHDB_BASE_URL=http://localhost:7200
-GRAPHDB_REPOSITORY_ID=twinship
-GRAPHDB_REPOSITORY_TITLE="TwinShip Data Repository"
 GRAPHDB_CLEAR_BEFORE_UPLOAD=true
 GRAPHDB_TIMEOUT_SECONDS=30
 GRAPHDB_MAX_READINESS_CHECKS=20
 GRAPHDB_READINESS_CHECK_INTERVAL_SECONDS=3
-GRAPHDB_USERNAME=
-GRAPHDB_PASSWORD=
 ```
+
+The pipeline writes to one repository per vessel, named after the vessel, so
+`GRAPHDB_REPOSITORY_ID` and `GRAPHDB_REPOSITORY_TITLE` are only fallbacks of the GraphDB client
+and are not used by the assets. The pipeline authenticates with a Keycloak token
+(`KEYCLOAK_*` variables). `GRAPHDB_USERNAME` and `GRAPHDB_PASSWORD` (basic authentication) are
+only used when Keycloak is not configured, e.g. against a GraphDB outside the Docker setup.
 
 ### Secrets and configuration (.env)
 

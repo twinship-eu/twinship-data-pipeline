@@ -21,7 +21,11 @@ from dagster import AssetExecutionContext, Config, MetadataValue, asset
 from rdflib import RDF, RDFS, Graph, Literal
 from rdflib.namespace import XSD
 
-from dagster_pipeline.assets.harmonisation import graphdb_upload, vessel_partitions_def
+from dagster_pipeline.assets.harmonisation import (
+    graphdb_upload,
+    vessel_graph,
+    vessel_partitions_def,
+)
 from dagster_pipeline.resources import GraphDBClient
 from twinship_harmonisation.constants import TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import create_twinship_uri
@@ -289,10 +293,10 @@ class VoyageConfig(Config):
     partitions_def=vessel_partitions_def,
     deps=[graphdb_upload],
     description=(
-        "Add the futuristic vessel's voyages, legs, waypoints, ports and weather to its "
-        "GraphDB repository (no-op for other vessels). Runs after graphdb_upload, which "
-        "clears the repository: re-running graphdb_upload alone removes the voyages "
-        "until this asset runs again."
+        "Replace the futuristic vessel's voyages, legs, waypoints, ports and weather in the "
+        "named graph https://twin-ship.eu/graphs/futuristic-vessel/voyages of its GraphDB "
+        "repository (no-op for other vessels). Runs after graphdb_upload, which creates "
+        "the repository."
     ),
     kinds={"GraphDB"},
 )
@@ -301,7 +305,7 @@ def futuristic_voyage_upload(
     config: VoyageConfig,
     graphdb_client: GraphDBClient,
 ) -> str:
-    """Build the futuristic vessel's voyage graph and add it to its repository."""
+    """Build the futuristic vessel's voyage graph and replace its voyage graph in GraphDB."""
     vessel = context.partition_key
     if vessel != VOYAGE_NAMESPACE:
         context.log.info(f"No voyage data for {vessel}")
@@ -322,16 +326,23 @@ def futuristic_voyage_upload(
     ttl_path = output_dir / f"{vessel}-voyages.ttl"
     g.serialize(destination=str(ttl_path), format="turtle")
 
+    voyages_graph = vessel_graph(vessel, "voyages")
     graphdb_client.wait_for_readiness()
-    graphdb_client.upload_ttl(ttl_path.read_text(encoding="utf-8"), repo_id=vessel)
+    graphdb_client.clear_repository(repo_id=vessel, contexts=[voyages_graph])
+    graphdb_client.upload_ttl(
+        ttl_path.read_text(encoding="utf-8"), repo_id=vessel, context=voyages_graph
+    )
     voyage_count = len(set(g.subjects(RDF.type, TWINSHIP.Voyage)))
-    context.log.info(f"Added {len(g)} voyage triples ({voyage_count} voyages) to '{vessel}'")
+    context.log.info(
+        f"Replaced <{voyages_graph}> in '{vessel}' with {len(g)} triples ({voyage_count} voyages)"
+    )
 
     context.add_output_metadata(
         {
             "records": MetadataValue.int(len(records)),
             "voyages": MetadataValue.int(voyage_count),
             "triples": MetadataValue.int(len(g)),
+            "graph": MetadataValue.text(voyages_graph),
             "ttl_path": MetadataValue.path(str(ttl_path)),
         }
     )
