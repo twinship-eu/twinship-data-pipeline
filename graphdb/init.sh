@@ -6,6 +6,9 @@
 # 3. Imports all ontology files from the server import directory
 # 4. Waits for the import to finish
 # 5. Enables GraphDB security
+#
+# If security is already enabled (an existing graphdb_home volume), the
+# initialisation has run before and the script exits without changes.
 
 set -e
 
@@ -16,9 +19,16 @@ ONTOLOGY_CATALOG="${ONTOLOGY_CATALOG:-/scripts/catalog-v001.xml}"
 
 # --- helpers ----------------------------------------------------------------
 
+# Waits until GraphDB answers. Sets SECURED=true if it requires a login
+# (401/403), i.e. security was enabled by an earlier run.
 wait_for_graphdb() {
     echo "Waiting for GraphDB at ${GRAPHDB_URL}..."
-    until curl -sf "${GRAPHDB_URL}/rest/repositories" > /dev/null 2>&1; do
+    while true; do
+        status=$(curl -s -o /dev/null -w '%{http_code}' "${GRAPHDB_URL}/rest/repositories" || true)
+        case "$status" in
+            200) SECURED=false; break ;;
+            401|403) SECURED=true; break ;;
+        esac
         sleep 2
     done
     echo "GraphDB is ready."
@@ -109,6 +119,11 @@ enable_security() {
 # --- main -------------------------------------------------------------------
 
 wait_for_graphdb
+if [ "$SECURED" = "true" ]; then
+    echo "GraphDB security is already enabled: initialisation ran before, nothing to do."
+    echo "(The '${ONTOLOGY_REPO}' repository keeps its ontology; use 'docker compose down -v' for a fresh start.)"
+    exit 0
+fi
 create_ontology_repo
 import_ontology_files
 wait_for_import
