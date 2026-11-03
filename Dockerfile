@@ -20,6 +20,7 @@ RUN uv sync --frozen --no-dev
 COPY twinship_harmonisation/ ./twinship_harmonisation/
 COPY dagster_pipeline/ ./dagster_pipeline/
 COPY shacl/ ./shacl/
+COPY ontology/catalog-v001.xml ./ontology/catalog-v001.xml
 COPY data/ ./data/
 COPY argo/ ./argo/
 

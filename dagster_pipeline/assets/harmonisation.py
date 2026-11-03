@@ -11,6 +11,7 @@ Pipeline structure:
 7. sparql_summary - SPARQL summary tables queried from all vessel repositories
 """
 
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from typing import Any
 
@@ -34,6 +35,7 @@ from dagster_pipeline.futuristic_extraction import (
     load_futuristic_sheets,
 )
 from dagster_pipeline.resources import GraphDBClient, ShaclValidator
+from dagster_pipeline.utils import vessel_data_dir
 from dagster_pipeline.validation.json_validation import validate_vessel_json
 from twinship_harmonisation import harmonise_twinship_vessel
 
@@ -48,11 +50,15 @@ vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 # Configuration Classes
 # =============================================================================
 
+# Hand-written operational modes of the futuristic vessel (placeholder values)
+FUTURISTIC_OPERATIONAL_MODES = Path("data/RoRo Futuristic Vessel Operational Modes.ttl")
+
 
 class SpreadsheetConfig(Config):
     """Configuration for spreadsheet asset."""
 
-    spreadsheet_path: str = "data/TwinShip-table-schema-specification.xlsx"
+    # Optional; only processed when the file exists.
+    spreadsheet_path: str = str(vessel_data_dir() / "TwinShip-table-schema-specification.xlsx")
     futuristic_spreadsheet_path: str = "data/RoRo Futuristic Vessel KG Working File.xlsx"
 
 
@@ -69,25 +75,26 @@ class ShaclConfig(Config):
     fail_on_validation_error: bool = True
 
 
-# Ontology files to import into each per-vessel repo (paths relative to GraphDB import dir)
-ONTOLOGY_SERVER_FILES = [
-    "ontology/external/IDO_20240503.ttl",
-    "ontology/external/PAV-simplified.ttl",
-    "ontology/external/SCHEMA_QUDT-simplified.ttl",
-    "ontology/vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl",
-    "ontology/vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl",
-    "ontology/external/vesselai/vesselAI_ontology_v2.owl",
-    "ontology/external/vesselai/modules/main.ttl",
-    "ontology/external/vesselai/modules/contextualInformation.ttl",
-    "ontology/external/vesselai/modules/events.ttl",
-    "ontology/external/vesselai/modules/trajectories_module.ttl",
-    "ontology/external/vesselai/modules/vesselCharacteristics.ttl",
-    "ontology/twinship-base.ttl",
-    "ontology/modules/vessel.ttl",
-    "ontology/modules/weatherconditions.ttl",
-    "ontology/modules/draft_time_mode.ttl",
-    "ontology/twinship-core.ttl",
-]
+ONTOLOGY_CATALOG = Path(__file__).resolve().parents[2] / "ontology" / "catalog-v001.xml"
+CATALOG_NS = "urn:oasis:names:tc:entity:xmlns:xml:catalog"
+
+
+def ontology_server_files(catalog: Path = ONTOLOGY_CATALOG) -> list[str]:
+    """Ontology files to import into each per-vessel repo, read from the ontology catalog.
+
+    Paths are relative to the GraphDB import dir, where ontology/ is mounted.
+    graphdb/init.sh derives the same list from the same catalog.
+    """
+    uris = (e.get("uri") for e in ET.parse(catalog).getroot().iter(f"{{{CATALOG_NS}}}uri"))
+    return sorted({f"ontology/{uri}" for uri in uris})
+
+
+GRAPH_BASE = "https://twin-ship.eu/graphs/"
+
+
+def vessel_graph(vessel: str, part: str) -> str:
+    """Named graph IRI within a vessel's repository: ontology, components or voyages."""
+    return f"{GRAPH_BASE}{vessel}/{part}"
 
 
 # =============================================================================
@@ -102,17 +109,17 @@ ONTOLOGY_SERVER_FILES = [
 )
 def spreadsheet_data(context: AssetExecutionContext, config: SpreadsheetConfig) -> dict:
     """Load all sheets from both TwinShip spreadsheets and discover vessels."""
-    # Load conventional spreadsheet
+    # Load conventional spreadsheet if it exists (kept outside the repository)
     spreadsheet_path = Path(config.spreadsheet_path)
-    if not spreadsheet_path.exists():
-        raise FileNotFoundError(f"Spreadsheet not found: {spreadsheet_path}")
-
-    sheets = load_spreadsheet_sheets(str(spreadsheet_path))
-    for name, df in sheets.items():
-        context.log.info(f"Loaded {name}: {len(df)} rows")
-
-    # Discover conventional vessels
-    vessels = discover_vessels_from_sheets(sheets)
+    sheets: dict = {}
+    vessels: dict = {}
+    if spreadsheet_path.exists():
+        sheets = load_spreadsheet_sheets(str(spreadsheet_path))
+        for name, df in sheets.items():
+            context.log.info(f"Loaded {name}: {len(df)} rows")
+        vessels = discover_vessels_from_sheets(sheets)
+    else:
+        context.log.info(f"Spreadsheet not found at {spreadsheet_path}, skipping its vessels")
 
     # Load futuristic spreadsheet if it exists
     fv_path = Path(config.futuristic_spreadsheet_path)
@@ -257,9 +264,21 @@ def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict
     # Log the number of triples generated
     vessel_id = validated_vessel_json.get("vessel", {}).get("id", "unknown")
     context.log.info(f"Generated {len(g)} triples for {namespace} ({vessel_id})")
+    metadata: dict[str, Any] = {}
+
+    # Futuristic vessel: add its operational modes (placeholder values, see the file header)
+    if is_futuristic and FUTURISTIC_OPERATIONAL_MODES.exists():
+        modes = Graph().parse(FUTURISTIC_OPERATIONAL_MODES, format="turtle")
+        g += modes
+        context.log.info(
+            f"Added {len(modes)} operational mode triples (placeholder values) "
+            f"from {FUTURISTIC_OPERATIONAL_MODES}"
+        )
+        metadata["operational_mode_triples"] = MetadataValue.int(len(modes))
 
     # Add metadata about the harmonised graph to the context for Dagster UI
-    context.add_output_metadata({"triple_count": MetadataValue.int(len(g))})
+    metadata["triple_count"] = MetadataValue.int(len(g))
+    context.add_output_metadata(metadata)
 
     return g
 
@@ -366,7 +385,10 @@ def shacl_validation_report(
 @asset(
     group_name="output",
     partitions_def=vessel_partitions_def,
-    description="Upload vessel TTL to its own per-vessel GraphDB repository",
+    description=(
+        "Upload vessel TTL to its own per-vessel GraphDB repository, into the named graphs "
+        "https://twin-ship.eu/graphs/<vessel>/components (vessel data) and .../ontology"
+    ),
     kinds={"GraphDB"},
 )
 def graphdb_upload(
@@ -393,20 +415,32 @@ def graphdb_upload(
     graphdb_client.wait_for_readiness()
     repo_created = graphdb_client.ensure_repository(repo_id=repo_id, title=repo_title)
 
+    ontology_graph = vessel_graph(vessel, "ontology")
+    components_graph = vessel_graph(vessel, "components")
     if graphdb_client.clear_before_upload:
-        graphdb_client.clear_repository(repo_id=repo_id)
+        # Other named graphs (e.g. voyages) are left alone. The default graph is
+        # cleared too: repositories from before named graphs keep their data there.
+        graphdb_client.clear_repository(
+            repo_id=repo_id, contexts=[ontology_graph, components_graph, None]
+        )
 
     # Import ontology files so RDFS+ reasoning works on vessel data
     context.log.info(f"Importing ontology into '{repo_id}'...")
-    graphdb_client.import_server_files(ONTOLOGY_SERVER_FILES, repo_id=repo_id)
+    graphdb_client.import_server_files(
+        ontology_server_files(), repo_id=repo_id, context=ontology_graph
+    )
     graphdb_client.wait_for_import(repo_id=repo_id)
     context.log.info(f"Ontology import complete for '{repo_id}'")
 
     g = Graph()
     g.parse(ttl_path, format="turtle")
     triple_count = len(g)
-    graphdb_client.upload_ttl(g.serialize(format="turtle"), repo_id=repo_id)
-    context.log.info(f"Uploaded {triple_count} triples to repository '{repo_id}'")
+    graphdb_client.upload_ttl(
+        g.serialize(format="turtle"), repo_id=repo_id, context=components_graph
+    )
+    context.log.info(
+        f"Uploaded {triple_count} triples to graph <{components_graph}> in '{repo_id}'"
+    )
 
     remote_triple_count = graphdb_client.triple_count(repo_id=repo_id)
 
@@ -415,6 +449,7 @@ def graphdb_upload(
         "repository_id": MetadataValue.text(repo_id),
         "uploaded_triples": MetadataValue.int(triple_count),
         "repository_created": MetadataValue.text(str(repo_created)),
+        "graph": MetadataValue.text(components_graph),
         "repository_cleared_before_upload": MetadataValue.text(
             str(graphdb_client.clear_before_upload)
         ),

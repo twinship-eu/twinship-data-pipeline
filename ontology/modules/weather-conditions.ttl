@@ -1,0 +1,193 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xml: <http://www.w3.org/XML/1998/namespace> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+<https://twin-ship.eu/twinship/weather-conditions> a owl:Ontology ;
+    owl:versionIRI <https://twin-ship.eu/twinship/weather-conditions/0.1.2> ;
+    owl:imports <https://twin-ship.eu/twinship/base> ;
+    dcterms:title "TwinShip Weather Conditions Module"@en ;
+    dcterms:description "This module defines TwinShip-native weather and wind condition concepts for vessel operational analysis. The module does not import VesselAI or DUL; selected external VesselAI terms may be referenced only using non-semantic rdfs:seeAlso annotations for traceability. WeatherCondition and WindCondition are modelled as TwinShipQuality-based classes aligned with the IDO upper ontology."@en ;
+    dcterms:creator "TwinShip Project" ;
+    dcterms:created "2026-01-30"^^xsd:date ;
+    dcterms:modified "2026-10-29"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
+    dcterms:rights "Definitions quoted from the IMO Compendium on Facilitation and Electronic Business (FAL.5/Circ.56), i.e. dcterms:description values of properties with an IMO skos:notation code and dcterms:source <https://www.imo.org/>, remain © International Maritime Organization (IMO) and are not covered by CC BY 4.0."@en ;
+    owl:versionInfo "0.1.2" ;
+    rdfs:comment "TwinShip-native weather and wind condition module. WeatherCondition and WindCondition are subclasses of TwinShipQuality (IDO-aligned). This module does not import VesselAI, DUL, GeoSPARQL, or OWL-Time. Note: VesselAI models WeatherCondition as a subclass of dul:Event; TwinShip models it as a quality/attribute, which is the correct IDO alignment."@en .
+
+#################################################################
+#
+#    Classes
+#
+#################################################################
+
+:WeatherCondition a owl:Class ;
+    rdfs:label "Weather Condition"@en ;
+    rdfs:comment "An environmental quality describing weather conditions affecting vessel operations. Extends TwinShipQuality in the IDO-aligned TwinShip ontology. Note: VesselAI models WeatherCondition as a subclass of dul:Event (a temporal occurrence); TwinShip models it as a quality, which is the appropriate IDO-based pattern. No semantic equivalence is asserted."@en ;
+    rdfs:subClassOf :TwinShipQuality ,
+        [ a owl:Restriction ; owl:onProperty :hasWindCondition ; owl:someValuesFrom :WindCondition ],
+        [ a owl:Restriction ; owl:onProperty :hasWaveCondition ; owl:someValuesFrom :WaveCondition ],
+        [ a owl:Restriction ; owl:onProperty :hasCurrentCondition ; owl:someValuesFrom :CurrentCondition ] ;
+    rdfs:seeAlso <http://www.vesselAI-project.eu/ontology#WeatherCondition> .
+
+:WindCondition a owl:Class ;
+    rdfs:label "Wind Condition"@en ;
+    rdfs:comment "A weather quality describing scalar wind speed and wind direction relevant to vessel operation. Subclass of WeatherCondition. Distinct from VesselAI U/V wind vector components (10_metre_U_wind_component_surface, 10_metre_V_wind_component_surface), which represent directional vector quantities; TwinShip twWindSpeedInKnots and twWindDirectionInDegrees represent scalar speed (knots) and meteorological bearing (degrees)."@en ;
+    rdfs:subClassOf :WeatherCondition ,
+        [ a owl:Restriction ; owl:onProperty :twWindSpeedInKnots     ; owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ; owl:onProperty :twWindDirectionInDegrees ; owl:someValuesFrom xsd:decimal ] ;
+    rdfs:seeAlso <http://www.vesselAI-project.eu/ontology#10_metre_U_wind_component_surface> ,
+                 <http://www.vesselAI-project.eu/ontology#10_metre_V_wind_component_surface> .
+
+:WaveCondition a owl:Class ;
+    rdfs:label "Wave Condition"@en ;
+    rdfs:comment "A weather quality describing scalar wave height and wave direction relevant to vessel operation. Subclass of WeatherCondition. TwinShip twSeaHeightInMeters, twSwellHeightInMeters, twSeaDirectionInDegrees and twSwellDirectionInDegrees represent scalar height (meters) and meteorological bearing (degrees)."@en ;
+    rdfs:subClassOf :WeatherCondition ,
+        [ a owl:Restriction ; owl:onProperty :twSeaHeightInMeters     ; owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ; owl:onProperty :twSwellHeightInMeters     ; owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ; owl:onProperty :twSeaDirectionInDegrees     ; owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ; owl:onProperty :twSwellDirectionInDegrees ; owl:someValuesFrom xsd:decimal ].
+
+:CurrentCondition a owl:Class ;
+    rdfs:label "Current Condition"@en ;
+    rdfs:comment "A weather quality describing current direction relevant to vessel operation. Subclass of WeatherCondition. TwinShip  twCurrentDirectionInDegrees represent meteorological bearing (degrees)."@en ;
+    rdfs:subClassOf :WeatherCondition ,
+        [ a owl:Restriction ; owl:onProperty :twCurrentDirectionInDegrees ; owl:someValuesFrom xsd:decimal ].
+
+
+#################################################################
+#
+#    Object Properties
+#
+#################################################################
+
+:hasWeatherCondition a owl:ObjectProperty ;
+    rdfs:label "has weather condition"@en ;
+    rdfs:comment "Relates a vessel, voyage, voyage segment, or observation to a weather condition."@en ;
+    rdfs:range :WeatherCondition ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasWindCondition a owl:ObjectProperty ;
+    rdfs:label "has wind condition"@en ;
+    rdfs:comment "Relates a vessel, voyage segment, or observation to a wind condition."@en ;
+    rdfs:range :WindCondition ;
+    rdfs:subPropertyOf :hasWeatherCondition .
+
+:hasWaveCondition a owl:ObjectProperty ;
+    rdfs:label "has wave condition"@en ;
+    rdfs:comment "Relates a vessel, voyage segment, or observation to a wave condition."@en ;
+    rdfs:range :WaveCondition ;
+    rdfs:subPropertyOf :hasWeatherCondition .
+
+:hasCurrentCondition a owl:ObjectProperty ;
+    rdfs:label "has current condition"@en ;
+    rdfs:comment "Relates a vessel, voyage segment, or observation to a current condition."@en ;
+    rdfs:range :CurrentCondition ;
+    rdfs:subPropertyOf :hasWeatherCondition .
+
+#################################################################
+#
+#    Data Properties
+#
+#################################################################
+# TODOs
+# Shall be changed to fit sensor values from vessel, not weather services. Hence relative angle will be used, not true direction.
+
+:twWindSpeedInKnots a owl:DatatypeProperty ;
+    rdfs:label "Wind speed in knots"@en ;
+    rdfs:comment "Scalar wind speed in knots. Distinct from VesselAI U/V wind vector components."@en ;
+    skos:notation "IMO0359" ;
+    skos:altLabel "Wind speed" ;
+    dcterms:description "The measure of wind speed." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twWindDirectionInDegrees a owl:DatatypeProperty ;
+    rdfs:label "Wind direction in degrees"@en ;
+    rdfs:comment "Meteorological wind direction in degrees from 0 to 360, where 0/360 is north and values indicate the direction from which the wind blows."@en ;
+    skos:notation "IMO0360" ;
+    skos:altLabel "Wind direction" ;
+    dcterms:description "True direction, from where wind is blowing (or will blow), measured in degrees." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twSeaHeightInMeters a owl:DatatypeProperty ;
+    rdfs:label "Sea height in meters"@en ;
+    rdfs:comment "Scalar sea height in meters. "@en ;
+    skos:notation "IMO0632" ;
+    skos:altLabel "Sea Height" ;
+    dcterms:description "Recorded sea height in metres as per weather provider." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twSwellHeightInMeters a owl:DatatypeProperty ;
+    rdfs:label "Swell height in meters"@en ;
+    rdfs:comment "Scalar swell height in meters. "@en ;
+    skos:notation "IMO0635" ;
+    skos:altLabel "Swell Height" ;
+    dcterms:description "Recorded swell height in metres as per weather provider." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twSeaDirectionInDegrees a owl:DatatypeProperty ;
+    rdfs:label "Sea direction in degrees"@en ;
+    rdfs:comment "Meteorological sea direction in degrees from 0 to 360, where 0/360 is north and values indicate the direction of the wind waves."@en ;
+    skos:notation "IMO0631" ;
+    skos:altLabel "Sea direction" ;
+    dcterms:description "Best estimate of the direction of sea, in degrees true, made by the seafarer onboard." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twSwellDirectionInDegrees a owl:DatatypeProperty ;
+    rdfs:label "Swell direction in degrees"@en ;
+    rdfs:comment "Meteorological swell direction in degrees from 0 to 360, where 0/360 is north and values indicate the direction of the swell waves."@en ;
+    skos:notation "IMO0634" ;
+    skos:altLabel "Swell direction" ;
+    dcterms:description "Best estimate of the direction of swell, in degrees true, made by the seafarer onboard." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twCurrentDirectionInDegrees a owl:DatatypeProperty ;
+    rdfs:label "Current direction in degrees"@en ;
+    rdfs:comment "Meteorological current direction in degrees from 0 to 360, where 0/360 is north and values indicate the direction of the current."@en ;
+    skos:notation "IMO0637" ;
+    skos:altLabel "Ocean current direction" ;
+    dcterms:description "Best estimate of the direction of ocean current, in degrees true, made by the seafarer onboard." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+
+# #################################################################
+# #
+# #    QUDT Quantity Restrictions
+# #
+# #    owl:someValuesFrom restrictions for the hasQuantity[X]
+# #    object properties defined in twinship-qudt-vocabulary.ttl.
+# #    These sit alongside the existing XSD datatype restrictions.
+# #
+# #################################################################
+
+:WeatherCondition rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantitySpeed ;
+      owl:someValuesFrom :TwinShipQuantitySpeed ] .
+
+:WindCondition rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityAngle ;
+      owl:someValuesFrom :TwinShipQuantityAngle ] .
+

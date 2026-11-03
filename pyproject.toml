@@ -3,6 +3,7 @@ name = "twinship-data-pipeline"
 version = "0.1.0"
 description = "Data processing pipeline for TwinShip maritime digital twin ontology"
 readme = "README.md"
+license = "MIT"
 requires-python = ">=3.11"
 dependencies = [
     "dagster>=1.12.13",

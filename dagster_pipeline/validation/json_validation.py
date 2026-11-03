@@ -88,11 +88,6 @@ class ValidationReport:
 # =============================================================================
 
 
-def _is_missing_marker(v: Any) -> bool:
-    # Erik said "-1 means missing"; JSON currently uses null a lot too.
-    return v in (-1, -1.0) or (isinstance(v, str) and v.strip() in {"-1", "-1.0"})
-
-
 def _expect_dict(report: ValidationReport, path: str, v: Any) -> bool:
     """Require v to be a JSON object (Python dict)."""
     if not isinstance(v, dict):
@@ -120,12 +115,10 @@ def _expect_str(report: ValidationReport, path: str, v: Any, allow_none: bool = 
 def _expect_num(report: ValidationReport, path: str, v: Any, allow_none: bool = False) -> None:
     """
     Require v to be numeric.
-    Allow None (null) if allow_none=True.
-    Allow -1/-1.0 as "missing marker".
+    Allow None (null) if allow_none=True. Unknown values are null, never -1
+    (extraction maps the source -1 marker to null).
     """
     if v is None and allow_none:
-        return
-    if _is_missing_marker(v):
         return
     if not isinstance(v, (int, float)):
         report.errors.append(f"{path}: expected number")
@@ -169,7 +162,7 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
     We validate:
       - required top-level keys: namespace + vessel object
       - ID formats
-      - numeric fields are numeric/null/-1
+      - numeric fields are numeric or null
       - relationships that matter for harmonisation:
           - main_engines[].gearbox_id must exist in gearboxes[].id
           - propellers[].gearbox_id must exist in gearboxes[].id
@@ -195,7 +188,7 @@ def validate_vessel_json(data: dict[str, Any]) -> ValidationReport:
     # Use vessel.id to verify component vessel_id fields match.
     vessel_id = vessel.get("id") if isinstance(vessel.get("id"), str) else None
 
-    # Optional vessel numeric fields (allow null OR -1)
+    # Optional vessel numeric fields (allow null)
     for k in [
         "displacement_max_mt",
         "draft_aft_max_m",

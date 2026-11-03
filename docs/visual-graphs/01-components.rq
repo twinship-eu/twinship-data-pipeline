@@ -1,0 +1,21 @@
+PREFIX ido:  <http://rds.posccaesar.org/ontology/lis14/rdl/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fv:   <https://twin-ship.eu/individuals/futuristic-vessel/>
+
+# Component overview: the vessel, its components and how they are connected.
+# FROM <explicit> keeps inferred super-types and properties out of the graph.
+CONSTRUCT {
+  ?vessel a ?vesselType .
+  ?c ido:partOf ?vessel ;
+     rdfs:label ?label ;
+     ido:connectedTo ?other .
+  ?other rdfs:label ?otherLabel .
+}
+FROM <http://www.ontotext.com/explicit>
+WHERE {
+  VALUES ?vessel { fv:FV-RR-1 }
+  ?c ido:partOf ?vessel .
+  OPTIONAL { ?vessel a ?vesselType }
+  OPTIONAL { ?c rdfs:label ?label }
+  OPTIONAL { ?c ido:connectedTo ?other . OPTIONAL { ?other rdfs:label ?otherLabel } }
+}

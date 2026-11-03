@@ -1,0 +1,340 @@
+@prefix : <https://twin-ship.eu/twinship#> .
+@prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+
+# #################################################################
+# #
+# #    Ontology
+# #
+# #################################################################
+
+<https://twin-ship.eu/twinship/operational-modes> a owl:Ontology ;
+    rdfs:label "TwinShip Operational Modes Module" ;
+    dcterms:title "TwinShip Operational Modes Module"@en ;
+    dcterms:description "Ontology module defining categorical operational states and modes used to classify vessel operation. Covers operating states, engine modes, draft modes, trim modes, combined draft\u2013trim modes, and speed reference frames, together with their controlled individuals and related object properties."@en ;
+    dcterms:creator "TwinShip Project" ;
+    dcterms:created "2026-05-21"^^xsd:date ;
+    dcterms:modified "2026-10-29"^^xsd:date ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
+    pav:createdOn "2026-05-21T00:00:00+00:00"^^xsd:dateTime ;
+    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.2" ;
+    rdfs:comment "Operational modes module for TwinShip ontology. Imports only twinship-base. All mode and state classes extend TwinShipQuality. Object properties are subproperties of hasQuality. This module is the canonical location for all categorical mode/state concepts in TwinShip." ;
+    owl:imports <https://twin-ship.eu/twinship/base> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/operational-modes/0.1.2> .
+
+# #################################################################
+# #
+# #    Classes — Operating State and Engine Mode
+# #
+# #################################################################
+
+:OperatingState a owl:Class ;
+    rdfs:label "Operating State" ;
+    rdfs:comment "A quality or state describing how a vessel is operating during a time interval or voyage segment (e.g., cruise, port, maneuvering, maintenance)." ;
+    rdfs:subClassOf :TwinShipQuality .
+
+:EngineMode a owl:Class ;
+    rdfs:label "Engine Mode" ;
+    rdfs:comment "A categorical, ordinal engine operating mode used to classify vessel operation, defined by a power/load range. Individuals are not pre-enumerated or shared globally: the number of modes and their kW ranges are vessel- or engine-specific, derived by a statistical model, so each engine system instantiates its own EngineMode individuals (e.g. a naming convention such as EngineMode1, EngineMode2, ... may be used locally per engine, following the same instantiation pattern as VesselSpeedBin). The engine system declares how many modes it uses via twEngineModeCount; EngineSystem.hasEngineMode lists that engine's full roster of valid modes, while a VoyageLeg's hasEngineMode records which one was active. Ordinal order is derived from twEngineModeLowerBoundInKW, not a separate index. Engine RPM bounds (twEngineModeLowerBoundInRevPerMin, twEngineModeUpperBoundInRevPerMin) are optional and apply where the statistical model bins on engine speed; the bounds are the contract, and any model-internal parameters (e.g. mean and deviation used to derive them) are not stored on the mode. Mode ranges are model-derived and may change when the model is re-fitted: a re-fit should mint new EngineMode individuals so existing VoyageLeg references keep their original meaning." ;
+    rdfs:subClassOf :TwinShipQuality ,
+        [ a owl:Restriction ; owl:onProperty :hasEngineSpeedBin ; owl:someValuesFrom :EngineSpeedBin ] ,
+        [ a owl:Restriction ; owl:onProperty :twEngineModeLowerBoundInKW ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twEngineModeLowerBoundVariationInKW ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twEngineModeUpperBoundInKW ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twEngineModeLowerBoundInRevPerMin ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twEngineModeUpperBoundInRevPerMin ; owl:someValuesFrom xsd:decimal ] .
+
+:EngineSpeedBin a owl:Class ;
+    rdfs:label "Engine Speed Bin" ;
+    rdfs:comment "A categorical, ordinal engine speed (RPM) operating region, corresponding to a region of the engine-propeller combinator diagram. Individuals are not pre-enumerated or shared globally: index order increases monotonically with engine/shaft speed, but numeric RPM ranges are vessel- or engine-specific, so each vessel or engine instantiates its own EngineSpeedBin individuals (e.g. a naming convention such as EngineSpeedBin1, EngineSpeedBin2, ... may be used locally, following the same instantiation pattern as EngineMode). For a direct-drive fixed-pitch-propeller vessel, engine speed equals propeller speed directly; for geared or controllable-pitch installations the relationship depends on gearbox ratio and/or pitch setting. Limitation: this class assumes a mechanically-coupled propulsion train (direct-drive or geared) and may not be applicable to diesel-electric or hybrid vessels, where engine (genset) speed is decoupled from propeller speed by the electrical system; how this class should apply to such vessels is not yet resolved and requires domain expert input." ;
+    rdfs:subClassOf :TwinShipQuality .
+
+# #################################################################
+# #
+# #    Classes — Draft, Trim, and Combined Modes
+# #
+# #################################################################
+
+:DraftMode a owl:Class ;
+    rdfs:label "Draft Mode" ;
+    rdfs:comment "A categorical, ordinal draft configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with draft depth, but the exact physical draft associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own DraftMode individuals (e.g. a naming convention such as DraftMode1, DraftMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin)." ;
+    rdfs:subClassOf :TwinShipQuality .
+
+:TrimMode a owl:Class ;
+    rdfs:label "Trim Mode" ;
+    rdfs:comment "A categorical, ordinal trim configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with trim value from bow trim toward stern trim, but the exact physical trim associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own TrimMode individuals (e.g. a naming convention such as TrimMode1, TrimMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin)." ;
+    rdfs:subClassOf :TwinShipQuality .
+
+:DraftTrimMode a owl:Class ;
+    rdfs:label "Draft\u2013Trim Mode" ;
+    rdfs:comment "A combined categorical mode representing a specific pairing of a DraftMode and a TrimMode, linked via hasDraftMode and hasTrimMode. No fixed vocabulary of combinations is defined in this module; individuals are created only for the draft\u2013trim pairings actually observed for a given vessel or fleet, following the same instantiation pattern as VesselSpeedBin (structure defined here, population left to instance data). Historically named combinations such as 'even keel', 'stern trim', 'bow trim', or 'optimal trim' are examples of the kind of individuals that may be created; additional individuals may be added as needed." ;
+    rdfs:subClassOf :TwinShipQuality ,
+        [ a owl:Restriction ; owl:onProperty :hasDraftMode ; owl:onClass :DraftMode ; owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] ,
+        [ a owl:Restriction ; owl:onProperty :hasTrimMode  ; owl:onClass :TrimMode  ; owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
+
+# No individual can simultaneously belong to two different mode/state classes.
+:OperatingState owl:disjointWith :EngineMode, :DraftMode, :TrimMode, :DraftTrimMode, :SpeedReference .
+:EngineMode     owl:disjointWith :DraftMode, :TrimMode, :DraftTrimMode, :SpeedReference .
+:DraftMode      owl:disjointWith :TrimMode, :DraftTrimMode, :SpeedReference .
+:TrimMode       owl:disjointWith :DraftTrimMode, :SpeedReference .
+:DraftTrimMode  owl:disjointWith :SpeedReference .
+
+:EngineSpeedBin owl:disjointWith :OperatingState, :EngineMode, :DraftMode, :TrimMode, :DraftTrimMode, :SpeedReference .
+
+# #################################################################
+# #
+# #    Classes — Speed Reference
+# #
+# #################################################################
+
+:SpeedReference a owl:Class ;
+    rdfs:label "Speed Reference" ;
+    rdfs:comment "A categorical qualifier indicating the physical reference frame a vessel speed-in-knots value is measured against: speed over ground (SOG) or speed through water (STW). Used to disambiguate speed values and bins where the reference frame is not otherwise specified." ;
+    rdfs:subClassOf :TwinShipQuality .
+
+# #################################################################
+# #
+# #    Object Properties — Mode and State Properties
+# #
+# #################################################################
+
+:hasOperatingState a owl:ObjectProperty ;
+    rdfs:label "has operating state" ;
+    rdfs:comment "Relates a vessel, voyage, or voyage leg to its categorical operating state." ;
+    rdfs:range :OperatingState ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasEngineMode a owl:ObjectProperty ;
+    rdfs:label "has engine mode" ;
+    rdfs:comment "Relates an engine system to a categorical engine operational mode it supports (declaring that engine's roster of valid modes), or relates a voyage segment to the mode that was active during it. Not functional: an engine system may have many valid modes, declared by twEngineModeCount." ;
+    rdfs:range :EngineMode ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasDraftMode a owl:ObjectProperty ;
+    rdfs:label "has draft mode" ;
+    rdfs:comment "Relates a vessel or voyage segment to its categorical draft mode." ;
+    rdfs:range :DraftMode ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasTrimMode a owl:ObjectProperty ;
+    rdfs:label "has trim mode" ;
+    rdfs:comment "Relates a vessel or voyage segment to its categorical trim mode." ;
+    rdfs:range :TrimMode ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasDraftTrimMode a owl:ObjectProperty ;
+    rdfs:label "has draft\u2013trim mode" ;
+    rdfs:comment "Relates a vessel or voyage segment to a combined categorical draft\u2013trim mode." ;
+    rdfs:range :DraftTrimMode ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasSpeedReference a owl:ObjectProperty ;
+    rdfs:label "has speed reference" ;
+    rdfs:comment "Relates a speed value, bin, or observation to the reference frame (SOG or STW) against which it was measured." ;
+    rdfs:range :SpeedReference ;
+    rdfs:subPropertyOf :hasQuality .
+
+:hasEngineSpeedBin a owl:ObjectProperty ;
+    rdfs:label "has engine speed bin" ;
+    rdfs:comment "Relates an engine mode, engine system, or voyage segment to its categorical engine speed (RPM) operating region." ;
+    rdfs:range :EngineSpeedBin ;
+    rdfs:subPropertyOf :hasQuality .
+
+# #################################################################
+# #
+# #    Individuals — Operating State
+# #
+# #################################################################
+
+:CruiseState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Cruise" ;
+    skos:altLabel "At sea"@en, "Sea passage"@en ;
+    dcterms:description "Operating state for a vessel underway in the open sea at service speed. Corresponds to the 'at sea' voyage phase in IMO SEEMP Part II and CII voyage state classification." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:comment "Vessel operating state corresponding to cruise operation at sea." .
+
+:PortState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Port state" ;
+    skos:altLabel "In port"@en, "In harbour"@en ;
+    dcterms:description "Operating state for a vessel moored at berth, anchored, or otherwise stationary in port. Corresponds to the 'in port' voyage phase in IMO SEEMP Part II and CII voyage state classification." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:comment "Vessel operating state corresponding to port stay or port operation." .
+
+:MaintenanceLayupState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Maintenance / Lay-up" ;
+    skos:altLabel "Laid up"@en ;
+    dcterms:description "Operating state for a vessel out of regular service for scheduled maintenance, dry-docking, or lay-up. Not separately categorised in IMO CII reporting; typically excluded from CII calculation periods." ;
+    rdfs:comment "Vessel operating state corresponding to maintenance period or lay-up." .
+
+:ManeuveringState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Maneuvering state" ;
+    skos:altLabel "Manoeuvring"@en ;
+    dcterms:description "Operating state for a vessel navigating at reduced speed during port approach, departure, canal transit, or similar constrained-waterway operations. Corresponds to the 'manoeuvring' voyage phase in IMO SEEMP Part II." ;
+    dcterms:source <https://www.imo.org/> ;
+    rdfs:comment "Vessel operating state corresponding to manoeuvring operation (e.g., port approach, departure, canal transit)." .
+
+:DriftState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Drift" ;
+    skos:altLabel "Drifting"@en, "Waiting at anchor"@en ;
+    dcterms:description "Operating state for a vessel with engines stopped or at minimum power, drifting or holding position without purposeful navigation." ;
+    rdfs:comment "Vessel operating state corresponding to drifting or non-propulsive movement." .
+
+:UnknownOperatingState a owl:NamedIndividual, :OperatingState ;
+    rdfs:label "Unknown Operating State" ;
+    rdfs:comment "Unknown or unclassified operating state." .
+
+# #################################################################
+# #
+# #    Individuals — Engine Mode
+# #
+# #    Intentionally none defined here: EngineMode individuals are
+# #    not shared globally, since their kW ranges are vessel- or
+# #    engine-specific (derived by a statistical model). Each engine
+# #    system instantiates its own EngineMode individuals, following
+# #    the same instantiation pattern as VesselSpeedBin and
+# #    DraftTrimMode (structure defined here, population left to
+# #    instance data).
+# #
+# #################################################################
+# #
+# #    Individuals — Engine Speed Bin
+# #
+# #    Intentionally none defined here: EngineSpeedBin individuals
+# #    are vessel- or engine-specific, not shared globally (moved out
+# #    of the shared ontology 2026-10-02, following the same pattern
+# #    already applied to EngineMode). The futuristic vessel
+# #    demonstrator's placeholder individuals now live in
+# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
+# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    vessels/fleets instantiate their own in their own instance data.
+# #
+# #################################################################
+
+# #################################################################
+# #
+# #    Individuals — Draft–Trim Mode
+# #
+# #    Intentionally none defined here: DraftTrimMode individuals
+# #    are created per vessel/fleet from observed DraftMode x
+# #    TrimMode pairings (see class comment), not enumerated in
+# #    this shared module.
+# #
+# #################################################################
+
+# #################################################################
+# #
+# #    Individuals — Draft Mode
+# #
+# #    Intentionally none defined here: DraftMode individuals are
+# #    vessel- or fleet-specific, not shared globally (moved out of
+# #    the shared ontology 2026-10-02, following the same pattern
+# #    already applied to EngineMode). The futuristic vessel
+# #    demonstrator's placeholder individuals now live in
+# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
+# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    vessels/fleets instantiate their own in their own instance data.
+# #
+# #################################################################
+
+# #################################################################
+# #
+# #    Individuals — Trim Mode
+# #
+# #    Intentionally none defined here: TrimMode individuals are
+# #    vessel- or fleet-specific, not shared globally (moved out of
+# #    the shared ontology 2026-10-02, following the same pattern
+# #    already applied to EngineMode). The futuristic vessel
+# #    demonstrator's placeholder individuals now live in
+# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
+# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    vessels/fleets instantiate their own in their own instance data.
+# #
+# #################################################################
+
+# #################################################################
+# #
+# #    Individuals — Speed Reference
+# #
+# #################################################################
+
+:SOG a owl:NamedIndividual, :SpeedReference ;
+    rdfs:label "SOG" ;
+    skos:altLabel "Speed Over Ground"@en ;
+    rdfs:comment "Vessel speed measured relative to the ground/seabed (typically GPS-derived); includes the effect of current and tide." .
+
+:STW a owl:NamedIndividual, :SpeedReference ;
+    rdfs:label "STW" ;
+    skos:altLabel "Speed Through Water"@en ;
+    rdfs:comment "Vessel speed measured relative to the surrounding water mass (e.g. via speed log); excludes the effect of current, though still influenced by wind and wave conditions." .
+
+# #################################################################
+# #
+# #    Closed-world disjointness for controlled-vocabulary individuals
+# #
+# #################################################################
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers (
+        :CruiseState :PortState :MaintenanceLayupState
+        :ManeuveringState :DriftState :UnknownOperatingState
+    ) .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( :SOG :STW ) .
+
+# #################################################################
+# #
+# #    Data Properties — Engine Mode Ranges
+# #
+# #################################################################
+
+:twEngineModeLowerBoundInKW a owl:DatatypeProperty ;
+    rdfs:label "Engine mode lower bound in kW" ;
+    rdfs:comment "Lower bound of an engine mode's power/load range, in kW (inclusive). Above this value and below twEngineModeLowerBoundVariationInKW the mode classification is ambiguous/transitional with the next-lower mode; vessel- or engine-specific, derived by a statistical model." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twEngineModeLowerBoundVariationInKW a owl:DatatypeProperty ;
+    rdfs:label "Engine mode lower bound variation in kW" ;
+    rdfs:comment "Width, in kW, of the transitional/hysteresis zone immediately above twEngineModeLowerBoundInKW, within which engine mode classification is ambiguous. Used to avoid rapid mode switching at a boundary; vessel- or engine-specific, derived by a statistical model." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twEngineModeUpperBoundInKW a owl:DatatypeProperty ;
+    rdfs:label "Engine mode upper bound in kW" ;
+    rdfs:comment "Upper bound of an engine mode's power/load range, in kW (exclusive). Vessel- or engine-specific, derived by a statistical model." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twEngineModeLowerBoundInRevPerMin a owl:DatatypeProperty ;
+    rdfs:label "Engine mode lower bound in rev per min" ;
+    rdfs:comment "Optional lower bound of an engine mode's engine speed range, in revolutions per minute (inclusive). Engine-specific, derived by a statistical model; may be computed from the model's mean and deviation (e.g. mean minus deviation) but is stored explicitly." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twEngineModeUpperBoundInRevPerMin a owl:DatatypeProperty ;
+    rdfs:label "Engine mode upper bound in rev per min" ;
+    rdfs:comment "Optional upper bound of an engine mode's engine speed range, in revolutions per minute (exclusive). Engine-specific, derived by a statistical model; may be computed from the model's mean and deviation (e.g. mean plus deviation) but is stored explicitly." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+# #################################################################
+# #
+# #    QUDT Quantity Restrictions
+# #
+# #################################################################
+
+:EngineMode rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityPower ;
+      owl:someValuesFrom :TwinShipQuantityPower ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityRotationalVelocity ;
+      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] .

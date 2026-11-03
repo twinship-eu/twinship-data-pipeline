@@ -4,10 +4,11 @@ Includes: PMS, Emergency Generators, Thrusters, Shaft Generators.
 """
 
 from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import RDF, RDFS, XSD
+from rdflib.namespace import RDF, RDFS
 
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
+    add_optional_code,
     add_optional_double,
     create_twinship_uri,
     get_twinship_type_uri,
@@ -91,19 +92,9 @@ def create_twinship_emergency_generator(
         TWINSHIP.twEmergencyDieselGeneratorSpeedMaxInRevPerMin,
         speed_max_rpm,
     )
-    if do_mode is not None:
-        # do_mode can be an int or a string like '[0,1]' - try to parse as int, default to -1
-        try:
-            do_mode_int = int(do_mode)
-        except (ValueError, TypeError):
-            do_mode_int = -1
-        g.add(
-            (
-                emergency_generator_uri,
-                TWINSHIP.twEmergencyDieselGeneratorEmergencyDOMode,
-                Literal(do_mode_int, datatype=XSD.integer),
-            )
-        )
+    add_optional_code(
+        g, emergency_generator_uri, TWINSHIP.twEmergencyDieselGeneratorEmergencyDOMode, do_mode
+    )
 
     return emergency_generator_uri, g
 

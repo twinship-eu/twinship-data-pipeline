@@ -1,0 +1,90 @@
+version = 1
+SPDX-PackageName = "twinship-data-pipeline"
+SPDX-PackageSupplier = "TwinShip Consortium"
+SPDX-PackageDownloadLocation = "https://github.com/twinship-eu/twinship-data-pipeline"
+
+# Later [[annotations]] blocks take precedence over earlier ones for the same file,
+# so general rules come first and third-party files last.
+
+# Code and deployment
+[[annotations]]
+path = [
+    "dagster_pipeline/**",
+    "twinship_harmonisation/**",
+    "tests/**",
+    "argo/**",
+    "k8s/**",
+    "keycloak/**",
+    "graphdb/**",
+    "scripts/**",
+    "Dockerfile",
+    "Dockerfile.dagster",
+    "docker-compose.yml",
+    "dagster.yaml",
+    "dagster-docker.yaml",
+    "workspace.yaml",
+    "pyproject.toml",
+    "uv.lock",
+    ".github/**",
+    ".pre-commit-config.yaml",
+    ".python-version",
+    ".gitignore",
+    ".env.example",
+    "README.md",
+    "CLAUDE.md",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 TwinShip Consortium"
+SPDX-License-Identifier = "MIT"
+
+# Synthetic data, SHACL shapes, documentation and TwinShip ontology copy
+[[annotations]]
+path = [
+    "data/**",
+    "docs/**",
+    "shacl/**",
+    "ontology/*.ttl",
+    "ontology/catalog-v001.xml",
+    "ontology/README.md",
+    "ontology/VERSION",
+    "ontology/modules/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 TwinShip Consortium"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Futuristic vessel voyage time series: TwinShip simulation output with weather
+# columns (Hs, Tp, th_wave, Uw, th_wind) sampled from a Copernicus hindcast.
+[[annotations]]
+path = "data/RoRo Futuristic Vessel Voyages.dat"
+precedence = "aggregate"
+SPDX-FileCopyrightText = [
+    "2025-2026 TwinShip Consortium",
+    "Generated using E.U. Copernicus Marine Service Information",
+    "Contains modified Copernicus Climate Change Service information 2024",
+]
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Third-party: ISO 15926-14 / IDO (POSC Caesar Association)
+[[annotations]]
+path = "ontology/external/IDO_20240503.ttl"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "POSC Caesar Association"
+SPDX-License-Identifier = "CC-BY-SA-4.0"
+
+# Third-party: simplified subsets derived from QUDT
+[[annotations]]
+path = [
+    "ontology/external/SCHEMA_QUDT-simplified.ttl",
+    "ontology/vocabularies/**",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "QUDT.org"
+SPDX-License-Identifier = "CC-BY-4.0"
+
+# Third-party: simplified subset of the PAV ontology (https://github.com/pav-ontology/pav)
+[[annotations]]
+path = "ontology/external/PAV-simplified.ttl"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Paolo Ciccarese, Stian Soiland-Reyes and PAV contributors"
+SPDX-License-Identifier = "Apache-2.0"

@@ -33,8 +33,9 @@ logs/
 # Output
 output/
 *.ttl
-!shacl/*.ttl
+!shacl/**/*.ttl
 !ontology/**/*.ttl
+!data/RoRo Futuristic Vessel Operational Modes.ttl
 
 # Private data (vessel spreadsheet and extracted JSON)
 data/TwinShip-table-schema-specification.xlsx
@@ -43,6 +44,9 @@ data/*.json
 # Environment
 .env
 .env.local
+
+# Local-only files (private data, backups, credentials)
+local/
 
 # Linting
 .ruff_cache/

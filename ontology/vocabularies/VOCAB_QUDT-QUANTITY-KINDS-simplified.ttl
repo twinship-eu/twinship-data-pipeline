@@ -22,6 +22,158 @@
                              owl:imports <http://qudt.org/schema/qudt/> .
 
 
+# ---------------------------------------------------------------
+# Quantity kinds used by TwinShip data properties
+# Extended 2026-06-11 to cover all maritime measurement domains
+# ---------------------------------------------------------------
+
+quantitykind:Angle
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Angle"@en ;
+  qudt:symbol "θ" ;
+.
+
+quantitykind:AngularVelocity
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Angular Velocity"@en ;
+  qudt:symbol "ω" ;
+.
+
+quantitykind:DimensionlessRatio
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Dimensionless Ratio"@en ;
+.
+
+quantitykind:ElectricCurrent
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Electric Current"@en ;
+  qudt:symbol "I" ;
+.
+
+quantitykind:ElectricPotential
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Electric Potential"@en ;
+  qudt:symbol "U" ;
+.
+
+quantitykind:Frequency
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Frequency"@en ;
+  qudt:symbol "f" ;
+.
+
+quantitykind:Length
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Length"@en ;
+  qudt:symbol "l" ;
+.
+
+quantitykind:Mass
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Mass"@en ;
+  qudt:symbol "m" ;
+.
+
+quantitykind:MassDensity
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Mass Density"@en ;
+  qudt:symbol "ρ" ;
+.
+
+quantitykind:MassFlowRate
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Mass Flow Rate"@en ;
+  qudt:symbol "ṁ" ;
+.
+
+quantitykind:MassRatio
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Mass Ratio"@en ;
+  qudt:plainTextDescription "Ratio of the mass of one substance to the mass of another (e.g. g/kg)." ;
+.
+
+quantitykind:Pressure
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Pressure"@en ;
+  qudt:symbol "p" ;
+.
+
+quantitykind:SpecificEnergy
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Specific Energy"@en ;
+  qudt:symbol "e" ;
+.
+
+quantitykind:Speed
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Speed"@en ;
+  qudt:symbol "v" ;
+.
+
+quantitykind:ThermodynamicTemperature
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Thermodynamic Temperature"@en ;
+  qudt:symbol "T" ;
+.
+
+quantitykind:Time
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Time"@en ;
+  qudt:symbol "t" ;
+.
+
+quantitykind:Torque
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Torque"@en ;
+  qudt:symbol "τ" ;
+.
+
+quantitykind:Volume
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Volume"@en ;
+  qudt:symbol "V" ;
+.
+
+quantitykind:VolumeFlowRate
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Volume Flow Rate"@en ;
+  qudt:symbol "Q" ;
+.
+
+# ---------------------------------------------------------------
+# Original Force/Power/ComplexPower/Energy entries follow
+# ---------------------------------------------------------------
+
+quantitykind:RotationalVelocity
+  a qudt:QuantityKind ;
+  rdfs:isDefinedBy <http://qudt.org/2.1/vocab/quantitykind> ;
+  rdfs:label "Rotational Velocity"@en ;
+  qudt:symbol "n" ;
+.
+
+# ---------------------------------------------------------------
+# Original Force/Power/ComplexPower/Energy entries follow
+# ---------------------------------------------------------------
+
 quantitykind:Force
   a qudt:QuantityKind ;
   dcterms:description "\"Force\" is an influence that causes mass to accelerate. It may be experienced as a lift, a push, or a pull. Force is defined by Newton's Second Law as \\(F = m \\times a \\), where \\(F\\) is force, \\(m\\) is mass and \\(a\\) is acceleration. Net force is mathematically equal to the time rate of change of the momentum of the body on which it acts. Since momentum is a vector quantity (has both a magnitude and direction), force also is a vector quantity."^^qudt:LatexString ;

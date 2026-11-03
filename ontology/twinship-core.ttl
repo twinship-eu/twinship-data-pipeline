@@ -7,6 +7,8 @@
 
 <https://twin-ship.eu/twinship/core> a owl:Ontology ;
     dcterms:title "TwinShip Ontology"@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
     dcterms:description """Complete TwinShip ontology for digital twins of ships. This is an aggregate ontology that imports the base foundation (twinship-base) plus all domain modules. Use this ontology to get the complete TwinShip conceptual model including vessels and weather. For modular development, import twinship-base and specific modules instead.
 
 ## Modeling Approach - Restriction-Based Design
@@ -30,8 +32,8 @@ To address this limitation while maintaining correct OWL semantics, we maintain 
 Both versions are kept synchronized through automated scripts."""@en ;
     rdfs:label "TwinShip Core Ontology (Complete)" ;
     pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-03-03T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.0.4" ;
+    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.2" ;
     rdfs:comment """Complete TwinShip ontology for digital twins of ships. This is an aggregate ontology that imports the base foundation (twinship-base) plus all domain modules. Use this ontology to get the complete TwinShip conceptual model including vessels and weather. For modular development, import twinship-base and specific modules instead.
 
 Modeling Approach Note:
@@ -47,7 +49,9 @@ Since most documentation and visualization tools (WIDOCO, WebVOWL) provide limit
 Both versions are kept synchronized through automated scripts. See twinship-base for detailed explanation of this modeling practice.""" ;
     owl:imports 
         <https://twin-ship.eu/twinship/vessel>,
-        <https://twin-ship.eu/twinship/weatherconditions> ,
-        <https://twin-ship.eu/twinship/draft-time-mode> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/core/0.0.4> .
+        <https://twin-ship.eu/twinship/weather-conditions> ,
+        <https://twin-ship.eu/twinship/operational-modes> ,
+        <https://twin-ship.eu/twinship/operational-context> ,
+        <https://twin-ship.eu/twinship/statistics>  ;
+    owl:versionIRI <https://twin-ship.eu/twinship/core/0.1.2> .
 

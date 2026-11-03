@@ -1,0 +1,15 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix pav: <http://purl.org/pav/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<https://twin-ship.eu/twinship/shapes> a owl:Ontology ;
+    rdfs:label "TwinShip SHACL shapes" ;
+    dcterms:title "TwinShip SHACL shapes"@en ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
+    pav:version "0.1.2" ;
+    owl:versionIRI <https://twin-ship.eu/twinship/shapes/0.1.2> ;
+    pav:derivedFrom <https://github.com/twinship-eu/twinship-data-pipeline> ;
+    rdfs:comment "Closed-world SHACL validation profile for TwinShip vessel component instance data. The shapes are not part of the OWL semantics of the TwinShip ontology; they complement its open-world class restrictions. Validate with the TwinShip ontology as the ontology graph and RDFS inference, otherwise targets on subclasses are missed."@en ,
+        "Derived from the shacl/ folder of twinship-data-pipeline at commit 16a7a97, with corrections: shapes moved to the https://twin-ship.eu/twinship/shapes# namespace, pipeline-specific shapes (connections.ttl, vessel.ttl) omitted, labels allow language tags, -1 is not accepted as an unknown marker (omit unknown values instead), the 1-7 propeller blade limit is removed, gearbox and propeller shapes target GearboxSystem and PropellerSystem, and partOf requires at least one VesselSystem instead of only VesselSystem values."@en .

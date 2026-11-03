@@ -6,18 +6,29 @@
 # 3. Imports all ontology files from the server import directory
 # 4. Waits for the import to finish
 # 5. Enables GraphDB security
+#
+# If security is already enabled (an existing graphdb_home volume), the
+# initialisation has run before and the script exits without changes.
 
 set -e
 
 GRAPHDB_URL="${GRAPHDB_URL:-http://graphdb:7200}"
 ONTOLOGY_REPO="${ONTOLOGY_REPO:-twinship-ontology}"
 ONTOLOGY_RULESET="${ONTOLOGY_RULESET:-rdfsplus-optimized}"
+ONTOLOGY_CATALOG="${ONTOLOGY_CATALOG:-/scripts/catalog-v001.xml}"
 
 # --- helpers ----------------------------------------------------------------
 
+# Waits until GraphDB answers. Sets SECURED=true if it requires a login
+# (401/403), i.e. security was enabled by an earlier run.
 wait_for_graphdb() {
     echo "Waiting for GraphDB at ${GRAPHDB_URL}..."
-    until curl -sf "${GRAPHDB_URL}/rest/repositories" > /dev/null 2>&1; do
+    while true; do
+        status=$(curl -s -o /dev/null -w '%{http_code}' "${GRAPHDB_URL}/rest/repositories" || true)
+        case "$status" in
+            200) SECURED=false; break ;;
+            401|403) SECURED=true; break ;;
+        esac
         sleep 2
     done
     echo "GraphDB is ready."
@@ -68,28 +79,14 @@ REPOEOF
 import_ontology_files() {
     echo "Importing ontology files into '${ONTOLOGY_REPO}'..."
 
+    # Every file mapped in the ontology catalog (same list as ontology_server_files()
+    # in dagster_pipeline/assets/harmonisation.py)
+    files=$(grep -o ' uri="[^"]*"' "${ONTOLOGY_CATALOG}" \
+        | sed 's/ uri="\(.*\)"/"ontology\/\1"/' | sort -u | paste -sd, -)
+
     curl -sf -X POST "${GRAPHDB_URL}/rest/repositories/${ONTOLOGY_REPO}/import/server" \
         -H "Content-Type: application/json" \
-        -d '{
-            "fileNames": [
-                "ontology/external/IDO_20240503.ttl",
-                "ontology/external/PAV-simplified.ttl",
-                "ontology/external/SCHEMA_QUDT-simplified.ttl",
-                "ontology/vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl",
-                "ontology/vocabularies/VOCAB_QUDT_UNIT2-simplified.ttl",
-                "ontology/external/vesselai/vesselAI_ontology_v2.owl",
-                "ontology/external/vesselai/modules/main.ttl",
-                "ontology/external/vesselai/modules/contextualInformation.ttl",
-                "ontology/external/vesselai/modules/events.ttl",
-                "ontology/external/vesselai/modules/trajectories_module.ttl",
-                "ontology/external/vesselai/modules/vesselCharacteristics.ttl",
-                "ontology/twinship-base.ttl",
-                "ontology/modules/vessel.ttl",
-                "ontology/modules/weatherconditions.ttl",
-                "ontology/modules/draft_time_mode.ttl",
-                "ontology/twinship-core.ttl"
-            ]
-        }'
+        -d "{\"fileNames\": [${files}]}"
 
     echo "Import request submitted."
 }
@@ -122,6 +119,11 @@ enable_security() {
 # --- main -------------------------------------------------------------------
 
 wait_for_graphdb
+if [ "$SECURED" = "true" ]; then
+    echo "GraphDB security is already enabled: initialisation ran before, nothing to do."
+    echo "(The '${ONTOLOGY_REPO}' repository keeps its ontology; use 'docker compose down -v' for a fresh start.)"
+    exit 0
+fi
 create_ontology_repo
 import_ontology_files
 wait_for_import

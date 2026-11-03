@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import pandas as pd
 import requests
@@ -40,6 +40,11 @@ def _env_int(var_name: str, default: int) -> int:
 def _ttl_escape_literal(value: str) -> str:
     """Escape a string for use inside a TTL quoted literal."""
     return value.replace("\\", "\\\\").replace('"', '\\"')
+
+
+def _context_param(context: str | None) -> str:
+    """RDF4J 'context' request parameter: <iri> for a named graph, null for the default graph."""
+    return "null" if context is None else f"<{context}>"
 
 
 def _normalize_graphdb_base_url(base_url: str) -> str:
@@ -238,21 +243,27 @@ class GraphDBClient(ConfigurableResource):
 
         return True
 
-    def import_server_files(self, file_names: list[str], repo_id: str | None = None) -> None:
+    def import_server_files(
+        self, file_names: list[str], repo_id: str | None = None, context: str | None = None
+    ) -> None:
         """Import files from GraphDB's server import directory into a repository.
 
 
         Args:
             file_names: Paths relative to the GraphDB import directory.
             repo_id: Target repository. Defaults to self.repository_id.
+            context: Named graph IRI to import into. Defaults to the default graph.
         """
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
+        body: dict[str, Any] = {"fileNames": file_names}
+        if context is not None:
+            body["importSettings"] = {"context": context}
 
         try:
             response = requests.post(
                 f"{base_url}/rest/repositories/{repo_id}/import/server",
-                json={"fileNames": file_names},
+                json=body,
                 timeout=self.timeout_seconds,
                 **self._merge_kwargs(extra_headers={"Content-Type": "application/json"}),
             )
@@ -286,14 +297,24 @@ class GraphDBClient(ConfigurableResource):
                 pass
             time.sleep(2)
 
-    def clear_repository(self, repo_id: str | None = None) -> None:
-        """Delete all statements from the repository."""
+    def clear_repository(
+        self, repo_id: str | None = None, contexts: list[str | None] | None = None
+    ) -> None:
+        """Delete statements from the repository.
+
+        Args:
+            repo_id: Target repository. Defaults to self.repository_id.
+            contexts: Named graph IRIs to clear; None in the list is the default
+                graph. When omitted, all statements in all graphs are deleted.
+        """
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
+        params = [("context", _context_param(c)) for c in contexts] if contexts else None
 
         try:
             response = requests.delete(
                 f"{base_url}/repositories/{repo_id}/statements",
+                params=params,
                 timeout=self.timeout_seconds,
                 **self._request_kwargs(),
             )
@@ -308,14 +329,18 @@ class GraphDBClient(ConfigurableResource):
                 response,
             )
 
-    def upload_ttl(self, ttl_data: str, repo_id: str | None = None) -> None:
-        """Upload Turtle data to the repository."""
+    def upload_ttl(
+        self, ttl_data: str, repo_id: str | None = None, context: str | None = None
+    ) -> None:
+        """Upload Turtle data to the repository, into a named graph if context is given."""
         repo_id = repo_id or self.repository_id
         base_url = self.normalized_base_url
+        params = {"context": _context_param(context)} if context is not None else None
 
         try:
             response = requests.post(
                 f"{base_url}/repositories/{repo_id}/statements",
+                params=params,
                 data=ttl_data.encode("utf-8"),
                 timeout=self.timeout_seconds,
                 **self._merge_kwargs(extra_headers={"Content-Type": "text/turtle; charset=utf-8"}),

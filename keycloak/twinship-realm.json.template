@@ -1,0 +1,172 @@
+{
+  "realm": "twinship",
+  "enabled": true,
+  "sslRequired": "none",
+  "roles": {
+    "realm": [
+      { "name": "ROLE_ADMIN", "description": "GraphDB administrator" },
+      { "name": "ROLE_USER", "description": "Basic GraphDB user" },
+      { "name": "ROLE_REPO_MANAGER", "description": "GraphDB repository manager" },
+      { "name": "READ_REPO_grimaldi-roro", "description": "Read access to grimaldi-roro repository" },
+      { "name": "WRITE_REPO_grimaldi-roro", "description": "Write access to grimaldi-roro repository" },
+      { "name": "READ_REPO_stena-ropax", "description": "Read access to stena-ropax repository" },
+      { "name": "WRITE_REPO_stena-ropax", "description": "Write access to stena-ropax repository" },
+      { "name": "READ_REPO_stena-tanker", "description": "Read access to stena-tanker repository" },
+      { "name": "WRITE_REPO_stena-tanker", "description": "Write access to stena-tanker repository" },
+      { "name": "READ_REPO_futuristic-vessel", "description": "Read access to futuristic-vessel repository" },
+      { "name": "WRITE_REPO_futuristic-vessel", "description": "Write access to futuristic-vessel repository" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "graphdb",
+      "name": "GraphDB Workbench",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "rootUrl": "http://localhost:7200",
+      "redirectUris": [
+        "http://localhost:7200/*",
+        "http://graphdb:7200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:7200",
+        "http://graphdb:7200"
+      ],
+      "protocol": "openid-connect",
+      "defaultClientScopes": ["openid", "profile", "email", "roles", "web-origins"],
+      "optionalClientScopes": ["offline_access"],
+      "protocolMappers": [
+        {
+          "name": "graphdb-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "graphdb",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "dagster-pipeline",
+      "name": "Dagster Pipeline Service Account",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "__DAGSTER_CLIENT_SECRET__",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "protocol": "openid-connect",
+      "protocolMappers": [
+        {
+          "name": "graphdb-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "graphdb",
+            "id.token.claim": "false",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "grimaldi-roro-user",
+      "enabled": true,
+      "email": "grimaldi-roro@example.com",
+      "firstName": "Grimaldi",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__GRIMALDI_RORO_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_grimaldi-roro"]
+    },
+    {
+      "username": "stena-ropax-user",
+      "enabled": true,
+      "email": "stena-ropax@example.com",
+      "firstName": "Stena RoPax",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__STENA_ROPAX_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-ropax"]
+    },
+    {
+      "username": "stena-tanker-user",
+      "enabled": true,
+      "email": "stena-tanker@example.com",
+      "firstName": "Stena Tanker",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__STENA_TANKER_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_stena-tanker"]
+    },
+    {
+      "username": "futuristic-vessel-user",
+      "enabled": true,
+      "email": "futuristic-vessel@example.com",
+      "firstName": "Futuristic Vessel",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__FUTURISTIC_VESSEL_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "READ_REPO_futuristic-vessel"]
+    },
+    {
+      "username": "twinship-developer",
+      "enabled": true,
+      "email": "twinship-developer@example.com",
+      "firstName": "TwinShip",
+      "lastName": "Developer",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "__DEVELOPER_PASSWORD__",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["offline_access", "ROLE_USER", "ROLE_REPO_MANAGER"]
+    },
+    {
+      "username": "service-account-dagster-pipeline",
+      "enabled": true,
+      "serviceAccountClientId": "dagster-pipeline",
+      "realmRoles": [
+        "ROLE_REPO_MANAGER",
+        "READ_REPO_grimaldi-roro",
+        "WRITE_REPO_grimaldi-roro",
+        "READ_REPO_stena-ropax",
+        "WRITE_REPO_stena-ropax",
+        "READ_REPO_stena-tanker",
+        "WRITE_REPO_stena-tanker",
+        "READ_REPO_futuristic-vessel",
+        "WRITE_REPO_futuristic-vessel"
+      ]
+    }
+  ]
+}

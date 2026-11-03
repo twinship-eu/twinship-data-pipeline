@@ -1,0 +1,32 @@
+PREFIX tw:   <https://twin-ship.eu/twinship#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX fv:   <https://twin-ship.eu/individuals/futuristic-vessel/>
+
+# A few voyages of the vessel with their ports and legs.
+# Change the LIMIT (or drop the ORDER BY) to show other/more voyages.
+CONSTRUCT {
+  ?vessel tw:hasVoyage ?voyage .
+  ?voyage a tw:Voyage ;
+          rdfs:label ?voyageLabel ;
+          tw:hasDeparturePort ?dep ;
+          tw:hasArrivalPort ?arr ;
+          tw:hasVoyageLeg ?leg .
+  ?dep rdfs:label ?depLabel .
+  ?arr rdfs:label ?arrLabel .
+  ?leg a tw:VoyageLeg .
+}
+WHERE {
+  {
+    SELECT ?vessel ?voyage WHERE {
+      VALUES ?vessel { fv:FV-RR-1 }
+      ?vessel tw:hasVoyage ?voyage .
+      ?voyage tw:twVoyageIdentifier ?id .
+    }
+    ORDER BY ?id
+    LIMIT 3
+  }
+  OPTIONAL { ?voyage rdfs:label ?voyageLabel }
+  OPTIONAL { ?voyage tw:hasDeparturePort ?dep . OPTIONAL { ?dep rdfs:label ?depLabel } }
+  OPTIONAL { ?voyage tw:hasArrivalPort ?arr . OPTIONAL { ?arr rdfs:label ?arrLabel } }
+  OPTIONAL { ?voyage tw:hasVoyageLeg ?leg }
+}

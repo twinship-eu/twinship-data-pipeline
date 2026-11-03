@@ -1,10 +1,11 @@
 """Low-level functions for creating engine-related TwinShip RDF triples."""
 
 from rdflib import Graph, Literal, URIRef
-from rdflib.namespace import RDF, RDFS, XSD
+from rdflib.namespace import RDF, RDFS
 
 from twinship_harmonisation.constants import IDO, TWINSHIP
 from twinship_harmonisation.low_level.vessel_functions import (
+    add_optional_code,
     add_optional_double,
     create_twinship_uri,
     get_twinship_type_uri,
@@ -88,21 +89,8 @@ def create_twinship_main_engine(
     add_optional_double(
         g, engine_uri, TWINSHIP.twScavengerAirRecTemperatureMaxInDegC, scavenger_air_rec_temp_max_c
     )
-    # Common DO mode - try to parse as int, default to -1 if complex string like '[0,1]'
-    if common_do_mode is not None:
-        try:
-            do_mode_int = int(common_do_mode)
-        except (ValueError, TypeError):
-            do_mode_int = -1
-        g.add((engine_uri, TWINSHIP.twCommonDOMode, Literal(do_mode_int, datatype=XSD.integer)))
-
-    # Common fuel mode - try to parse as int, default to -1 if complex string
-    if common_fuel_mode is not None:
-        try:
-            fuel_mode_int = int(common_fuel_mode)
-        except (ValueError, TypeError):
-            fuel_mode_int = -1
-        g.add((engine_uri, TWINSHIP.twCommonFuelMode, Literal(fuel_mode_int, datatype=XSD.integer)))
+    add_optional_code(g, engine_uri, TWINSHIP.twCommonDOMode, common_do_mode)
+    add_optional_code(g, engine_uri, TWINSHIP.twCommonFuelMode, common_fuel_mode)
 
     add_optional_double(
         g, engine_uri, TWINSHIP.twFuelConsumptionTotalInMT, fuel_consumption_total_mt
@@ -163,12 +151,6 @@ def create_twinship_auxiliary_engine(
         g, engine_uri, TWINSHIP.twAuxiliaryFuelRateMassNetKgPerHr, fuel_rate_mass_net_kg_per_hr
     )
 
-    # Auxiliary DO mode - try to parse as int, default to -1 if complex string
-    if auxiliary_do_mode is not None:
-        try:
-            do_mode_int = int(auxiliary_do_mode)
-        except (ValueError, TypeError):
-            do_mode_int = -1
-        g.add((engine_uri, TWINSHIP.twAuxiliaryDOMode, Literal(do_mode_int, datatype=XSD.integer)))
+    add_optional_code(g, engine_uri, TWINSHIP.twAuxiliaryDOMode, auxiliary_do_mode)
 
     return engine_uri, g

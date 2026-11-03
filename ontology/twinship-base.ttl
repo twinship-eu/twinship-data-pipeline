@@ -1,4 +1,5 @@
 @prefix : <https://twin-ship.eu/twinship#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix ido: <http://rds.posccaesar.org/ontology/lis14/rdl/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix pav: <http://purl.org/pav/> .
@@ -17,10 +18,12 @@
 
 <https://twin-ship.eu/twinship/base> a owl:Ontology ;
     rdfs:label "TwinShip Ontology" ;
+    dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dcterms:rightsHolder "TwinShip Consortium" ;
     pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-03-03T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.0.4" ;
-    rdfs:comment """Base/foundation ontology for TwinShip. Defines core classes, properties, and patterns that all TwinShip modules extend. This includes the base TwinShip physical object class, property hierarchies, and fundamental object properties. Domain-specific classes are defined in separate modules (vessel, weatherconditions).
+    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.2" ;
+    rdfs:comment """Base/foundation ontology for TwinShip. Defines core classes, properties, and patterns that all TwinShip modules extend. This includes the base TwinShip physical object class, property hierarchies, and fundamental object properties. Domain-specific classes are defined in separate modules (vessel, weather-conditions).
 
 Modeling Approach - Restriction-Based Design:
 
@@ -49,8 +52,8 @@ The visualization version is regenerated whenever the source ontology changes, e
         <http://qudt.org/vocab/quantitykind/>,
         <http://qudt.org/vocab/unit/>,
         <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0>,
-        <http://www.vesselAI-project.eu/vesselai> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/base/0.0.4> .
+        <https://twin-ship.eu/twinship/qudt-vocabulary> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/base/0.1.2> .
 
 # #################################################################
 # #
@@ -127,6 +130,36 @@ skos:altLabel a owl:AnnotationProperty ;
 
 # #################################################################
 # #
+# #    Process, Quality, and Information Abstraction Classes
+# #
+# #    NOTE: IDO does not define ido:Process. The closest IDO class
+# #    for processes/activities is ido:Activity, which is used here
+# #    as the upper-ontology anchor for TwinShipProcess.
+# #
+# #################################################################
+
+:TwinShipProcess a owl:Class ;
+    rdfs:label "TwinShip Process" ;
+    rdfs:comment "Base class for processes in the TwinShip ontology. Used for voyages, voyage legs, and other operational processes. Subclass of ido:Activity (the closest IDO class — IDO does not define ido:Process directly)." ;
+    rdfs:subClassOf ido:Activity .
+
+:TwinShipEvent a owl:Class ;
+    rdfs:label "TwinShip Event" ;
+    rdfs:comment "Base class for discrete events in the TwinShip ontology. Subclass of ido:Event." ;
+    rdfs:subClassOf ido:Event .
+
+:TwinShipQuality a owl:Class ;
+    rdfs:label "TwinShip Quality" ;
+    rdfs:comment "Base class for qualities, states, conditions, and modes of TwinShip physical objects or operational processes. Subclass of ido:Quality." ;
+    rdfs:subClassOf ido:Quality .
+
+:TwinShipInformationObject a owl:Class ;
+    rdfs:label "TwinShip Information Object" ;
+    rdfs:comment "Base class for information artefacts, statistical summaries, derived data, model outputs, and operational profiles. Subclass of ido:InformationObject." ;
+    rdfs:subClassOf ido:InformationObject .
+
+# #################################################################
+# #
 # #    Organizational Classes
 # #
 # #################################################################
@@ -175,17 +208,38 @@ skos:altLabel a owl:AnnotationProperty ;
 :componentOf a owl:ObjectProperty ;
     rdfs:label "component of" ;
     rdfs:comment "Relates a component to the ship or system it is part of." ;
+    rdfs:range :TwinShipInanimatePhysicalObject ;
     rdfs:subPropertyOf ido:partOf ;
     owl:inverseOf :hasComponent .
 
 :hasComponent a owl:ObjectProperty ;
     rdfs:label "has component" ;
     rdfs:comment "Relates a ship or system to a component that is part of it." ;
+    rdfs:range :TwinShipInanimatePhysicalObject ;
     rdfs:subPropertyOf ido:hasPart .
 
 :ownedBy a owl:ObjectProperty ;
     rdfs:label "owned by" ;
     rdfs:comment "Relates an entity to its owner (typically an Organization)." ;
+    rdfs:range :TwinShipOrganization ;
+    rdfs:subPropertyOf :twinshipObjectProperties .
+
+:hasQuality a owl:ObjectProperty ;
+    rdfs:label "has quality" ;
+    rdfs:comment "Relates a TwinShip entity or process to a quality, state, condition, or mode." ;
+    rdfs:range :TwinShipQuality ;
+    rdfs:subPropertyOf :twinshipObjectProperties .
+
+:hasProcess a owl:ObjectProperty ;
+    rdfs:label "has process" ;
+    rdfs:comment "Relates a TwinShip entity to a process in which it participates or that is associated with it." ;
+    rdfs:range :TwinShipProcess ;
+    rdfs:subPropertyOf :twinshipObjectProperties .
+
+:hasInformationObject a owl:ObjectProperty ;
+    rdfs:label "has information object" ;
+    rdfs:comment "Relates a TwinShip entity, process, or observation to an information object such as a derived profile, statistical summary, or model output." ;
+    rdfs:range :TwinShipInformationObject ;
     rdfs:subPropertyOf :twinshipObjectProperties .
 
 # #################################################################

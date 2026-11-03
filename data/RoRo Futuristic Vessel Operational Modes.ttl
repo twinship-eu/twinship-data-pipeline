@@ -1,0 +1,165 @@
+# Operational modes of the futuristic vessel: per-genset EngineMode
+# individuals and the vessel's EngineSpeedBin, DraftMode and TrimMode
+# ordinal bins. These are vessel- and engine-specific, so they are instance
+# data rather than shared individuals in the ontology's operational-modes
+# module.
+#
+# PLACEHOLDER DATA: the mode count of 4 per genset and all kW bounds (0.0)
+# are placeholders, and the bins have no numeric ranges yet. Replace them
+# with real values from the statistical model (engine modes) and the
+# engine-propeller combinator diagram (speed bins) once available, ideally
+# by adding them to "RoRo Futuristic Vessel KG Working File.xlsx".
+# Genset RPM bounds are intentionally omitted: the gensets run at constant
+# speed.
+#
+# The pipeline adds this file to the futuristic vessel's component graph
+# (vessel_rdf_graph). IRIs follow the pipeline's scheme; FV-GN-1 and
+# FV-GN-2 are the gensets created from the spreadsheet.
+# Moved from twinship-futuristic-vessel (data/futuristic-vessel-individuals.ttl).
+
+@prefix fv: <https://twin-ship.eu/individuals/futuristic-vessel/> .
+@prefix tw: <https://twin-ship.eu/twinship#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# #################################################################
+# #
+# #    Individuals — Engine Speed Bin
+# #
+# #################################################################
+
+fv:EngineSpeedBin1 a owl:NamedIndividual, tw:EngineSpeedBin ;
+    rdfs:label "Engine Speed Bin 1" ;
+    rdfs:comment "Ordinal engine speed (RPM) region index 1 (lowest speed). Numeric range not yet defined; to be derived from the engine-propeller combinator diagram for the futuristic vessel's gensets." .
+
+fv:EngineSpeedBin2 a owl:NamedIndividual, tw:EngineSpeedBin ;
+    rdfs:label "Engine Speed Bin 2" ;
+    rdfs:comment "Ordinal engine speed (RPM) region index 2 (low-intermediate speed). Numeric range not yet defined; to be derived from the engine-propeller combinator diagram for the futuristic vessel's gensets." .
+
+fv:EngineSpeedBin3 a owl:NamedIndividual, tw:EngineSpeedBin ;
+    rdfs:label "Engine Speed Bin 3" ;
+    rdfs:comment "Ordinal engine speed (RPM) region index 3 (intermediate-high speed). Numeric range not yet defined; to be derived from the engine-propeller combinator diagram for the futuristic vessel's gensets." .
+
+fv:EngineSpeedBin4 a owl:NamedIndividual, tw:EngineSpeedBin ;
+    rdfs:label "Engine Speed Bin 4" ;
+    rdfs:comment "Ordinal engine speed (RPM) region index 4 (highest speed). Numeric range not yet defined; to be derived from the engine-propeller combinator diagram for the futuristic vessel's gensets." .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( fv:EngineSpeedBin1 fv:EngineSpeedBin2 fv:EngineSpeedBin3 fv:EngineSpeedBin4 ) .
+
+# #################################################################
+# #
+# #    Individuals — Draft Mode
+# #
+# #################################################################
+
+fv:DraftMode1 a owl:NamedIndividual, tw:DraftMode ;
+    rdfs:label "Draft Mode 1" ;
+    rdfs:comment "Ordinal draft configuration index 1 (shallowest) for the futuristic vessel. May represent a ballast-like condition." .
+
+fv:DraftMode2 a owl:NamedIndividual, tw:DraftMode ;
+    rdfs:label "Draft Mode 2" ;
+    rdfs:comment "Ordinal draft configuration index 2 (intermediate) for the futuristic vessel. May represent a part-load-like condition." .
+
+fv:DraftMode3 a owl:NamedIndividual, tw:DraftMode ;
+    rdfs:label "Draft Mode 3" ;
+    rdfs:comment "Ordinal draft configuration index 3 (deepest) for the futuristic vessel. May represent a laden/fully-loaded-like condition." .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( fv:DraftMode1 fv:DraftMode2 fv:DraftMode3 ) .
+
+# #################################################################
+# #
+# #    Individuals — Trim Mode
+# #
+# #################################################################
+
+fv:TrimMode1 a owl:NamedIndividual, tw:TrimMode ;
+    rdfs:label "Trim Mode 1" ;
+    rdfs:comment "Ordinal trim configuration index 1 (lowest trim value) for the futuristic vessel. May represent a bow-trim-like condition." .
+
+fv:TrimMode2 a owl:NamedIndividual, tw:TrimMode ;
+    rdfs:label "Trim Mode 2" ;
+    rdfs:comment "Ordinal trim configuration index 2 (intermediate trim value) for the futuristic vessel. May represent an even-keel-like condition." .
+
+fv:TrimMode3 a owl:NamedIndividual, tw:TrimMode ;
+    rdfs:label "Trim Mode 3" ;
+    rdfs:comment "Ordinal trim configuration index 3 (highest trim value) for the futuristic vessel. May represent a stern-trim-like condition." .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( fv:TrimMode1 fv:TrimMode2 fv:TrimMode3 ) .
+
+# #################################################################
+# #
+# #    Engine Modes — per genset
+# #
+# #    Count of 4 per genset and all-zero kW bounds are placeholders.
+# #
+# #################################################################
+
+fv:FV-GN-1 tw:twEngineModeCount 4 ;
+    tw:hasEngineMode fv:FV-GN-1-EngineMode1,
+        fv:FV-GN-1-EngineMode2,
+        fv:FV-GN-1-EngineMode3,
+        fv:FV-GN-1-EngineMode4 .
+
+fv:FV-GN-2 tw:twEngineModeCount 4 ;
+    tw:hasEngineMode fv:FV-GN-2-EngineMode1,
+        fv:FV-GN-2-EngineMode2,
+        fv:FV-GN-2-EngineMode3,
+        fv:FV-GN-2-EngineMode4 .
+
+fv:FV-GN-1-EngineMode1 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 1 Engine Mode 1" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-1-EngineMode2 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 1 Engine Mode 2" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-1-EngineMode3 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 1 Engine Mode 3" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-1-EngineMode4 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 1 Engine Mode 4" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-2-EngineMode1 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 2 Engine Mode 1" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-2-EngineMode2 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 2 Engine Mode 2" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-2-EngineMode3 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 2 Engine Mode 3" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+fv:FV-GN-2-EngineMode4 a owl:NamedIndividual, tw:EngineMode ;
+    rdfs:label "Genset 2 Engine Mode 4" ;
+    tw:twEngineModeLowerBoundInKW 0.0 ;
+    tw:twEngineModeLowerBoundVariationInKW 0.0 ;
+    tw:twEngineModeUpperBoundInKW 0.0 .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers (
+        fv:FV-GN-1-EngineMode1 fv:FV-GN-1-EngineMode2 fv:FV-GN-1-EngineMode3 fv:FV-GN-1-EngineMode4
+        fv:FV-GN-2-EngineMode1 fv:FV-GN-2-EngineMode2 fv:FV-GN-2-EngineMode3 fv:FV-GN-2-EngineMode4
+    ) .

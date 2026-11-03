@@ -18,7 +18,8 @@ class ShaclValidator(ConfigurableResource):
 
         Args:
             data_graph: The RDF graph to validate.
-            shapes_path: Path to a SHACL shapes file or directory of .ttl files.
+            shapes_path: Path to a SHACL shapes file or directory of .ttl files
+                (subdirectories included).
 
         Returns:
             Tuple of (conforms, report_text).
@@ -27,7 +28,7 @@ class ShaclValidator(ConfigurableResource):
         shapes_path = Path(str(shapes_path))
 
         if shapes_path.is_dir():
-            for ttl_file in sorted(shapes_path.glob("*.ttl")):
+            for ttl_file in sorted(shapes_path.rglob("*.ttl")):
                 shapes_graph.parse(str(ttl_file), format="turtle")
         else:
             shapes_graph.parse(str(shapes_path), format="turtle")

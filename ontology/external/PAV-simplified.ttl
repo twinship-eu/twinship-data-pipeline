@@ -1,3 +1,6 @@
+# Modified by the TwinShip Consortium: reduced subset of the PAV ontology
+# (https://github.com/pav-ontology/pav), Apache License 2.0 (see LICENSES/Apache-2.0.txt).
+# Original authors: Paolo Ciccarese, Stian Soiland-Reyes and PAV contributors.
 @prefix dc: <http://purl.org/dc/elements/1.1/> .
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
