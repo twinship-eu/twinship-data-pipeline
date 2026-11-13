@@ -64,13 +64,18 @@
 
 :DraftMode a owl:Class ;
     rdfs:label "Draft Mode" ;
-    rdfs:comment "A categorical, ordinal draft configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with draft depth, but the exact physical draft associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own DraftMode individuals (e.g. a naming convention such as DraftMode1, DraftMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin)." ;
-    rdfs:subClassOf :TwinShipQuality .
+    rdfs:comment "A categorical, ordinal draft configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with draft depth, but the exact physical draft associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own DraftMode individuals (e.g. a naming convention such as DraftMode1, DraftMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin). The draft range of a mode is given by twDraftModeLowerBoundInM and twDraftModeUpperBoundInM, with an optional reference draft twDraftModeReferenceDraftInM." ;
+    rdfs:subClassOf :TwinShipQuality ,
+        [ a owl:Restriction ; owl:onProperty :twDraftModeReferenceDraftInM ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twDraftModeLowerBoundInM ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twDraftModeUpperBoundInM ; owl:someValuesFrom xsd:decimal ] .
 
 :TrimMode a owl:Class ;
     rdfs:label "Trim Mode" ;
-    rdfs:comment "A categorical, ordinal trim configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with trim value from bow trim toward stern trim, but the exact physical trim associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own TrimMode individuals (e.g. a naming convention such as TrimMode1, TrimMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin)." ;
-    rdfs:subClassOf :TwinShipQuality .
+    rdfs:comment "A categorical, ordinal trim configuration used to classify vessel operation. Individuals are not pre-enumerated or shared globally: index order increases monotonically with trim value from bow trim toward stern trim, but the exact physical trim associated with each index is vessel- or fleet-specific and not standardized, so each vessel or fleet instantiates its own TrimMode individuals (e.g. a naming convention such as TrimMode1, TrimMode2, ... may be used locally, following the same instantiation pattern as EngineMode/VesselSpeedBin). The trim range of a mode is given by twTrimModeLowerBoundInM and twTrimModeUpperBoundInM, using the same sign convention as twTrimInM (aft draft minus forward draft; positive values indicate stern trim)." ;
+    rdfs:subClassOf :TwinShipQuality ,
+        [ a owl:Restriction ; owl:onProperty :twTrimModeLowerBoundInM ; owl:someValuesFrom xsd:decimal ] ,
+        [ a owl:Restriction ; owl:onProperty :twTrimModeUpperBoundInM ; owl:someValuesFrom xsd:decimal ] .
 
 :DraftTrimMode a owl:Class ;
     rdfs:label "Draft\u2013Trim Mode" ;
@@ -211,8 +216,8 @@
 # #    of the shared ontology 2026-10-02, following the same pattern
 # #    already applied to EngineMode). The futuristic vessel
 # #    demonstrator's placeholder individuals now live in
-# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
-# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    twinship-data-pipeline's data/RoRo Futuristic Vessel
+# #    Operational Modes.ttl. Other
 # #    vessels/fleets instantiate their own in their own instance data.
 # #
 # #################################################################
@@ -237,8 +242,8 @@
 # #    the shared ontology 2026-10-02, following the same pattern
 # #    already applied to EngineMode). The futuristic vessel
 # #    demonstrator's placeholder individuals now live in
-# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
-# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    twinship-data-pipeline's data/RoRo Futuristic Vessel
+# #    Operational Modes.ttl. Other
 # #    vessels/fleets instantiate their own in their own instance data.
 # #
 # #################################################################
@@ -252,8 +257,8 @@
 # #    the shared ontology 2026-10-02, following the same pattern
 # #    already applied to EngineMode). The futuristic vessel
 # #    demonstrator's placeholder individuals now live in
-# #    twinship-futuristic-vessel/data/futuristic-vessel-individuals.ttl,
-# #    pending merge into examples/futuristic-vessel.ttl. Other
+# #    twinship-data-pipeline's data/RoRo Futuristic Vessel
+# #    Operational Modes.ttl. Other
 # #    vessels/fleets instantiate their own in their own instance data.
 # #
 # #################################################################
@@ -327,6 +332,42 @@
 
 # #################################################################
 # #
+# #    Data Properties — Draft and Trim Mode Ranges
+# #
+# #################################################################
+
+:twDraftModeReferenceDraftInM a owl:DatatypeProperty ;
+    rdfs:label "Draft mode reference draft in m" ;
+    rdfs:comment "Optional representative draft of a draft mode, in metres (e.g. a design or loading-condition draft the mode is centred on). Vessel- or fleet-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twDraftModeLowerBoundInM a owl:DatatypeProperty ;
+    rdfs:label "Draft mode lower bound in m" ;
+    rdfs:comment "Lower bound of a draft mode's draft range, in metres (inclusive). Omitted for the shallowest mode when its range is open-ended. Vessel- or fleet-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twDraftModeUpperBoundInM a owl:DatatypeProperty ;
+    rdfs:label "Draft mode upper bound in m" ;
+    rdfs:comment "Upper bound of a draft mode's draft range, in metres (exclusive). Omitted for the deepest mode when its range is open-ended. Vessel- or fleet-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twTrimModeLowerBoundInM a owl:DatatypeProperty ;
+    rdfs:label "Trim mode lower bound in m" ;
+    rdfs:comment "Lower bound of a trim mode's trim range, in metres (inclusive). Trim is aft draft minus forward draft, as in twTrimInM: positive values indicate stern trim, negative values bow trim. Omitted for the lowest mode when its range is open-ended. Vessel- or fleet-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twTrimModeUpperBoundInM a owl:DatatypeProperty ;
+    rdfs:label "Trim mode upper bound in m" ;
+    rdfs:comment "Upper bound of a trim mode's trim range, in metres (exclusive). Trim is aft draft minus forward draft, as in twTrimInM: positive values indicate stern trim, negative values bow trim. Omitted for the highest mode when its range is open-ended. Vessel- or fleet-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+# #################################################################
+# #
 # #    QUDT Quantity Restrictions
 # #
 # #################################################################
@@ -338,3 +379,13 @@
     [ a owl:Restriction ;
       owl:onProperty :hasQuantityRotationalVelocity ;
       owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] .
+
+:DraftMode rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityLength ;
+      owl:someValuesFrom :TwinShipQuantityLength ] .
+
+:TrimMode rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityLength ;
+      owl:someValuesFrom :TwinShipQuantityLength ] .

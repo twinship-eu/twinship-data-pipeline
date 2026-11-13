@@ -50,7 +50,7 @@ vessel_partitions_def = DynamicPartitionsDefinition(name="vessels")
 # Configuration Classes
 # =============================================================================
 
-# Hand-written operational modes of the futuristic vessel (placeholder values)
+# Hand-written operational modes of the futuristic vessel (provisional values)
 FUTURISTIC_OPERATIONAL_MODES = Path("data/RoRo Futuristic Vessel Operational Modes.ttl")
 
 
@@ -266,12 +266,12 @@ def vessel_rdf_graph(context: AssetExecutionContext, validated_vessel_json: dict
     context.log.info(f"Generated {len(g)} triples for {namespace} ({vessel_id})")
     metadata: dict[str, Any] = {}
 
-    # Futuristic vessel: add its operational modes (placeholder values, see the file header)
+    # Futuristic vessel: add its operational modes (provisional values, see the file header)
     if is_futuristic and FUTURISTIC_OPERATIONAL_MODES.exists():
         modes = Graph().parse(FUTURISTIC_OPERATIONAL_MODES, format="turtle")
         g += modes
         context.log.info(
-            f"Added {len(modes)} operational mode triples (placeholder values) "
+            f"Added {len(modes)} operational mode triples (provisional values) "
             f"from {FUTURISTIC_OPERATIONAL_MODES}"
         )
         metadata["operational_mode_triples"] = MetadataValue.int(len(modes))

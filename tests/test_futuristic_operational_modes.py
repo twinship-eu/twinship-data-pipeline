@@ -33,8 +33,19 @@ def test_counts(modes):
     def count(cls):
         return len(set(modes.subjects(RDF.type, TWINSHIP[cls])))
 
-    assert (count("EngineMode"), count("EngineSpeedBin")) == (8, 4)
+    assert (count("EngineMode"), count("EngineSpeedBin")) == (8, 0)
     assert (count("DraftMode"), count("TrimMode")) == (3, 3)
+
+
+def test_draft_ranges_are_contiguous(modes):
+    """Draft modes in order: each upper bound is the next mode's lower bound."""
+    modes_in_order = sorted(
+        modes.subjects(RDF.type, TWINSHIP.DraftMode),
+        key=lambda m: modes.value(m, TWINSHIP.twDraftModeReferenceDraftInM).toPython(),
+    )
+    uppers = [modes.value(m, TWINSHIP.twDraftModeUpperBoundInM) for m in modes_in_order[:-1]]
+    lowers = [modes.value(m, TWINSHIP.twDraftModeLowerBoundInM) for m in modes_in_order[1:]]
+    assert uppers == lowers and None not in uppers
 
 
 def test_uses_pipeline_iris(modes):

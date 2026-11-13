@@ -140,6 +140,7 @@
     rdfs:subClassOf :TwinShipInformationObject ,
         [ a owl:Restriction ; owl:onProperty :twSpeedBinLowerBoundInKnots ; owl:someValuesFrom xsd:decimal ],
         [ a owl:Restriction ; owl:onProperty :twSpeedBinUpperBoundInKnots ; owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ; owl:onProperty :twSpeedBinPropellerSpeedInRevPerMin ; owl:someValuesFrom xsd:decimal ],
         [ a owl:Restriction ; owl:onProperty :twSpeedValueInKnots         ; owl:someValuesFrom xsd:decimal ],
         [ a owl:Restriction ; owl:onProperty :twStateFrequency     ; owl:someValuesFrom xsd:decimal ],
         [ a owl:Restriction ; owl:onProperty :hasSpeedReference ; owl:onClass :SpeedReference ; owl:qualifiedCardinality "1"^^xsd:nonNegativeInteger ] .
@@ -472,6 +473,12 @@
     rdfs:range xsd:decimal ;
     rdfs:subPropertyOf :TwinShipDataProperties .
 
+:twSpeedBinPropellerSpeedInRevPerMin a owl:DatatypeProperty ;
+    rdfs:label "Speed bin propeller speed in rev per min" ;
+    rdfs:comment "Optional representative propeller shaft speed for a speed bin, in revolutions per minute (e.g. from the vessel's speed-power or combinator data at the bin's reference speed). Vessel-specific." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
 # #################################################################
 # #
 # #    Data Properties — Frequency and Statistics
@@ -606,7 +613,10 @@
 :VesselSpeedBin rdfs:subClassOf
     [ a owl:Restriction ;
       owl:onProperty :hasQuantitySpeed ;
-      owl:someValuesFrom :TwinShipQuantitySpeed ] .
+      owl:someValuesFrom :TwinShipQuantitySpeed ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityRotationalVelocity ;
+      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] .
 
 :FuelConsumptionObservation rdfs:subClassOf
     [ a owl:Restriction ;

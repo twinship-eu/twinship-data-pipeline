@@ -1,0 +1,151 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix tws: <https://twin-ship.eu/twinship#> .
+@prefix twsh: <https://twin-ship.eu/twinship/shapes#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Shapes for vessel- and engine-specific operational modes and bins.
+# Bounds are optional (an open-ended range omits a bound); where both are
+# given, the lower bound must not exceed the upper bound. Equal bounds are
+# allowed (e.g. 0 to 0 kW for a genset that is off in a mode).
+
+# Shape for EngineMode (per-engine power/load range)
+twsh:EngineModeShape a sh:NodeShape ;
+    sh:targetClass tws:EngineMode ;
+    sh:property [
+        sh:path tws:twEngineModeLowerBoundInKW ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:lessThanOrEquals tws:twEngineModeUpperBoundInKW ;
+        sh:message "Engine mode lower bound must be a single non-negative number, not above the upper bound" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEngineModeUpperBoundInKW ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Engine mode upper bound must be a single non-negative number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEngineModeLowerBoundVariationInKW ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Engine mode lower bound variation must be a single non-negative number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEngineModeLowerBoundInRevPerMin ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:lessThanOrEquals tws:twEngineModeUpperBoundInRevPerMin ;
+        sh:message "Engine mode lower RPM bound must be a single non-negative number, not above the upper RPM bound" ;
+    ] ;
+    sh:property [
+        sh:path tws:twEngineModeUpperBoundInRevPerMin ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Engine mode upper RPM bound must be a single non-negative number" ;
+    ] .
+
+# Shape for DraftMode (draft range in metres)
+twsh:DraftModeShape a sh:NodeShape ;
+    sh:targetClass tws:DraftMode ;
+    sh:property [
+        sh:path tws:twDraftModeReferenceDraftInM ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Draft mode reference draft must be a single non-negative number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twDraftModeLowerBoundInM ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:lessThanOrEquals tws:twDraftModeUpperBoundInM ;
+        sh:message "Draft mode lower bound must be a single non-negative number, not above the upper bound" ;
+    ] ;
+    sh:property [
+        sh:path tws:twDraftModeUpperBoundInM ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Draft mode upper bound must be a single non-negative number" ;
+    ] .
+
+# Shape for TrimMode (trim range in metres; negative values are bow trim)
+twsh:TrimModeShape a sh:NodeShape ;
+    sh:targetClass tws:TrimMode ;
+    sh:property [
+        sh:path tws:twTrimModeLowerBoundInM ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:lessThanOrEquals tws:twTrimModeUpperBoundInM ;
+        sh:message "Trim mode lower bound must be a single number, not above the upper bound" ;
+    ] ;
+    sh:property [
+        sh:path tws:twTrimModeUpperBoundInM ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:message "Trim mode upper bound must be a single number" ;
+    ] .
+
+# Shape for DraftTrimMode (one draft mode and one trim mode)
+twsh:DraftTrimModeShape a sh:NodeShape ;
+    sh:targetClass tws:DraftTrimMode ;
+    sh:property [
+        sh:path tws:hasDraftMode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class tws:DraftMode ;
+        sh:message "Draft-trim mode must have exactly one draft mode" ;
+    ] ;
+    sh:property [
+        sh:path tws:hasTrimMode ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class tws:TrimMode ;
+        sh:message "Draft-trim mode must have exactly one trim mode" ;
+    ] .
+
+# Shape for VesselSpeedBin (speed range in knots)
+twsh:VesselSpeedBinShape a sh:NodeShape ;
+    sh:targetClass tws:VesselSpeedBin ;
+    sh:property [
+        sh:path tws:hasSpeedReference ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class tws:SpeedReference ;
+        sh:message "Vessel speed bin must have exactly one speed reference (SOG or STW)" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSpeedBinLowerBoundInKnots ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:lessThanOrEquals tws:twSpeedBinUpperBoundInKnots ;
+        sh:message "Speed bin lower bound must be a single non-negative number, not above the upper bound" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSpeedBinUpperBoundInKnots ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Speed bin upper bound must be a single non-negative number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSpeedValueInKnots ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Speed bin reference speed must be a single non-negative number" ;
+    ] ;
+    sh:property [
+        sh:path tws:twSpeedBinPropellerSpeedInRevPerMin ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:minInclusive 0 ;
+        sh:message "Speed bin propeller speed must be a single non-negative number" ;
+    ] .

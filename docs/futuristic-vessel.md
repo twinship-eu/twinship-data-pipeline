@@ -67,10 +67,23 @@ The file does not state its start time, time step, port positions or direction c
 Hand-written RDF with the vessel's operational modes, which the spreadsheet does not contain yet:
 
 - 4 **engine modes** per genset (`FV-GN-1` and `FV-GN-2`, linked with `tws:hasEngineMode`), each with lower and upper power bounds, and `tws:twEngineModeCount` on the gensets.
-- 4 **engine speed bins**, 3 **draft modes** and 3 **trim modes**: ordinal bins without numeric ranges.
+- 3 **draft modes** with reference drafts and draft ranges, and 3 **trim modes** (ranges still to come).
 - `owl:AllDifferent` statements declaring the individuals in each group distinct.
+- Names such as *Manoeuvring in port*, *Design draft* or *Bow trim* in `skos:altLabel`; `rdfs:comment` holds explanations.
 
-**All values are placeholders**: the mode count of 4 and all power bounds (0.0 kW) are not real data, and the bins have no ranges yet. Query results involving engine modes or bins only show the structure. The real values are to come from the statistical model (engine modes) and the engine-propeller combinator diagram (speed bins), ideally through the spreadsheet.
+**The values are provisional** (November 2026, from the vessel's designers):
+
+| Mode | Condition | Power per genset (kW) |
+| --- | --- | --- |
+| 1 | Manoeuvring in port | 1200–3500 |
+| 2 | 6 kn (only genset 1 runs; genset 2 at 0 kW) | 1600–1800 |
+| 3 | ECO speed, 15 kn | 3100–3500 |
+| 4 | Design speed, 18 kn | 5200–5800 |
+
+- The 15 % sea margin is included in the upper bounds, so the lower-bound variation is 0 kW. In port the vessel is on shore power with both gensets off. Mode 1 overlaps modes 2 and 3.
+- Draft modes have reference drafts of 6.5, 6.75 (design) and 7.3 m (`twDraftModeReferenceDraftInM`), with provisional boundaries at 6.625 and 7.025 m (`twDraftModeLowerBoundInM`, `twDraftModeUpperBoundInM`); the shallowest and deepest modes are open-ended.
+- Trim modes are still placeholders.
+- Engine speed bins don't apply: the propellers are driven by electric motors. Vessel speed bins in knots are to be added once their bounds are known.
 
 `vessel_rdf_graph` adds the file to the futuristic vessel's graph, so it is validated with SHACL and stored in the `components` graph together with the components.
 
@@ -97,14 +110,14 @@ The pipeline loads everything into the repository `futuristic-vessel`, in three 
 | Named graph | Content | Written by |
 | --- | --- | --- |
 | `https://twin-ship.eu/graphs/futuristic-vessel/ontology` | The TwinShip ontology | `graphdb_upload` |
-| `https://twin-ship.eu/graphs/futuristic-vessel/components` | The vessel and its components, and the operational modes (placeholders) | `graphdb_upload` |
+| `https://twin-ship.eu/graphs/futuristic-vessel/components` | The vessel and its components, and the operational modes (provisional) | `graphdb_upload` |
 | `https://twin-ship.eu/graphs/futuristic-vessel/voyages` | Voyages, legs, waypoints, ports and weather | `futuristic_voyage_upload` |
 
 Individuals have IRIs under `https://twin-ship.eu/individuals/futuristic-vessel/`. The vessel is `…/FV-RR-1`, and voyage individuals are named `Voyage-0001`, `Voyage-0001-Leg01`, `Voyage-0001-WP01`, `Voyage-0001-Leg01-Wind` and so on, and `Port-NLRTM`, `Port-GBIMM`.
 
 Queries without `FROM` or `GRAPH` see all three graphs and the triples GraphDB infers. A query restricted with `FROM <graph>` loses the inferred triples unless it also adds `FROM <http://www.ontotext.com/implicit>`.
 
-The voyage data is about 60,000 triples, against about 350 for the components and operational modes. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
+The voyage data is about 60,000 triples, against about 330 for the components and operational modes. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
 
 ## Visual graphs
 

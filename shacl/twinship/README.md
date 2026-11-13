@@ -1,6 +1,6 @@
 # TwinShip SHACL shapes
 
-Closed-world SHACL validation profile for TwinShip vessel component instance data (engines, gensets, propellers, gearboxes, fuels, energy and efficiency systems).
+Closed-world SHACL validation profile for TwinShip vessel component instance data (engines, gensets, propellers, gearboxes, fuels, energy and efficiency systems) and for vessel-specific operational modes and bins.
 
 ## What the shapes check
 
@@ -9,6 +9,7 @@ Closed-world SHACL validation profile for TwinShip vessel component instance dat
 - Coded values use only the documented codes (`0`, `1`). An unknown value is left out; the `-1` marker is not accepted.
 - `tws:consume` points to a `tws:Fuel`, and fuels have a label.
 - Labels are strings or language-tagged strings, with at most one per language.
+- Operational modes and bins (`operational_modes.ttl`): engine, draft and trim modes and vessel speed bins have at most one value per bound, non-negative where physical (trim may be negative), and a lower bound not above the upper bound; equal bounds and open-ended ranges are allowed. Draft–trim modes have exactly one draft and one trim mode, and speed bins exactly one speed reference.
 
 ## Relation to the ontology
 
@@ -33,7 +34,7 @@ From Python, parse all files into one graph and call `pyshacl.validate(data, sha
 
 ## Scope
 
-The shapes cover vessel components only. There are no shapes yet for the operational-context, operational-modes, weather-conditions, or statistics modules.
+The shapes cover vessel components, and the operational modes and vessel speed bins. There are no shapes yet for the rest of the operational-context module (voyages, observations, summaries) or for the weather-conditions and statistics modules. Cross-checks between modes, such as overlaps or gaps between bins and `twEngineModeCount` against the number of modes, are not included.
 
 Rules that depend on a particular data producer or vessel configuration are not included. They stay in [twinship-data-pipeline](https://github.com/twinship-eu/twinship-data-pipeline). Examples: the closed list of allowed classes, propulsion-chain and PMS connectivity rules, the vessel completeness rules (at least one engine or genset, at least one propeller), and checks that both directions of the symmetric IDO connection properties are stated.
 
