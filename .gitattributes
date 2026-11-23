@@ -1,0 +1,4 @@
+# Synced copies of twinship-ontology: keep the bytes as committed there,
+# so the checksums in ontology/VERSION hold on every platform.
+ontology/** -text
+shacl/twinship/** -text
