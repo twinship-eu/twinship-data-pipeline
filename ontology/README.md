@@ -5,35 +5,22 @@ This directory contains the TwinShip ontology organized in a **modular architect
 ## Architecture Overview
 
 ```
-┌──────────────────────────────────────────────────────────────────────────────────┐
-│                     twinship-core.ttl (Complete)                                 │  ← Import this for
-│                     Aggregate of base + all modules                              │    full ontology
-└───┬──────────────────┬─────────────────────┬────────────────────────┬────────────┘
-    │ imports          │ imports             │ imports                │ imports
-    ▼                  ▼                     ▼                        ▼
-┌──────────┐  ┌──────────────────┐  ┌────────────────────┐  ┌──────────────────────┐
-│ twinship │  │ modules/         │  │ modules/           │  │ modules/             │
-│  -base   │  │ vessel.ttl       │  │ weather-           │  │ operational-context  │
-│          │  │                  │  │ conditions.ttl     │  │ .ttl                 │
-│ Base     │  │ Vessels, Engines │  │ Weather, Wind      │  │ Voyages, Ports,      │
-│ classes, │  │ Propulsion,      │  │ conditions         │  │ Profiles, Statistics │
-│ props    │  │ Fuel, Gearbox    │  │                    │  └──┬──────────┬────────┘
-└────┬─────┘  └────────┬─────────┘  └────────┬───────────┘     │ imports  │ imports
-     │                 │                     │◄────────────────┘          │
-     │◄────────────────┘                     │                            ▼
-     │                                       │               ┌──────────────────────┐
-     │◄──────────────────────────────────────┘               │ modules/             │
-     │◄──────────────────────────────────────────────────────┤ operational-modes    │
-     │                                                       │ .ttl                 │
-     ▼                                                       │ States, Modes,       │
-┌──────────────────────────────────────────────────────┐     │ Draft/Trim modes     │
-│  External Ontologies (imported): IDO, PAV, QUDT      │     └──────────────────────┘
-└──────────────────────────────────────────────────────┘
+twinship-core.ttl (complete aggregate; imports the five modules)    ← Import this for the full ontology
+│
+├─ modules/statistics.ttl          → operational-context, operational-modes, weather-conditions, base
+├─ modules/operational-context.ttl → vessel, operational-modes, weather-conditions, base
+├─ modules/vessel.ttl              → base
+├─ modules/weather-conditions.ttl  → base
+└─ modules/operational-modes.ttl   → base
+
+twinship-base.ttl                  → twinship-qudt-vocabulary, IDO, PAV, QUDT vocabularies
+twinship-qudt-vocabulary.ttl       → QUDT schema and vocabularies
 ```
 
 **Import dependency summary:**
 - `vessel`, `weather-conditions`, `operational-modes` each import only `twinship-base`
-- `operational-context` imports `twinship-base` + `operational-modes` + `weather-conditions`
+- `operational-context` imports `twinship-base` + `operational-modes` + `weather-conditions` + `vessel`
+- `statistics` imports `twinship-base` + `operational-modes` + `operational-context` + `weather-conditions`
 - No circular dependencies — the graph is a strict DAG
 
 ## Directory Structure
@@ -42,11 +29,13 @@ This directory contains the TwinShip ontology organized in a **modular architect
 model/                          # Source ontology files (version controlled)
 ├── twinship-base.ttl           # Foundation ontology (base classes, properties)
 ├── twinship-core.ttl           # Complete aggregate (imports base + all modules)
+├── twinship-qudt-vocabulary.ttl # QUDT quantity/unit families (imported by base)
 ├── modules/                    # Domain-specific modules
 │   ├── vessel.ttl              # Vessels, engines, propulsion, fuel, gearbox
 │   ├── weather-conditions.ttl  # Weather and wind condition classes
 │   ├── operational-modes.ttl   # Categorical operating states, engine modes, draft/trim modes
-│   └── operational-context.ttl # Voyages, ports, profiles, observations, summaries
+│   ├── operational-context.ttl # Voyages, ports, profiles, observations, summaries
+│   └── statistics.ttl          # Estimation, prediction, statistical models (model cards)
 ├── external/                   # External ontology dependencies
 │   ├── IDO_20240503.ttl        # ISO 15926-14 upper ontology
 │   ├── PAV-simplified.ttl      # Provenance, Authoring and Versioning
@@ -66,7 +55,7 @@ build/                          # Auto-generated build artifacts (gitignored)
 
 ### Core Files
 
-1. **twinship-base.ttl** (166 lines) - **Foundation Layer**
+1. **twinship-base.ttl** - **Foundation Layer**
    - Base classes: `TwinShipInanimatePhysicalObject`, `EnergySystem`
    - Base properties: `TwinShipDataProperties`, `twinshipObjectProperties`
    - Object properties: `componentOf`, `hasComponent`, `ownedBy`
@@ -74,7 +63,7 @@ build/                          # Auto-generated build artifacts (gitignored)
    - IDO extensions and annotations
    - **Import this + specific modules for modular development**
 
-2. **twinship-core.ttl** (15 lines) - **Complete Aggregate**
+2. **twinship-core.ttl** - **Complete Aggregate**
    - Minimal file that imports `twinship-base` + all domain modules
    - Provides the complete TwinShip ontology
    - Intentionally kept minimal (no package tiers/variants); write your own small aggregate for a custom subset
@@ -82,11 +71,11 @@ build/                          # Auto-generated build artifacts (gitignored)
 
 ### Domain Modules
 
-3. **modules/vessel.ttl** (≈1960 lines)
+3. **modules/vessel.ttl**
    - Vessel types: `VesselSystem`, `RoRo`, `RoPax`, `Tanker`
-   - Hull properties: displacement, draft (aft, fore, mid port/starboard), depth of water; observed draft, trim and displacement (`twBowDraftInM`, `twSternDraftInM`, `twTrimInM`, `twDisplacementInMT`, ...)
+   - Hull properties: displacement, draft (aft, fore, mid port/starboard), depth of water; observed draft, trim and displacement (`twBowDraftInM`, `twSternDraftInM`, `twMeanDraftInM`, `twTrimInM`, `twDisplacementInMT`, ...)
    - Engine systems: `EngineSystem` (with `twEngineModeCount`), `MainEngineSystem`, `AuxiliaryEngineSystem`
-   - Engine types: `DieselEngine`, `FourStroke`, `TwoStroke`, `Boiler`
+   - Engine types: `DieselEngine`, `FourStroke`, `TwoStroke`, `Boiler` (with subclass `CompositeExhaustGasBoiler`)
    - Propulsion: `PropellerSystem`, `CPP`, `FPP`
    - Transmission: `GearboxSystem`, `DirectDrive`, `Reduction`, `TISO`
    - Power: `ShaftGeneratorSystem`, `RGShaftGenerator`, `PTO`
@@ -96,9 +85,9 @@ build/                          # Auto-generated build artifacts (gitignored)
    - Imports: `twinship-base`
 
 4. **modules/weather-conditions.ttl** — TwinShip-native weather and wind condition module
-   - Classes: `WeatherCondition` (subClassOf `TwinShipQuality`), `WindCondition` (subClassOf `WeatherCondition`)
-   - Object properties: `hasWeatherCondition` (subPropertyOf `hasQuality`), `hasWindCondition` (subPropertyOf `hasWeatherCondition`)
-   - Data properties: `windSpeed`, `windDirection` (`xsd:decimal`)
+   - Classes: `WeatherCondition` (subClassOf `TwinShipQuality`); `WindCondition`, `WaveCondition`, `CurrentCondition` (subClassOf `WeatherCondition`)
+   - Object properties: `hasWeatherCondition` (subPropertyOf `hasQuality`); `hasWindCondition`, `hasWaveCondition`, `hasCurrentCondition`
+   - Data properties: `twWindSpeedInKnots`, `twWindDirectionInDegrees`, `twSeaHeightInMeters`, `twSwellHeightInMeters`, `twSeaDirectionInDegrees`, `twSwellDirectionInDegrees`, `twCurrentDirectionInDegrees` (`xsd:decimal`)
    - Does **not** import VesselAI, DUL, GeoSPARQL, or OWL-Time
    - IRI: `https://twin-ship.eu/twinship/weather-conditions`
    - Imports: `twinship-base`
@@ -108,7 +97,7 @@ build/                          # Auto-generated build artifacts (gitignored)
    - Engine modes: `EngineMode` (no individuals in this module — vessel-/engine-specific, instantiated per engine in instance data; engine declares its roster via `hasEngineMode` and count via `twEngineModeCount`). Each mode carries kW bounds (`twEngineModeLowerBoundInKW`, `twEngineModeLowerBoundVariationInKW`, `twEngineModeUpperBoundInKW`) and optional engine RPM bounds (`twEngineModeLowerBoundInRevPerMin`, `twEngineModeUpperBoundInRevPerMin`); the bounds are the contract and model-internal parameters (e.g. mean/deviation) are not stored. `EngineSpeedBin` (no individuals in this module — vessel-/engine-specific, instantiated per vessel/engine in instance data), linked via `hasEngineSpeedBin`
    - Draft modes: `DraftMode`, `TrimMode` (no individuals in this module — vessel-/fleet-specific, instantiated in instance data); `DraftTrimMode` composed from `hasDraftMode`/`hasTrimMode` (qualified cardinality 1 each), no fixed enumerated individuals (populated per vessel/fleet, same pattern as `VesselSpeedBin`). Draft ranges via `twDraftModeLowerBoundInM`, `twDraftModeUpperBoundInM` and optional `twDraftModeReferenceDraftInM`; trim ranges via `twTrimModeLowerBoundInM`, `twTrimModeUpperBoundInM` (aft minus forward draft, positive = stern trim, as `twTrimInM`)
    - Speed reference: `SpeedReference` with individuals `SOG`, `STW`; `hasSpeedReference` is required (exactly one) on every `VesselSpeedBin` instance
-   - Object properties: `hasOperatingState`, `hasEngineMode`, `hasDraftMode`, `hasTrimMode`, `hasDraftTrimMode`
+   - Object properties: `hasOperatingState`, `hasEngineMode`, `hasDraftMode`, `hasTrimMode`, `hasDraftTrimMode`, `hasSpeedReference`, `hasEngineSpeedBin`
    - All mode/state classes extend `TwinShipQuality`
    - IRI: `https://twin-ship.eu/twinship/operational-modes`
    - Imports: `twinship-base`
@@ -120,7 +109,7 @@ build/                          # Auto-generated build artifacts (gitignored)
    - Object properties: voyage structure, profile/statistics, fuel, context links
    - Data properties: voyage times/IDs, state statistics, engine observations, speed bins, fuel consumption
    - IRI: `https://twin-ship.eu/twinship/operational-context`
-   - Imports: `twinship-base`, `operational-modes`, `weather-conditions`
+   - Imports: `twinship-base`, `operational-modes`, `weather-conditions`, `vessel`
 
 7. **modules/statistics.ttl** — TwinShip-native estimation, prediction, and statistical model concepts
    - Statistical classes: `VesselPerformanceStatistics`, `VesselPerformanceModel`
@@ -180,6 +169,8 @@ build/                          # Auto-generated build artifacts (gitignored)
 
 TwinShip uses **OWL restriction-based modelling**: property usage on classes is declared with `owl:someValuesFrom` restrictions on the class rather than `rdfs:domain` on the property. `rdfs:range` is required on all properties. `rdfs:domain` assertions are never written manually — they are synthesized by the build pipeline from the restriction patterns for WIDOCO/WebVOWL compatibility.
 
+`tests/test_repository_rules.py` enforces this: no `rdfs:domain` in `model/` sources, and every TwinShip property that is not a superproperty has a class restriction.
+
 ### QUDT Quantities and Units
 
 TwinShip follows the **Nexus advanced pattern** (see `model/nexus-core-advanced.ttl` in the sibling `Nexus-main` repository; not vendored here) for representing quantities and units via QUDT. The vocabulary file `model/twinship-qudt-vocabulary.ttl` provides:
@@ -187,7 +178,7 @@ TwinShip follows the **Nexus advanced pattern** (see `model/nexus-core-advanced.
 - 22 quantity kind families, each with `TwinShipQuantityKindFor[X]`, `TwinShipUnitFor[X]`, `TwinShipQuantityValue[X]`, `TwinShipQuantity[X]` classes
 - `hasQuantity[X]` object properties (`rdfs:subPropertyOf qudt:hasQuantity`) for each family
 
-`twinship-qudt-vocabulary.ttl` is imported by `twinship-base.ttl`, so the family classes and properties are available to all domain modules automatically. Each domain module (`vessel.ttl`, `operational-context.ttl`, `weather-conditions.ttl`) declares its own `owl:someValuesFrom` restrictions linking its classes to the applicable quantity families — co-located with the class and XSD data property declarations in that module.
+`twinship-qudt-vocabulary.ttl` is imported by `twinship-base.ttl`, so the family classes and properties are available to all domain modules automatically. Each domain module (`vessel.ttl`, `operational-context.ttl`, `weather-conditions.ttl`, `operational-modes.ttl`) declares its own `owl:someValuesFrom` restrictions linking its classes to the applicable quantity families — co-located with the class and XSD data property declarations in that module.
 
 The existing `tw`-prefixed `owl:DatatypeProperty` declarations (with `rdfs:range xsd:double` / `xsd:decimal`) are retained for SPARQL query compatibility. This dual-layer design is explicit project policy:
 - **QUDT layer**: semantic grounding, unit disambiguation, standards alignment
@@ -199,7 +190,7 @@ The existing `tw`-prefixed `owl:DatatypeProperty` declarations (with `rdfs:range
 
 ### Pattern
 
-Every class in every module must declare `rdfs:subClassOf` restrictions for all object and data properties characteristic of it. Use `owl:someValuesFrom` for both:
+Every class in every module must declare `rdfs:subClassOf` restrictions for all object and data properties characteristic of it. Use `owl:someValuesFrom` for both; use `owl:onClass` + `owl:qualifiedCardinality` only where exactly one value is required (e.g. `DraftTrimMode.hasDraftMode`):
 
 ```turtle
 :MyClass a owl:Class ;
@@ -212,7 +203,7 @@ Every class in every module must declare `rdfs:subClassOf` restrictions for all 
           owl:someValuesFrom xsd:decimal ] .
 ```
 
-What Protégé shows as "subclass of `twinship my data property`" is one of these anonymous restriction classes — not a direct class-to-property relationship. The build script `generate_viz_ontology.py` reads these restrictions to synthesize `rdfs:domain` in the visualization output; a missing restriction means the property will not appear in the WebVOWL graph.
+What Protégé shows as "subclass of `twinship my data property`" is one of these anonymous restriction classes — not a direct class-to-property relationship. The build script `generate_viz_ontology.py` reads these restrictions (`someValuesFrom`, `allValuesFrom`, qualified-cardinality `onClass`, and `owl:unionOf` fillers) to synthesize `rdfs:domain` in the visualization output; a missing restriction means the property will not appear in the WebVOWL graph.
 
 ### Concrete example (from vessel.ttl)
 
@@ -268,7 +259,7 @@ All data properties use the **`tw` prefix** (two-character lowercase abbreviatio
 
 | Property | Range | Notes |
 |---|---|---|
-| `:twBoilerPowerMaxInKW` | `xsd:decimal` | Unit suffix `InKW` |
+| `:twBoilerPowerMaxInKW` | `xsd:double` | Unit suffix `InKW` |
 | `:twVoyageDurationHours` | `xsd:decimal` | Unit embedded in name |
 | `:twWindSpeedInKnots` | `xsd:decimal` | Unit suffix `InKnots` |
 | `:twVoyageIdentifier` | `xsd:string` | No unit suffix (string identifier) |
@@ -302,7 +293,7 @@ Data property names should ideally be traceable to a recognised maritime standar
 **IMO example** (`dcterms:source <https://www.imo.org/>`):
 ```turtle
 :twFuelConsumptionTotalInMT a owl:DatatypeProperty ;
-    rdfs:label "fuel consumption total in MT" ;
+    rdfs:label "Fuel consumption total in MT" ;
     rdfs:comment "Total fuel consumption in metric tons." ;
     skos:notation "IMO0670" ;
     skos:altLabel "Fuel consumed, by Main Engine" ;
@@ -315,7 +306,7 @@ Data property names should ideally be traceable to a recognised maritime standar
 **ISO example** (`dcterms:source <https://www.iso.org/>`):
 ```turtle
 :twInletAirPressureMaxInHPa a owl:DatatypeProperty ;
-    rdfs:label "inlet air pressure max in hPa" ;
+    rdfs:label "Inlet air pressure max in hPa" ;
     rdfs:comment "Maximum inlet air pressure in hectopascals." ;
     skos:notation "ME_AIR_PRS" ;
     skos:altLabel "Main Engine Air Pressure" ;
@@ -345,9 +336,12 @@ https://twin-ship.eu/twinship/vessel
 https://twin-ship.eu/twinship/weather-conditions
 https://twin-ship.eu/twinship/operational-modes
 https://twin-ship.eu/twinship/operational-context
+https://twin-ship.eu/twinship/statistics
+https://twin-ship.eu/twinship/qudt-vocabulary
+https://twin-ship.eu/twinship/core
 ```
 
-Version IRIs append `/<semver>`, e.g., `https://twin-ship.eu/twinship/base/0.1.2`.
+Version IRIs append `/<semver>`, e.g., `https://twin-ship.eu/twinship/base/0.1.3`.
 
 ## Upper Ontology (TOP)
 
@@ -395,18 +389,18 @@ All TwinShip physical entities inherit from `TwinShipInanimatePhysicalObject` wh
 This enables Protégé and other tools to resolve `owl:imports` statements to local files instead of fetching from the web.
 ## Adding New Modules
 
-The `modules/` directory contains four fully implemented modules. To add a new module:
+The `modules/` directory contains five fully implemented modules. To add a new module:
 
-1. Create `model/modules/<name>.ttl` with `owl:imports <https://twin-ship.eu/twinship/base>`
+1. Create `model/modules/<name>.ttl` with `owl:imports <https://twin-ship.eu/twinship/base>` (also import any module whose classes it uses; imports must stay a DAG)
 2. Add a URI mapping entry to `model/catalog-v001.xml`
 3. Add `owl:imports <https://twin-ship.eu/twinship/<name>>` to `model/twinship-core.ttl`
 4. Run `./scripts/generate_website.sh` to verify integration
 
 ## Version Information
 
-- **Version**: 0.1.2
+- **Version**: 0.1.3
 - **Created**: 2025-01-21
-- **Last Updated**: 2026-10-29
+- **Last Updated**: 2026-11-23
 
 ## Usage Examples
 

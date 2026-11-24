@@ -9,17 +9,17 @@
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
 
 <https://twin-ship.eu/twinship/weather-conditions> a owl:Ontology ;
-    owl:versionIRI <https://twin-ship.eu/twinship/weather-conditions/0.1.2> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/weather-conditions/0.1.3> ;
     owl:imports <https://twin-ship.eu/twinship/base> ;
     dcterms:title "TwinShip Weather Conditions Module"@en ;
     dcterms:description "This module defines TwinShip-native weather and wind condition concepts for vessel operational analysis. The module does not import VesselAI or DUL; selected external VesselAI terms may be referenced only using non-semantic rdfs:seeAlso annotations for traceability. WeatherCondition and WindCondition are modelled as TwinShipQuality-based classes aligned with the IDO upper ontology."@en ;
     dcterms:creator "TwinShip Project" ;
     dcterms:created "2026-01-30"^^xsd:date ;
-    dcterms:modified "2026-10-29"^^xsd:date ;
+    dcterms:modified "2026-11-23"^^xsd:date ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:rightsHolder "TwinShip Consortium" ;
     dcterms:rights "Definitions quoted from the IMO Compendium on Facilitation and Electronic Business (FAL.5/Circ.56), i.e. dcterms:description values of properties with an IMO skos:notation code and dcterms:source <https://www.imo.org/>, remain © International Maritime Organization (IMO) and are not covered by CC BY 4.0."@en ;
-    owl:versionInfo "0.1.2" ;
+    owl:versionInfo "0.1.3" ;
     rdfs:comment "TwinShip-native weather and wind condition module. WeatherCondition and WindCondition are subclasses of TwinShipQuality (IDO-aligned). This module does not import VesselAI, DUL, GeoSPARQL, or OWL-Time. Note: VesselAI models WeatherCondition as a subclass of dul:Event; TwinShip models it as a quality/attribute, which is the correct IDO alignment."@en .
 
 #################################################################

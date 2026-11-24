@@ -19,15 +19,15 @@
     dcterms:description "Ontology module defining categorical operational states and modes used to classify vessel operation. Covers operating states, engine modes, draft modes, trim modes, combined draft\u2013trim modes, and speed reference frames, together with their controlled individuals and related object properties."@en ;
     dcterms:creator "TwinShip Project" ;
     dcterms:created "2026-05-21"^^xsd:date ;
-    dcterms:modified "2026-10-29"^^xsd:date ;
+    dcterms:modified "2026-11-23"^^xsd:date ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:rightsHolder "TwinShip Consortium" ;
     pav:createdOn "2026-05-21T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.1.2" ;
+    pav:lastUpdateOn "2026-11-23T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.3" ;
     rdfs:comment "Operational modes module for TwinShip ontology. Imports only twinship-base. All mode and state classes extend TwinShipQuality. Object properties are subproperties of hasQuality. This module is the canonical location for all categorical mode/state concepts in TwinShip." ;
     owl:imports <https://twin-ship.eu/twinship/base> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/operational-modes/0.1.2> .
+    owl:versionIRI <https://twin-ship.eu/twinship/operational-modes/0.1.3> .
 
 # #################################################################
 # #

@@ -2,7 +2,7 @@
 # Replaces ontology/ and shacl/twinship/ with the model/ and shapes/ directories
 # of one twinship-ontology git ref (preferably a release tag).
 #
-# Usage: scripts/sync_ontology.sh <tag-or-commit>      e.g. scripts/sync_ontology.sh v0.1.2
+# Usage: scripts/sync_ontology.sh <tag-or-commit>      e.g. scripts/sync_ontology.sh v0.1.3
 #
 # Reads from a local twinship-ontology clone (default: sibling directory,
 # override with TWINSHIP_ONTOLOGY_PATH). Only merged work is synced: the commit

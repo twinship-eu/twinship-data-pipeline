@@ -42,7 +42,7 @@ Coexistence with XSD data properties:
     owl:imports <http://qudt.org/schema/qudt/>,
         <http://qudt.org/vocab/quantitykind/>,
         <http://qudt.org/vocab/unit/> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/qudt-vocabulary/0.1.2> .
+    owl:versionIRI <https://twin-ship.eu/twinship/qudt-vocabulary/0.1.3> .
 
 
 # #################################################################

@@ -12,15 +12,15 @@
 
 <https://twin-ship.eu/twinship/statistics> a owl:Ontology ;
     rdfs:label "TwinShip Statistics Module" ;
-    owl:versionIRI <https://twin-ship.eu/twinship/statistics/0.1.2> ;
+    owl:versionIRI <https://twin-ship.eu/twinship/statistics/0.1.3> ;
     dcterms:title "TwinShip Statistics Module"@en ;
     dcterms:description "This module defines TwinShip-native estimation, prediction, and statistical model concepts for vessel operational analysis. The module does not import VesselAI or DUL. "@en ;
     dcterms:creator "TwinShip Project" ;
     dcterms:created "2026-06-22"^^xsd:date ;
-    dcterms:modified "2026-10-29"^^xsd:date ;
+    dcterms:modified "2026-11-23"^^xsd:date ;
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:rightsHolder "TwinShip Consortium" ;
-    owl:versionInfo "0.1.2" ;
+    owl:versionInfo "0.1.3" ;
     owl:imports <https://twin-ship.eu/twinship/base>,
         <https://twin-ship.eu/twinship/operational-modes>,
         <https://twin-ship.eu/twinship/operational-context>,

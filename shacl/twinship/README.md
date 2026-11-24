@@ -21,7 +21,7 @@ Shape IRIs use the namespace `https://twin-ship.eu/twinship/shapes#` (prefix `tw
 
 Validate with the ontology as the ontology graph and RDFS inference. Without them, `sh:targetClass` and `sh:class` do not match subclass instances (for example a `tws:CPP` is not checked as a `tws:PropellerSystem`).
 
-The build (`scripts/generate_website.sh`, or `uv run python scripts/merge_shapes.py` on its own) merges the files into `build/twinship-shapes.ttl`, which is also published with the website:
+The build (`scripts/generate_website.sh`, or `uv run python scripts/merge_shapes.py` on its own) merges the files into `build/twinship-shapes.ttl`, which is also copied to `docs/website/` (the deploy workflow currently uploads only `docs/website/documentation/`):
 
 ```bash
 uv run python scripts/merge_shapes.py

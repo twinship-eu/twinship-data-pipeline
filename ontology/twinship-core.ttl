@@ -32,8 +32,8 @@ To address this limitation while maintaining correct OWL semantics, we maintain 
 Both versions are kept synchronized through automated scripts."""@en ;
     rdfs:label "TwinShip Core Ontology (Complete)" ;
     pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.1.2" ;
+    pav:lastUpdateOn "2026-11-23T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.3" ;
     rdfs:comment """Complete TwinShip ontology for digital twins of ships. This is an aggregate ontology that imports the base foundation (twinship-base) plus all domain modules. Use this ontology to get the complete TwinShip conceptual model including vessels and weather. For modular development, import twinship-base and specific modules instead.
 
 Modeling Approach Note:
@@ -53,5 +53,5 @@ Both versions are kept synchronized through automated scripts. See twinship-base
         <https://twin-ship.eu/twinship/operational-modes> ,
         <https://twin-ship.eu/twinship/operational-context> ,
         <https://twin-ship.eu/twinship/statistics>  ;
-    owl:versionIRI <https://twin-ship.eu/twinship/core/0.1.2> .
+    owl:versionIRI <https://twin-ship.eu/twinship/core/0.1.3> .
 
