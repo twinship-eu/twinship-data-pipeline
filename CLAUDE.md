@@ -37,6 +37,7 @@ CI (`.github/workflows/ci.yml`) runs ruff, ruff format and pytest on PRs to `dev
 - Unknown values are omitted (no triple), never written as `-1`. The source spreadsheets use `-1` for unknown; `clean_value` maps it to `None`.
 - No credentials in tracked files: secrets come from `.env` (template `.env.example`); Keycloak users are defined in `keycloak/twinship-realm.json.template`.
 - Branches: work on a branch from `develop` and open PRs into `develop`. `main` only receives release PRs from `develop` (merge commit, not squash), approved by the maintainer.
+- Before a PR is approved, run the `pr-reviewer` agent (`.claude/agents/pr-reviewer.md`, on Fable) on it and fix or answer its findings; checks and procedure in `docs/review-guidelines.md`.
 - Docker tests that need a clean state should use separate volumes rather than the developer's `twinship-data-pipeline_*` volumes.
 
 See `README.md` for setup, logins and configuration, and `docs/futuristic-vessel.md` for the futuristic vessel data.
