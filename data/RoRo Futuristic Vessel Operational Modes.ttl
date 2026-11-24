@@ -1,5 +1,6 @@
 # Operational modes of the futuristic vessel: per-genset EngineMode
-# individuals and the vessel's DraftMode and TrimMode ordinal bins. These
+# individuals, the vessel's DraftMode and TrimMode ordinal bins and its
+# VesselSpeedBin individuals. These
 # are vessel- and engine-specific, so they are instance data rather than
 # shared individuals in the ontology's operational-modes module.
 #
@@ -7,7 +8,9 @@
 # - Engine modes: kW ranges per genset and mode. The 15 % sea margin is
 #   included in the upper bounds, so the lower-bound variation is 0 kW. In
 #   port the vessel is on shore power with both gensets off. Mode 1
-#   (manoeuvring in port) overlaps modes 2 and 3; this is under discussion.
+#   (manoeuvring in port) overlaps modes 2 and 3 on purpose: manoeuvring can
+#   need 3500 kW at 0 knots, so it is identified from the situation (in
+#   port, thrusters in use), not from load.
 # - Draft modes: reference drafts 6.5, 6.75 (design) and 7.3 m, with
 #   boundaries halfway between them (6.625 and 7.025 m). The shallowest and
 #   deepest modes are open-ended, so they have only one bound.
@@ -15,7 +18,9 @@
 #   clarified.
 # - Engine speed bins do not apply to this diesel-electric vessel (the
 #   propellers are driven by electric motors); vessel speed bins in knots
-#   are to be added once their bounds are known.
+#   (speed over ground) are used instead. Four bins with the designers'
+#   reference speeds 6, 14, 15 and 18 knots and propeller speeds; their
+#   bounds are omitted until the designers confirm them.
 # Mode names are in skos:altLabel; rdfs:comment holds explanations.
 # Genset RPM bounds are intentionally omitted: the gensets run at constant
 # speed.
@@ -85,6 +90,46 @@ fv:TrimMode3 a owl:NamedIndividual, tw:TrimMode ;
 
 [] a owl:AllDifferent ;
     owl:distinctMembers ( fv:TrimMode1 fv:TrimMode2 fv:TrimMode3 ) .
+
+# #################################################################
+# #
+# #    Individuals — Vessel Speed Bin
+# #
+# #################################################################
+
+fv:VesselSpeedBin1 a owl:NamedIndividual, tw:VesselSpeedBin ;
+    rdfs:label "Vessel Speed Bin 1" ;
+    skos:altLabel "6 knots" ;
+    rdfs:comment "Lowest vessel speed bin of the futuristic vessel. Bounds to be confirmed." ;
+    tw:hasSpeedReference tw:SOG ;
+    tw:twSpeedValueInKnots 6.0 ;
+    tw:twSpeedBinPropellerSpeedInRevPerMin 60.0 .
+
+fv:VesselSpeedBin2 a owl:NamedIndividual, tw:VesselSpeedBin ;
+    rdfs:label "Vessel Speed Bin 2" ;
+    skos:altLabel "14 knots" ;
+    rdfs:comment "Vessel speed bin 2 of the futuristic vessel. Bounds to be confirmed." ;
+    tw:hasSpeedReference tw:SOG ;
+    tw:twSpeedValueInKnots 14.0 ;
+    tw:twSpeedBinPropellerSpeedInRevPerMin 85.0 .
+
+fv:VesselSpeedBin3 a owl:NamedIndividual, tw:VesselSpeedBin ;
+    rdfs:label "Vessel Speed Bin 3" ;
+    skos:altLabel "ECO speed, 15 knots" ;
+    rdfs:comment "Vessel speed bin 3 of the futuristic vessel. Bounds to be confirmed." ;
+    tw:hasSpeedReference tw:SOG ;
+    tw:twSpeedValueInKnots 15.0 ;
+    tw:twSpeedBinPropellerSpeedInRevPerMin 92.0 .
+
+fv:VesselSpeedBin4 a owl:NamedIndividual, tw:VesselSpeedBin ;
+    rdfs:label "Vessel Speed Bin 4" ;
+    skos:altLabel "Design speed, 18 knots" ;
+    rdfs:comment "Highest vessel speed bin of the futuristic vessel. Propeller speed 111-115 rev/min according to the designers; no single value is given. Bounds to be confirmed." ;
+    tw:hasSpeedReference tw:SOG ;
+    tw:twSpeedValueInKnots 18.0 .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( fv:VesselSpeedBin1 fv:VesselSpeedBin2 fv:VesselSpeedBin3 fv:VesselSpeedBin4 ) .
 
 # #################################################################
 # #

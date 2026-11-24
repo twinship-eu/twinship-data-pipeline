@@ -68,6 +68,7 @@ Hand-written RDF with the vessel's operational modes, which the spreadsheet does
 
 - 4 **engine modes** per genset (`FV-GN-1` and `FV-GN-2`, linked with `tws:hasEngineMode`), each with lower and upper power bounds, and `tws:twEngineModeCount` on the gensets.
 - 3 **draft modes** with reference drafts and draft ranges, and 3 **trim modes** (ranges still to come).
+- 4 **vessel speed bins** (speed over ground, `tws:hasSpeedReference tws:SOG`) with reference speeds and propeller speeds; bounds still to come.
 - `owl:AllDifferent` statements declaring the individuals in each group distinct.
 - Names such as *Manoeuvring in port*, *Design draft* or *Bow trim* in `skos:altLabel`; `rdfs:comment` holds explanations.
 
@@ -80,22 +81,22 @@ Hand-written RDF with the vessel's operational modes, which the spreadsheet does
 | 3 | ECO speed, 15 kn | 3100–3500 |
 | 4 | Design speed, 18 kn | 5200–5800 |
 
-- The 15 % sea margin is included in the upper bounds, so the lower-bound variation is 0 kW. In port the vessel is on shore power with both gensets off. Mode 1 overlaps modes 2 and 3.
+- The 15 % sea margin is included in the upper bounds, so the lower-bound variation is 0 kW. In port the vessel is on shore power with both gensets off. Mode 1 overlaps modes 2 and 3 on purpose: manoeuvring can need 3500 kW at 0 kn, so it is identified from the situation (in port, thrusters in use), not from load.
 - Draft modes have reference drafts of 6.5, 6.75 (design) and 7.3 m (`twDraftModeReferenceDraftInM`), with provisional boundaries at 6.625 and 7.025 m (`twDraftModeLowerBoundInM`, `twDraftModeUpperBoundInM`); the shallowest and deepest modes are open-ended.
 - Trim modes are still placeholders.
-- Engine speed bins don't apply: the propellers are driven by electric motors. Vessel speed bins in knots are to be added once their bounds are known.
+- Engine speed bins don't apply: the propellers are driven by electric motors. Vessel speed bins are used instead, with reference speeds 6, 14, 15 and 18 kn (`twSpeedValueInKnots`) and propeller speeds 60, 85 and 92 rpm (`twSpeedBinPropellerSpeedInRevPerMin`); the 18 kn bin's 111–115 rpm range is in its comment. Their bounds are left out until the designers confirm them.
 
-`vessel_rdf_graph` adds the file to the futuristic vessel's graph, so it is validated with SHACL and stored in the `components` graph together with the components.
+`vessel_rdf_graph` adds the file to the futuristic vessel's graph, so it is validated with SHACL and stored in the `components` graph together with the components. The validator also reads the types and labels of the ontology's named individuals, so the file can refer to `tws:SOG` without repeating its type.
 
 ## How the voyages are built
 
 A crossing runs from a record with `dist_trav` = 0 to a record with `dist_rem` = 0. The file holds 266 complete crossings (133 in each direction) of 11 records each, 180 nm in total.
 
-- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed.
+- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed, and a draft condition (`twMeanDraftInM`) and a trim condition (`twTrimInM`) with the mean of its records. Draft and trim are set at loading, so they are kept per voyage, not per leg.
 - **Waypoint**: one per record, with time and position. The position is interpolated linearly between the two ports from `dist_trav`.
 - **Voyage leg**: one between each pair of consecutive waypoints (10 per voyage, 18 nm each), with distance, speed and the wind and wave conditions of its start record.
 
-Only columns with a matching ontology property are converted: time and position, `Vs_SOG`, `Uw` (converted to knots) and `th_wind`, `Hs` and `th_wave`. Propeller pitch, draft, trim, `Tp`, `beta`, `b_wind`, propeller speed and power, fuel consumption and emissions are not converted.
+Only columns with a matching ontology property are converted: time and position, `Vs_SOG`, `draft`, `trim`, `Uw` (converted to knots) and `th_wind`, `Hs` and `th_wave`. Propeller pitch, `Tp`, `beta`, `b_wind`, propeller speed and power, fuel consumption and emissions are not converted.
 
 ### Known issues in the data
 

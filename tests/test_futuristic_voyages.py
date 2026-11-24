@@ -1,6 +1,7 @@
 """Tests for the futuristic vessel voyage patch (dagster_pipeline/assets/futuristic_voyages.py)."""
 
 from datetime import timedelta
+from decimal import Decimal
 from pathlib import Path
 
 import pytest
@@ -36,9 +37,9 @@ def _rec(i, direction, dist_trav, dist_rem, **values):
 
 # Two complete crossings (Rotterdam -> Immingham, back) and an unfinished third one
 RECORDS = [
-    _rec(1, 1, 0, 36),
-    _rec(2, 1, 18, 18),
-    _rec(3, 1, 36, 0),
+    _rec(1, 1, 0, 36, draft=7.0, trim=0.2),
+    _rec(2, 1, 18, 18, draft=7.0, trim=0.4),
+    _rec(3, 1, 36, 0, draft=7.0, trim=0.6),
     _rec(4, 2, 0, 36),
     _rec(5, 2, 18, 18),
     _rec(6, 2, 36, 0),
@@ -88,6 +89,23 @@ def test_build_voyage_graph_structure():
     assert all(str(s).startswith(PIPELINE_NS) for s in g.subjects())
 
 
+def test_draft_and_trim_per_voyage():
+    """Each voyage has one draft and one trim condition with the mean of its records."""
+    g, _ = build_voyage_graph(RECORDS)
+    for voyage in g.subjects(RDF.type, TWINSHIP.Voyage):
+        (draft,) = g.objects(voyage, TWINSHIP.hasDraftCondition)
+        (trim,) = g.objects(voyage, TWINSHIP.hasTrimCondition)
+        assert (draft, RDF.type, TWINSHIP.DraftCondition) in g
+        assert (trim, RDF.type, TWINSHIP.TrimCondition) in g
+    first = URIRef(PIPELINE_NS + "Voyage-0001")
+    (draft,) = g.objects(first, TWINSHIP.hasDraftCondition)
+    (trim,) = g.objects(first, TWINSHIP.hasTrimCondition)
+    assert g.value(draft, TWINSHIP.twMeanDraftInM).toPython() == Decimal("7.000")
+    assert g.value(trim, TWINSHIP.twTrimInM).toPython() == Decimal("0.400")
+    legs = set(g.subjects(RDF.type, TWINSHIP.VoyageLeg))
+    assert not any((leg, TWINSHIP.hasDraftCondition, None) in g for leg in legs)
+
+
 def test_voyage_terms_exist_in_ontology():
     """Every TwinShip class and property the voyage graph uses is declared in ontology/."""
     ontology = Graph()
@@ -106,7 +124,10 @@ def test_voyage_terms_exist_in_ontology():
     reason="Needs the voyage file and twinship-futuristic-vessel/output/voyages.ttl",
 )
 def test_matches_futuristic_vessel_generator():
-    """Same triples as the original generator, after mapping its IRIs to the pipeline's."""
+    """Same triples as the original generator, after mapping its IRIs to the pipeline's.
+
+    The generator had no draft and trim conditions; those triples are left out here.
+    """
     g, _ = build_voyage_graph(read_records(VOYAGE_FILE))
 
     def remap(term):
@@ -115,7 +136,9 @@ def test_matches_futuristic_vessel_generator():
         return term
 
     reference = {tuple(remap(t) for t in triple) for triple in Graph().parse(REFERENCE_TTL)}
-    ours = set(g)
+    conditions = set(g.objects(None, TWINSHIP.hasDraftCondition))
+    conditions |= set(g.objects(None, TWINSHIP.hasTrimCondition))
+    ours = {t for t in g if t[0] not in conditions and t[2] not in conditions}
     assert ours == reference, (
         f"{len(ours - reference)} triples only in pipeline, "
         f"{len(reference - ours)} only in reference"

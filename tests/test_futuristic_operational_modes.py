@@ -3,11 +3,11 @@
 from pathlib import Path
 
 import pytest
-from rdflib import RDF, Graph, URIRef
+from rdflib import RDF, RDFS, Graph, URIRef
 
 from dagster_pipeline.assets.harmonisation import FUTURISTIC_OPERATIONAL_MODES
 from dagster_pipeline.futuristic_extraction import extract_futuristic_vessel, load_futuristic_sheets
-from dagster_pipeline.resources import ShaclValidator
+from dagster_pipeline.resources import ShaclValidator, ontology_individuals
 from twinship_harmonisation.constants import TWINSHIP, TWINSHIP_IND
 from twinship_harmonisation.high_level import harmonise_twinship_vessel
 
@@ -35,6 +35,15 @@ def test_counts(modes):
 
     assert (count("EngineMode"), count("EngineSpeedBin")) == (8, 0)
     assert (count("DraftMode"), count("TrimMode")) == (3, 3)
+    assert count("VesselSpeedBin") == 4
+
+
+def test_speed_bins_use_sog_and_rising_reference_speeds(modes):
+    """Each speed bin has exactly one speed reference, SOG; reference speeds rise with the bin."""
+    bins = sorted(modes.subjects(RDF.type, TWINSHIP.VesselSpeedBin))
+    assert all(list(modes.objects(b, TWINSHIP.hasSpeedReference)) == [TWINSHIP.SOG] for b in bins)
+    speeds = [modes.value(b, TWINSHIP.twSpeedValueInKnots).toPython() for b in bins]
+    assert speeds == sorted(set(speeds)) and len(speeds) == 4
 
 
 def test_draft_ranges_are_contiguous(modes):
@@ -76,3 +85,11 @@ def test_terms_exist_in_ontology(modes):
 def test_components_with_modes_pass_shacl(modes, components):
     conforms, report = ShaclValidator().validate(components + modes, REPO_ROOT / "shacl")
     assert conforms, f"SHACL validation failed:\n{report}"
+
+
+def test_validator_gets_ontology_individuals_only():
+    """The validator sees the ontology's individuals (types and labels), not its classes."""
+    g = ontology_individuals(REPO_ROOT / "ontology")
+    assert (TWINSHIP.SOG, RDF.type, TWINSHIP.SpeedReference) in g
+    assert (TWINSHIP.BF, RDFS.label, None) in g
+    assert (TWINSHIP.VesselSpeedBin, None, None) not in g
