@@ -53,6 +53,8 @@ A time series of crossings between Rotterdam and Immingham in 2024: 2,928 record
 | `FOCbio`, `CO2bio`, `NOxbio` | ton/h | The same for biofuel |
 | `FOCNH`, `CO2NH`, `NOxNH` | ton/h | The same for ammonia |
 
+`draft` and `trim` are the same in every record: 7.0 m and 0.0 m. They are taken as the loading condition the simulation assumed, with the vessel on even keel, and are converted as such; the file doesn't state the trim sign. To be confirmed by the data provider.
+
 The file does not state its start time, time step, port positions or direction coding. These are constants in `futuristic_voyages.py`:
 
 | Setting | Value | Source |
@@ -92,7 +94,7 @@ Hand-written RDF with the vessel's operational modes, which the spreadsheet does
 
 A crossing runs from a record with `dist_trav` = 0 to a record with `dist_rem` = 0. The file holds 266 complete crossings (133 in each direction) of 11 records each, 180 nm in total.
 
-- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed, and a draft condition (`twMeanDraftInM`) and a trim condition (`twTrimInM`) with the mean of its records. Draft and trim are set at loading, so they are kept per voyage, not per leg. The file doesn't state its trim sign; all records have 0.0 m, so the sign doesn't matter yet (`twTrimInM` is positive by the stern).
+- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed, and a draft condition (`twMeanDraftInM`) and a trim condition (`twTrimInM`) with the mean of its records. Draft and trim are set at loading, so they are kept per voyage, not per leg. With 0.0 m trim the sign doesn't matter yet (`twTrimInM` is positive by the stern).
 - **Waypoint**: one per record, with time and position. The position is interpolated linearly between the two ports from `dist_trav`.
 - **Voyage leg**: one between each pair of consecutive waypoints (10 per voyage, 18 nm each), with distance, speed and the wind and wave conditions of its start record.
 
@@ -118,7 +120,7 @@ Individuals have IRIs under `https://twin-ship.eu/individuals/futuristic-vessel/
 
 Queries without `FROM` or `GRAPH` see all three graphs and the triples GraphDB infers. A query restricted with `FROM <graph>` loses the inferred triples unless it also adds `FROM <http://www.ontotext.com/implicit>`.
 
-The voyage data is about 60,000 triples, against about 330 for the components and operational modes. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
+The voyage data is about 60,000 triples, against about 390 for the components and operational modes. Keeping time series like this in the knowledge graph works for this small synthetic dataset, but does not scale to vessels with high-frequency sensor data. The named graphs are a temporary structure until the time series moves to a time-series database queried through a virtual knowledge graph (OBDA).
 
 ## Visual graphs
 
