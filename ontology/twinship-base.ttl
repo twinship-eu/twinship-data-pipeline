@@ -21,8 +21,8 @@
     dcterms:license <https://creativecommons.org/licenses/by/4.0/> ;
     dcterms:rightsHolder "TwinShip Consortium" ;
     pav:createdOn "2025-01-21T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.1.2" ;
+    pav:lastUpdateOn "2026-11-23T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.3" ;
     rdfs:comment """Base/foundation ontology for TwinShip. Defines core classes, properties, and patterns that all TwinShip modules extend. This includes the base TwinShip physical object class, property hierarchies, and fundamental object properties. Domain-specific classes are defined in separate modules (vessel, weather-conditions).
 
 Modeling Approach - Restriction-Based Design:
@@ -53,7 +53,7 @@ The visualization version is regenerated whenever the source ontology changes, e
         <http://qudt.org/vocab/unit/>,
         <http://rds.posccaesar.org/ontology/lis14/ont/core/1.0>,
         <https://twin-ship.eu/twinship/qudt-vocabulary> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/base/0.1.2> .
+    owl:versionIRI <https://twin-ship.eu/twinship/base/0.1.3> .
 
 # #################################################################
 # #
@@ -74,7 +74,6 @@ ido:contains a owl:ObjectProperty ;
 ido:directlyConnectedTo a owl:ObjectProperty ;
     rdfs:label "directly connected to" ;
     rdfs:comment "Relates two inanimate physical objects that are directly connected." ;
-    rdfs:domain ido:InanimatePhysicalObject ;
     rdfs:range ido:InanimatePhysicalObject .
 
 # #################################################################

@@ -7,8 +7,11 @@ futuristic vessel's GraphDB repository, next to its components.
 Ported from twinship-futuristic-vessel (fv2rdf/dat_io.py, voyage_model.py,
 voyage_builder.py). Only columns with an existing ontology property are mapped:
 position/time -> WayPoint, Vs_SOG -> leg speed, Uw/th_wind -> WindCondition,
-Hs/th_wave -> WaveCondition (Hs as sea height). Propulsion, fuel, draft, trim
-and Tp columns have no matching property and are not emitted.
+Hs/th_wave -> WaveCondition (Hs as sea height), draft/trim -> the voyage's
+DraftCondition (mean draft) and TrimCondition (mean trim). Draft and trim are
+set at loading, so they are kept per voyage, not per leg; values that change
+along a crossing belong in the time series (OBDA). Propulsion, fuel and Tp
+columns have no matching property and are not emitted.
 """
 
 import math
@@ -234,6 +237,7 @@ def _add_crossing(g: Graph, c: Crossing) -> None:
     g.add((voyage, TWINSHIP.twDistanceInNm, _dec(c.total_nm, 1)))
     mean_speed = sum(r["vs_sog"] for r in recs) / len(recs)
     g.add((voyage, TWINSHIP.twMeanSpeedInKnots, _dec(mean_speed, 3)))
+    _add_draft_and_trim(g, voyage, vid, recs)
 
     waypoints = []
     for k, rec in enumerate(recs, start=1):
@@ -257,6 +261,17 @@ def _add_crossing(g: Graph, c: Crossing) -> None:
         g.add((leg, TWINSHIP.twDistanceInNm, _dec(leg_nm, 1)))
         g.add((leg, TWINSHIP.twMeanSpeedInKnots, _dec(rec["vs_sog"], 3)))
         _add_weather(g, leg, leg_id, rec)
+
+
+def _add_draft_and_trim(g: Graph, voyage, vid: str, recs: list[dict[str, float]]) -> None:
+    draft = _iri(f"{vid}-Draft")
+    trim = _iri(f"{vid}-Trim")
+    g.add((voyage, TWINSHIP.hasDraftCondition, draft))
+    g.add((draft, RDF.type, TWINSHIP.DraftCondition))
+    g.add((draft, TWINSHIP.twMeanDraftInM, _dec(sum(r["draft"] for r in recs) / len(recs), 3)))
+    g.add((voyage, TWINSHIP.hasTrimCondition, trim))
+    g.add((trim, RDF.type, TWINSHIP.TrimCondition))
+    g.add((trim, TWINSHIP.twTrimInM, _dec(sum(r["trim"] for r in recs) / len(recs), 3)))
 
 
 def _add_weather(g: Graph, leg, leg_id: str, rec: dict[str, float]) -> None:

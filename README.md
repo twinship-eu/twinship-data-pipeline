@@ -181,10 +181,10 @@ Pull requests into `develop` are reviewed against [docs/review-guidelines.md](do
 
 ### Ontology version
 
-`ontology/` and `shacl/twinship/` are copies of the `model/` and `shapes/` directories of one [twinship-ontology](https://github.com/twinship-eu/twinship-ontology) release; the pinned ref and commit are in `ontology/VERSION`. Do not edit them by hand. Pipeline-specific shapes live in `shacl/pipeline/` and are not touched by the sync. To move to another release, with a twinship-ontology clone next to this repository (or `TWINSHIP_ONTOLOGY_PATH` set):
+`ontology/` and `shacl/twinship/` are copies of the `model/` and `shapes/` directories of one [twinship-ontology](https://github.com/twinship-eu/twinship-ontology) release; the pinned ref, commit and a SHA-256 checksum per file are in `ontology/VERSION`. Do not edit them by hand: `tests/test_ontology_copy.py` fails if a copied file is changed, added or removed. Change the ontology in twinship-ontology and merge it there first; the sync script only accepts commits that are on a remote branch. Pipeline-specific shapes live in `shacl/pipeline/` and are not touched by the sync. To move to another release, with a twinship-ontology clone next to this repository (or `TWINSHIP_ONTOLOGY_PATH` set):
 
 ```bash
-scripts/sync_ontology.sh v0.1.2
+scripts/sync_ontology.sh v0.1.3
 ```
 
 ### GraphDB configuration

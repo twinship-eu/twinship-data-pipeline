@@ -22,11 +22,11 @@
     dcterms:rightsHolder "TwinShip Consortium" ;
     dcterms:rights "Definitions quoted from the IMO Compendium on Facilitation and Electronic Business (FAL.5/Circ.56), i.e. dcterms:description values of properties with an IMO skos:notation code and dcterms:source <https://www.imo.org/>, remain © International Maritime Organization (IMO) and are not covered by CC BY 4.0."@en ;
     pav:createdOn "2026-02-05T00:00:00+00:00"^^xsd:dateTime ;
-    pav:lastUpdateOn "2026-10-29T00:00:00+00:00"^^xsd:dateTime ;
-    pav:version "0.1.2" ;
+    pav:lastUpdateOn "2026-11-23T00:00:00+00:00"^^xsd:dateTime ;
+    pav:version "0.1.3" ;
     rdfs:comment "Vessel module for TwinShip ontology. Combines engine and hull concepts. Defines vessel types, hull-related properties, and all engine-related classes, properties, and individuals including propulsion systems, auxiliary power generation, propellers, gearboxes, shaft generators, boilers, and fuel types. Extends twinship-base foundation classes." ;
     owl:imports <https://twin-ship.eu/twinship/base> ;
-    owl:versionIRI <https://twin-ship.eu/twinship/vessel/0.1.2> .
+    owl:versionIRI <https://twin-ship.eu/twinship/vessel/0.1.3> .
 
 # #################################################################
 # #
@@ -149,7 +149,54 @@
         [ a owl:Restriction ;
             owl:onProperty :twBoilerSpeedMaxInRevPerMin ;
             owl:someValuesFrom xsd:double ],
-        :TwinShipInanimatePhysicalObject .
+        :TwinShipInanimatePhysicalObject,
+        [ a owl:Restriction ;
+            owl:onProperty :twBoilerDOTemperatureRetInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBoilerDOVolRetInLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBoilerMGOMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ] .
+
+:CompositeExhaustGasBoiler a owl:Class ;
+    rdfs:label "Composite Exhaust Gas Boiler" ;
+    rdfs:comment "A boiler that generates steam from exhaust-gas heat and can also be oil-fired. Uses the composite exhaust gas boiler datatype properties; other boiler characteristics are inherited from Boiler." ;
+    rdfs:subClassOf :Boiler,
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerBLRFuelMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerDOTemperatureInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerDOVolInLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerEmergencyDOMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerFuelTempInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerFuelVolLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerMGOInUse ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerMGOMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerPowerMaxInKW ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twCompositeExhaustGasBoilerSpeedMaxInRevPerMin ;
+            owl:someValuesFrom xsd:double ] .
 
 :CPP a owl:Class ;
     rdfs:label "Controllable Pitch Propeller" ;
@@ -175,7 +222,40 @@
         [ a owl:Restriction ;
             owl:onProperty ido:partOf ;
             owl:someValuesFrom :VesselSystem ],
-        :TwinShipInanimatePhysicalObject .
+        :TwinShipInanimatePhysicalObject,
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorBLRFuelMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorDOTemperatureInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorDOVolInLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorEmergencyDOMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorFuelTempInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorFuelVolLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorMGOInUse ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorMGOMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorPowerMaxInKW ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twEmergencyDieselGeneratorSpeedMaxInRevPerMin ;
+            owl:someValuesFrom xsd:double ] .
 
 :EngineSystem a owl:Class ;
     rdfs:label "Engine System" ;
@@ -189,6 +269,9 @@
         [ a owl:Restriction ;
             owl:onProperty :twEngineModeCount ;
             owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twFuelConsumptionRateInMTPerHr ;
+            owl:someValuesFrom xsd:double ],
         :TwinShipInanimatePhysicalObject .
 
 :FPP a owl:Class ;
@@ -245,7 +328,10 @@
         [ a owl:Restriction ;
             owl:onProperty :twGearboxShaftGenerator ;
             owl:someValuesFrom xsd:integer ],
-        :TwinShipInanimatePhysicalObject .
+        :TwinShipInanimatePhysicalObject,
+        [ a owl:Restriction ;
+            owl:onProperty :twGearboxEfficiency ;
+            owl:someValuesFrom xsd:double ] .
 
 :MainEngineSystem a owl:Class ;
     rdfs:label "Main Engine System" ;
@@ -321,7 +407,40 @@
         [ a owl:Restriction ;
             owl:onProperty ido:partOf ;
             owl:someValuesFrom :VesselSystem ],
-        :TwinShipInanimatePhysicalObject .
+        :TwinShipInanimatePhysicalObject,
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterBLRFuelMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterDOTemperatureInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterDOVolInLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterEmergencyDOMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterFuelTempInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterFuelVolLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterMGOInUse ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterMGOMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterPowerMaxInKW ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternThrusterSpeedMaxInRevPerMin ;
+            owl:someValuesFrom xsd:double ] .
 
 :PropellerSystem a owl:Class ;
     rdfs:label "Propeller System" ;
@@ -770,7 +889,34 @@
         [ a owl:Restriction ;
             owl:onProperty :twBowThrusterSpeedMaxInRevPerMin ;
             owl:someValuesFrom xsd:double ],
-        :Maneuvering .
+        :Maneuvering,
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterBLRFuelMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterDOTemperatureInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterDOVolInLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterEmergencyDOMode ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterFuelTempInDegC ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterFuelVolLitrePerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterMGOInUse ;
+            owl:someValuesFrom xsd:integer ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterMGOMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowThrusterMassInKgPerHr ;
+            owl:someValuesFrom xsd:double ] .
 
 :GateRudder a owl:Class ;
     rdfs:label "Gate Rudder" ;
@@ -1869,7 +2015,13 @@
 :LoadingCondition a owl:Class ;
     rdfs:label "Loading Condition" ;
     rdfs:comment "A vessel loading condition, describing displacement and associated draft values at a point in time or voyage segment." ;
-    rdfs:subClassOf :TwinShipQuality .
+    rdfs:subClassOf :TwinShipQuality,
+        [ a owl:Restriction ;
+            owl:onProperty :twDisplacementInMT ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty :twLoadingConditionLogged ;
+            owl:someValuesFrom xsd:boolean ] .
 
 :LoadingPreset a owl:Class ;
     rdfs:label "Loading Preset" ;
@@ -1879,12 +2031,30 @@
 :DraftCondition a owl:Class ;
     rdfs:label "Draft Condition" ;
     rdfs:comment "A condition describing observed vessel draft values (bow, stern, aft, fore, or mean draft)." ;
-    rdfs:subClassOf :TwinShipQuality .
+    rdfs:subClassOf :TwinShipQuality,
+        [ a owl:Restriction ;
+            owl:onProperty :twAftDraftInM ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty :twBowDraftInM ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty :twForeDraftInM ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty :twMeanDraftInM ;
+            owl:someValuesFrom xsd:decimal ],
+        [ a owl:Restriction ;
+            owl:onProperty :twSternDraftInM ;
+            owl:someValuesFrom xsd:decimal ] .
 
 :TrimCondition a owl:Class ;
     rdfs:label "Trim Condition" ;
     rdfs:comment "A condition describing the trim of the vessel, defined as the difference between aft/stern and fore/bow draft." ;
-    rdfs:subClassOf :TwinShipQuality .
+    rdfs:subClassOf :TwinShipQuality,
+        [ a owl:Restriction ;
+            owl:onProperty :twTrimInM ;
+            owl:someValuesFrom xsd:decimal ] .
 
 # #################################################################
 # #
@@ -1954,6 +2124,12 @@
 :twForeDraftInM a owl:DatatypeProperty ;
     rdfs:label "Fore draft in M" ;
     rdfs:comment "Observed vessel draft at the fore, in metres. Equivalent to twBowDraftInM; use both for compatibility with different dataset conventions." ;
+    rdfs:range xsd:decimal ;
+    rdfs:subPropertyOf :TwinShipDataProperties .
+
+:twMeanDraftInM a owl:DatatypeProperty ;
+    rdfs:label "Mean draft in M" ;
+    rdfs:comment "Observed mean draft of the vessel in metres, typically the mean of the fore and aft drafts. Use when only a single draft value is reported." ;
     rdfs:range xsd:decimal ;
     rdfs:subPropertyOf :TwinShipDataProperties .
 
@@ -2073,6 +2249,42 @@
       owl:onProperty :hasQuantityMassFlowRate ;
       owl:someValuesFrom :TwinShipQuantityMassFlowRate ] .
 
+# --- Boiler and emergency equipment ---
+
+:Boiler rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityMassFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityMassFlowRate ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityPower ;
+      owl:someValuesFrom :TwinShipQuantityPower ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityRotationalVelocity ;
+      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityTemperature ;
+      owl:someValuesFrom :TwinShipQuantityTemperature ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityVolumeFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityVolumeFlowRate ] .
+
+:EmergencyEquipment rdfs:subClassOf
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityMassFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityMassFlowRate ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityPower ;
+      owl:someValuesFrom :TwinShipQuantityPower ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityRotationalVelocity ;
+      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityTemperature ;
+      owl:someValuesFrom :TwinShipQuantityTemperature ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityVolumeFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityVolumeFlowRate ] .
+
 # --- Maneuvering ---
 
 :Maneuvering rdfs:subClassOf
@@ -2081,7 +2293,16 @@
       owl:someValuesFrom :TwinShipQuantityPower ] ,
     [ a owl:Restriction ;
       owl:onProperty :hasQuantityRotationalVelocity ;
-      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] .
+      owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityMassFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityMassFlowRate ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityTemperature ;
+      owl:someValuesFrom :TwinShipQuantityTemperature ] ,
+    [ a owl:Restriction ;
+      owl:onProperty :hasQuantityVolumeFlowRate ;
+      owl:someValuesFrom :TwinShipQuantityVolumeFlowRate ] .
 
 :GateRudder rdfs:subClassOf
     [ a owl:Restriction ;
@@ -2127,8 +2348,8 @@
       owl:onProperty :hasQuantityRotationalVelocity ;
       owl:someValuesFrom :TwinShipQuantityRotationalVelocity ] ,
     [ a owl:Restriction ;
-      owl:onProperty :hasQuantityForce ;
-      owl:someValuesFrom :TwinShipQuantityForce ] .
+      owl:onProperty :hasQuantityTorque ;
+      owl:someValuesFrom :TwinShipQuantityTorque ] .
 
 :BidirectionalConverterSystem rdfs:subClassOf
     [ a owl:Restriction ;

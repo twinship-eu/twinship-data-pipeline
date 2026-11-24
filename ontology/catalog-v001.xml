@@ -2,21 +2,21 @@
 <catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
     <!-- TwinShip Ontologies -->
     <uri id="TwinShip Base" name="https://twin-ship.eu/twinship/base" uri="twinship-base.ttl"/>
-    <uri id="TwinShip Base Version" name="https://twin-ship.eu/twinship/base/0.1.2" uri="twinship-base.ttl"/>
+    <uri id="TwinShip Base Version" name="https://twin-ship.eu/twinship/base/0.1.3" uri="twinship-base.ttl"/>
     <uri id="TwinShip Core" name="https://twin-ship.eu/twinship/core" uri="twinship-core.ttl"/>
-    <uri id="TwinShip Core Version" name="https://twin-ship.eu/twinship/core/0.1.2" uri="twinship-core.ttl"/>
+    <uri id="TwinShip Core Version" name="https://twin-ship.eu/twinship/core/0.1.3" uri="twinship-core.ttl"/>
     <uri id="TwinShip Vessel Module" name="https://twin-ship.eu/twinship/vessel" uri="modules/vessel.ttl"/>
-    <uri id="TwinShip Vessel Module Version" name="https://twin-ship.eu/twinship/vessel/0.1.2" uri="modules/vessel.ttl"/>
+    <uri id="TwinShip Vessel Module Version" name="https://twin-ship.eu/twinship/vessel/0.1.3" uri="modules/vessel.ttl"/>
     <uri id="TwinShip WeatherConditions Module" name="https://twin-ship.eu/twinship/weather-conditions" uri="modules/weather-conditions.ttl"/>
-    <uri id="TwinShip WeatherConditions Module Version" name="https://twin-ship.eu/twinship/weather-conditions/0.1.2" uri="modules/weather-conditions.ttl"/>
+    <uri id="TwinShip WeatherConditions Module Version" name="https://twin-ship.eu/twinship/weather-conditions/0.1.3" uri="modules/weather-conditions.ttl"/>
     <uri id="TwinShip OperationalModes Module" name="https://twin-ship.eu/twinship/operational-modes" uri="modules/operational-modes.ttl"/>
-    <uri id="TwinShip OperationalModes Module Version" name="https://twin-ship.eu/twinship/operational-modes/0.1.2" uri="modules/operational-modes.ttl"/>
+    <uri id="TwinShip OperationalModes Module Version" name="https://twin-ship.eu/twinship/operational-modes/0.1.3" uri="modules/operational-modes.ttl"/>
     <uri id="TwinShip OperationalContext Module" name="https://twin-ship.eu/twinship/operational-context" uri="modules/operational-context.ttl"/>
-    <uri id="TwinShip OperationalContext Module Version" name="https://twin-ship.eu/twinship/operational-context/0.1.2" uri="modules/operational-context.ttl"/>
+    <uri id="TwinShip OperationalContext Module Version" name="https://twin-ship.eu/twinship/operational-context/0.1.3" uri="modules/operational-context.ttl"/>
     <uri id="TwinShip QUDT Vocabulary" name="https://twin-ship.eu/twinship/qudt-vocabulary" uri="twinship-qudt-vocabulary.ttl"/>
-    <uri id="TwinShip QUDT Vocabulary Version" name="https://twin-ship.eu/twinship/qudt-vocabulary/0.1.2" uri="twinship-qudt-vocabulary.ttl"/>
+    <uri id="TwinShip QUDT Vocabulary Version" name="https://twin-ship.eu/twinship/qudt-vocabulary/0.1.3" uri="twinship-qudt-vocabulary.ttl"/>
     <uri id="TwinShip Statistics Module" name="https://twin-ship.eu/twinship/statistics" uri="modules/statistics.ttl"/>
-    <uri id="TwinShip Statistics Module Version" name="https://twin-ship.eu/twinship/statistics/0.1.2" uri="modules/statistics.ttl"/>
+    <uri id="TwinShip Statistics Module Version" name="https://twin-ship.eu/twinship/statistics/0.1.3" uri="modules/statistics.ttl"/>
     <!-- External Ontologies -->
     <uri id="QUDT Schema" name="http://qudt.org/schema/qudt/" uri="external/SCHEMA_QUDT-simplified.ttl"/>
     <uri id="QUDT Quantity Kinds" name="http://qudt.org/vocab/quantitykind/" uri="vocabularies/VOCAB_QUDT-QUANTITY-KINDS-simplified.ttl"/>

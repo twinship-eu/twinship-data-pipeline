@@ -50,7 +50,11 @@ tws:KnownTypeShape a sh:NodeShape ;
                     tws:WindAssistedPropulsionSystem, tws:SuctionSail,
                     tws:AirLubricationSystem, tws:DynamicWing,
                     tws:FuelCellSystem,
-                    tws:EngineMode, tws:EngineSpeedBin, tws:DraftMode, tws:TrimMode
+                    tws:EngineMode, tws:EngineSpeedBin, tws:DraftMode, tws:TrimMode,
+                    tws:VesselSpeedBin,
+                    # Types of the ontology's own individuals (tws:SOG, the operating
+                    # states), which the validator adds from the ontology
+                    tws:SpeedReference, tws:OperatingState
                 ))
             }
         """ ;
