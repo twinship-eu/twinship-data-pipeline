@@ -53,7 +53,7 @@ A time series of crossings between Rotterdam and Immingham in 2024: 2,928 record
 | `FOCbio`, `CO2bio`, `NOxbio` | ton/h | The same for biofuel |
 | `FOCNH`, `CO2NH`, `NOxNH` | ton/h | The same for ammonia |
 
-`draft` and `trim` are the same in every record: 7.0 m and 0.0 m. They are taken as the loading condition the simulation assumed, with the vessel on even keel, and are converted as such; the file doesn't state the trim sign. To be confirmed by the data provider.
+`draft` and `trim` are the same in every record: 7.0 m and 0.0 m. They are taken as the loading condition the simulation assumed, with the vessel on even keel, and are converted as such. This is an assumption; the file doesn't state the trim sign.
 
 The file does not state its start time, time step, port positions or direction coding. These are constants in `futuristic_voyages.py`:
 
