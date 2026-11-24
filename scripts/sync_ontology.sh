@@ -6,7 +6,7 @@
 #
 # Reads from a local twinship-ontology clone (default: sibling directory,
 # override with TWINSHIP_ONTOLOGY_PATH). Only merged work is synced: the commit
-# must be on a remote branch of the clone. The files are taken from git at that
+# must be on origin/main or origin/develop of the clone. The files are taken from git at that
 # commit, not from the clone's working tree. The full QUDT and IMO sources under
 # model/external/ are left out; GraphDB only needs the simplified files.
 # Pipeline-specific shapes in shacl/pipeline/ are not touched.
@@ -27,8 +27,9 @@ COMMIT="$(git -C "${ONTOLOGY_PATH}" rev-parse --verify --quiet "${REF}^{commit}"
     echo "Ref '${REF}' not found in ${ONTOLOGY_PATH}" >&2
     exit 1
 }
-if [ -z "$(git -C "${ONTOLOGY_PATH}" branch -r --contains "${COMMIT}")" ]; then
-    echo "Commit ${COMMIT:0:7} is not on any remote branch of ${ONTOLOGY_PATH}:" \
+BRANCHES="$(git -C "${ONTOLOGY_PATH}" branch -r --contains "${COMMIT}")"
+if ! grep -qE '^[* ] origin/(main|develop)$' <<<"${BRANCHES}"; then
+    echo "Commit ${COMMIT:0:7} is not on origin/main or origin/develop of ${ONTOLOGY_PATH}:" \
         "merge the change in twinship-ontology, fetch, then sync." >&2
     exit 1
 fi
