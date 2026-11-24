@@ -26,6 +26,7 @@ path = [
     "pyproject.toml",
     "uv.lock",
     ".github/**",
+    ".claude/**",
     ".pre-commit-config.yaml",
     ".python-version",
     ".gitignore",

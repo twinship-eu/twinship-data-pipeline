@@ -175,6 +175,10 @@ uv sync                        # install all dependencies
 uv run pre-commit install      # set up git hooks (auto-formats code on commit)
 ```
 
+### Review
+
+Pull requests into `develop` are reviewed against [docs/review-guidelines.md](docs/review-guidelines.md) before they are approved; with Claude Code, by the read-only reviewer agent in `.claude/agents/pr-reviewer.md`. CI (`lint-and-test`, required on `develop`) stays the required check.
+
 ### Ontology version
 
 `ontology/` and `shacl/twinship/` are copies of the `model/` and `shapes/` directories of one [twinship-ontology](https://github.com/twinship-eu/twinship-ontology) release; the pinned ref and commit are in `ontology/VERSION`. Do not edit them by hand. Pipeline-specific shapes live in `shacl/pipeline/` and are not touched by the sync. To move to another release, with a twinship-ontology clone next to this repository (or `TWINSHIP_ONTOLOGY_PATH` set):
