@@ -93,3 +93,9 @@ def test_validator_gets_ontology_individuals_only():
     assert (TWINSHIP.SOG, RDF.type, TWINSHIP.SpeedReference) in g
     assert (TWINSHIP.BF, RDFS.label, None) in g
     assert (TWINSHIP.VesselSpeedBin, None, None) not in g
+
+
+def test_validator_fails_without_ontology_modules(tmp_path):
+    """A missing ontology copy is an error, not an empty graph (e.g. in a Docker image)."""
+    with pytest.raises(FileNotFoundError):
+        ontology_individuals(tmp_path)

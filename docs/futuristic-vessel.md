@@ -92,7 +92,7 @@ Hand-written RDF with the vessel's operational modes, which the spreadsheet does
 
 A crossing runs from a record with `dist_trav` = 0 to a record with `dist_rem` = 0. The file holds 266 complete crossings (133 in each direction) of 11 records each, 180 nm in total.
 
-- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed, and a draft condition (`twMeanDraftInM`) and a trim condition (`twTrimInM`) with the mean of its records. Draft and trim are set at loading, so they are kept per voyage, not per leg.
+- **Voyage**: one per crossing, with departure and arrival port, estimated start and end time, total distance and mean speed, and a draft condition (`twMeanDraftInM`) and a trim condition (`twTrimInM`) with the mean of its records. Draft and trim are set at loading, so they are kept per voyage, not per leg. The file doesn't state its trim sign; all records have 0.0 m, so the sign doesn't matter yet (`twTrimInM` is positive by the stern).
 - **Waypoint**: one per record, with time and position. The position is interpolated linearly between the two ports from `dist_trav`.
 - **Voyage leg**: one between each pair of consecutive waypoints (10 per voyage, 18 nm each), with distance, speed and the wind and wave conditions of its start record.
 
