@@ -17,10 +17,12 @@
 # - Trim modes: even keel at design draft is the default; bow trim only
 #   applies where a trim study shows it is more efficient. The designers
 #   gave bow trim 0.1-1 m and even keel 0 m, with no stern-trim mode. In
-#   twTrimInM (aft minus forward draft, positive by the stern) bow trim is
-#   -1.0 to -0.1 m; even keel covers -0.1 m upwards, so the two modes leave
-#   no gap and stern trim counts as even keel. Lower bounds are inclusive,
-#   upper bounds exclusive.
+#   twTrimInM (aft minus forward draft, positive by the stern) the boundary
+#   lies halfway between even keel and the designers' smallest bow trim, at
+#   -0.05 m, as for the draft modes. Bow trim covers everything below it and
+#   even keel everything from it upwards, so every trim falls in one mode and
+#   stern trim counts as even keel. Lower bounds are inclusive, upper bounds
+#   exclusive.
 # - Engine speed bins do not apply to this diesel-electric vessel (the
 #   propellers are driven by electric motors); vessel speed bins in knots
 #   (speed over ground) are used instead. Four bins with the designers'
@@ -84,15 +86,14 @@ fv:DraftMode3 a owl:NamedIndividual, tw:DraftMode ;
 fv:TrimMode1 a owl:NamedIndividual, tw:TrimMode ;
     rdfs:label "Trim Mode 1" ;
     skos:altLabel "Bow trim" ;
-    rdfs:comment "Trim by the bow of 0.1 to 1 m; used where a trim study shows it is more efficient." ;
-    tw:twTrimModeLowerBoundInM -1.0 ;
-    tw:twTrimModeUpperBoundInM -0.1 .
+    rdfs:comment "Trim by the bow; the designers give 0.1 to 1 m, used where a trim study shows it is more efficient. Open-ended downwards." ;
+    tw:twTrimModeUpperBoundInM -0.05 .
 
 fv:TrimMode2 a owl:NamedIndividual, tw:TrimMode ;
     rdfs:label "Trim Mode 2" ;
     skos:altLabel "Even keel" ;
     rdfs:comment "Even keel at design draft, the most common and default trim. Open-ended upwards, so any stern trim also falls here." ;
-    tw:twTrimModeLowerBoundInM -0.1 .
+    tw:twTrimModeLowerBoundInM -0.05 .
 
 [] a owl:AllDifferent ;
     owl:distinctMembers ( fv:TrimMode1 fv:TrimMode2 ) .
