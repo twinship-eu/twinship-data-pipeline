@@ -81,7 +81,7 @@ def test_speed_bins_are_contiguous(modes):
 
 
 def test_trim_modes_are_contiguous(modes):
-    """Trim modes in order: bow trim's upper bound is even keel's lower bound; even keel is open upwards."""
+    """Bow trim's upper bound is even keel's lower bound; both are open at their outer end."""
     by_name = {
         str(modes.value(m, SKOS.altLabel)): m for m in modes.subjects(RDF.type, TWINSHIP.TrimMode)
     }
@@ -89,7 +89,8 @@ def test_trim_modes_are_contiguous(modes):
     assert modes.value(bow, TWINSHIP.twTrimModeUpperBoundInM) == modes.value(
         even, TWINSHIP.twTrimModeLowerBoundInM
     )
-    assert modes.value(bow, TWINSHIP.twTrimModeLowerBoundInM).toPython() < 0
+    assert modes.value(bow, TWINSHIP.twTrimModeLowerBoundInM) is None
+    assert modes.value(bow, TWINSHIP.twTrimModeUpperBoundInM).toPython() < 0
     assert modes.value(even, TWINSHIP.twTrimModeUpperBoundInM) is None
     assert modes.value(even, TWINSHIP.twTrimModeLowerBoundInM).toPython() <= 0
 
