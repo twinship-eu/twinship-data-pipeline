@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pytest
 from rdflib import RDF, RDFS, Graph, URIRef
+from rdflib.namespace import SKOS
 
 from dagster_pipeline.assets.harmonisation import FUTURISTIC_OPERATIONAL_MODES
 from dagster_pipeline.futuristic_extraction import extract_futuristic_vessel, load_futuristic_sheets
@@ -34,7 +35,7 @@ def test_counts(modes):
         return len(set(modes.subjects(RDF.type, TWINSHIP[cls])))
 
     assert (count("EngineMode"), count("EngineSpeedBin")) == (8, 0)
-    assert (count("DraftMode"), count("TrimMode")) == (3, 3)
+    assert (count("DraftMode"), count("TrimMode")) == (3, 2)
     assert count("VesselSpeedBin") == 4
 
 
@@ -55,6 +56,42 @@ def test_draft_ranges_are_contiguous(modes):
     uppers = [modes.value(m, TWINSHIP.twDraftModeUpperBoundInM) for m in modes_in_order[:-1]]
     lowers = [modes.value(m, TWINSHIP.twDraftModeLowerBoundInM) for m in modes_in_order[1:]]
     assert uppers == lowers and None not in uppers
+
+
+def test_speed_bins_are_contiguous(modes):
+    """Speed bins in order: each upper bound is the next bin's lower bound, from 0 kn."""
+    bins = sorted(
+        modes.subjects(RDF.type, TWINSHIP.VesselSpeedBin),
+        key=lambda b: modes.value(b, TWINSHIP.twSpeedValueInKnots).toPython(),
+    )
+    lowers = [modes.value(b, TWINSHIP.twSpeedBinLowerBoundInKnots) for b in bins]
+    uppers = [modes.value(b, TWINSHIP.twSpeedBinUpperBoundInKnots) for b in bins]
+    assert None not in lowers + uppers
+    assert lowers[0].toPython() == 0 and uppers[:-1] == lowers[1:]
+    for b in bins:
+        lo, hi, ref = (
+            modes.value(b, TWINSHIP[p]).toPython()
+            for p in (
+                "twSpeedBinLowerBoundInKnots",
+                "twSpeedBinUpperBoundInKnots",
+                "twSpeedValueInKnots",
+            )
+        )
+        assert lo <= ref < hi, f"Reference speed {ref} outside its bin [{lo}, {hi})"
+
+
+def test_trim_modes_are_contiguous(modes):
+    """Trim modes in order: bow trim's upper bound is even keel's lower bound; even keel is open upwards."""
+    by_name = {
+        str(modes.value(m, SKOS.altLabel)): m for m in modes.subjects(RDF.type, TWINSHIP.TrimMode)
+    }
+    bow, even = by_name["Bow trim"], by_name["Even keel"]
+    assert modes.value(bow, TWINSHIP.twTrimModeUpperBoundInM) == modes.value(
+        even, TWINSHIP.twTrimModeLowerBoundInM
+    )
+    assert modes.value(bow, TWINSHIP.twTrimModeLowerBoundInM).toPython() < 0
+    assert modes.value(even, TWINSHIP.twTrimModeUpperBoundInM) is None
+    assert modes.value(even, TWINSHIP.twTrimModeLowerBoundInM).toPython() <= 0
 
 
 def test_uses_pipeline_iris(modes):

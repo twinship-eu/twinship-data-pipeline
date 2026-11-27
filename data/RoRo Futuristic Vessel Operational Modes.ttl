@@ -14,13 +14,20 @@
 # - Draft modes: reference drafts 6.5, 6.75 (design) and 7.3 m, with
 #   boundaries halfway between them (6.625 and 7.025 m). The shallowest and
 #   deepest modes are open-ended, so they have only one bound.
-# - Trim modes: placeholders; trim ranges and sign convention to be
-#   clarified.
+# - Trim modes: even keel at design draft is the default; bow trim only
+#   applies where a trim study shows it is more efficient. The designers
+#   gave bow trim 0.1-1 m and even keel 0 m, with no stern-trim mode. In
+#   twTrimInM (aft minus forward draft, positive by the stern) bow trim is
+#   -1.0 to -0.1 m; even keel covers -0.1 m upwards, so the two modes leave
+#   no gap and stern trim counts as even keel. Lower bounds are inclusive,
+#   upper bounds exclusive.
 # - Engine speed bins do not apply to this diesel-electric vessel (the
 #   propellers are driven by electric motors); vessel speed bins in knots
 #   (speed over ground) are used instead. Four bins with the designers'
-#   reference speeds 6, 14, 15 and 18 knots and propeller speeds; their
-#   bounds are omitted until the designers confirm them.
+#   reference speeds 6, 14, 15 and 18 knots and propeller speeds; the
+#   bounds lie halfway between the reference speeds (0-10, 10-14.5,
+#   14.5-16.5, 16.5-18.5 knots), proposed to the designers in November 2026
+#   without objection.
 # Mode names are in skos:altLabel; rdfs:comment holds explanations.
 # Genset RPM bounds are intentionally omitted: the gensets run at constant
 # speed.
@@ -76,20 +83,18 @@ fv:DraftMode3 a owl:NamedIndividual, tw:DraftMode ;
 fv:TrimMode1 a owl:NamedIndividual, tw:TrimMode ;
     rdfs:label "Trim Mode 1" ;
     skos:altLabel "Bow trim" ;
-    rdfs:comment "Ordinal trim configuration index 1 (lowest trim value) for the futuristic vessel. May represent a bow-trim-like condition." .
+    rdfs:comment "Trim by the bow of 0.1 to 1 m; used where a trim study shows it is more efficient." ;
+    tw:twTrimModeLowerBoundInM -1.0 ;
+    tw:twTrimModeUpperBoundInM -0.1 .
 
 fv:TrimMode2 a owl:NamedIndividual, tw:TrimMode ;
     rdfs:label "Trim Mode 2" ;
     skos:altLabel "Even keel" ;
-    rdfs:comment "Ordinal trim configuration index 2 (intermediate trim value) for the futuristic vessel. May represent an even-keel-like condition." .
-
-fv:TrimMode3 a owl:NamedIndividual, tw:TrimMode ;
-    rdfs:label "Trim Mode 3" ;
-    skos:altLabel "Stern trim" ;
-    rdfs:comment "Ordinal trim configuration index 3 (highest trim value) for the futuristic vessel. May represent a stern-trim-like condition." .
+    rdfs:comment "Even keel at design draft, the most common and default trim. Open-ended upwards, so any stern trim also falls here." ;
+    tw:twTrimModeLowerBoundInM -0.1 .
 
 [] a owl:AllDifferent ;
-    owl:distinctMembers ( fv:TrimMode1 fv:TrimMode2 fv:TrimMode3 ) .
+    owl:distinctMembers ( fv:TrimMode1 fv:TrimMode2 ) .
 
 # #################################################################
 # #
@@ -100,33 +105,41 @@ fv:TrimMode3 a owl:NamedIndividual, tw:TrimMode ;
 fv:VesselSpeedBin1 a owl:NamedIndividual, tw:VesselSpeedBin ;
     rdfs:label "Vessel Speed Bin 1" ;
     skos:altLabel "6 knots" ;
-    rdfs:comment "Lowest vessel speed bin of the futuristic vessel. Bounds to be confirmed." ;
+    rdfs:comment "Lowest vessel speed bin of the futuristic vessel." ;
     tw:hasSpeedReference tw:SOG ;
     tw:twSpeedValueInKnots 6.0 ;
-    tw:twSpeedBinPropellerSpeedInRevPerMin 60.0 .
+    tw:twSpeedBinPropellerSpeedInRevPerMin 60.0 ;
+    tw:twSpeedBinLowerBoundInKnots 0.0 ;
+    tw:twSpeedBinUpperBoundInKnots 10.0 .
 
 fv:VesselSpeedBin2 a owl:NamedIndividual, tw:VesselSpeedBin ;
     rdfs:label "Vessel Speed Bin 2" ;
     skos:altLabel "14 knots" ;
-    rdfs:comment "Vessel speed bin 2 of the futuristic vessel. Bounds to be confirmed." ;
+    rdfs:comment "Vessel speed bin 2 of the futuristic vessel." ;
     tw:hasSpeedReference tw:SOG ;
     tw:twSpeedValueInKnots 14.0 ;
-    tw:twSpeedBinPropellerSpeedInRevPerMin 85.0 .
+    tw:twSpeedBinPropellerSpeedInRevPerMin 85.0 ;
+    tw:twSpeedBinLowerBoundInKnots 10.0 ;
+    tw:twSpeedBinUpperBoundInKnots 14.5 .
 
 fv:VesselSpeedBin3 a owl:NamedIndividual, tw:VesselSpeedBin ;
     rdfs:label "Vessel Speed Bin 3" ;
     skos:altLabel "ECO speed, 15 knots" ;
-    rdfs:comment "Vessel speed bin 3 of the futuristic vessel. Bounds to be confirmed." ;
+    rdfs:comment "Vessel speed bin 3 of the futuristic vessel." ;
     tw:hasSpeedReference tw:SOG ;
     tw:twSpeedValueInKnots 15.0 ;
-    tw:twSpeedBinPropellerSpeedInRevPerMin 92.0 .
+    tw:twSpeedBinPropellerSpeedInRevPerMin 92.0 ;
+    tw:twSpeedBinLowerBoundInKnots 14.5 ;
+    tw:twSpeedBinUpperBoundInKnots 16.5 .
 
 fv:VesselSpeedBin4 a owl:NamedIndividual, tw:VesselSpeedBin ;
     rdfs:label "Vessel Speed Bin 4" ;
     skos:altLabel "Design speed, 18 knots" ;
-    rdfs:comment "Highest vessel speed bin of the futuristic vessel. Propeller speed 111-115 rev/min according to the designers; no single value is given. Bounds to be confirmed." ;
+    rdfs:comment "Highest vessel speed bin of the futuristic vessel. Propeller speed 111-115 rev/min according to the designers; no single value is given." ;
     tw:hasSpeedReference tw:SOG ;
-    tw:twSpeedValueInKnots 18.0 .
+    tw:twSpeedValueInKnots 18.0 ;
+    tw:twSpeedBinLowerBoundInKnots 16.5 ;
+    tw:twSpeedBinUpperBoundInKnots 18.5 .
 
 [] a owl:AllDifferent ;
     owl:distinctMembers ( fv:VesselSpeedBin1 fv:VesselSpeedBin2 fv:VesselSpeedBin3 fv:VesselSpeedBin4 ) .
