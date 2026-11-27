@@ -177,7 +177,7 @@ uv run pre-commit install      # set up git hooks (auto-formats code on commit)
 
 ### Review
 
-Pull requests into `develop` are reviewed against [docs/review-guidelines.md](docs/review-guidelines.md) before they are approved; with Claude Code, by the read-only reviewer agent in `.claude/agents/pr-reviewer.md`. CI (`lint-and-test`, required on `develop`) stays the required check.
+Every branch is reviewed against [docs/review-guidelines.md](docs/review-guidelines.md) before its pull request into `develop` is opened; with Claude Code, by the read-only reviewer agent in `.claude/agents/pr-reviewer.md`. The report is posted as the pull request's first comment, with how each finding was handled (*Procedure* in the guidelines). CI (`lint-and-test`, required on `develop`) stays the required check.
 
 ### Ontology version
 

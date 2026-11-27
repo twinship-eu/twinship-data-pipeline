@@ -7,7 +7,7 @@
 - [ ] Branched from `develop`, and this pull request targets `develop` (or `main` for a release)
 - [ ] `README.md`, `CLAUDE.md` and `docs/` match the change (if affected)
 - [ ] No confidential vessel data or credentials; `ontology/` and `shacl/twinship/` changed only by `scripts/sync_ontology.sh`
-- [ ] Reviewed against `docs/review-guidelines.md`: the reviewer agent's findings are answered, or a maintainer is asked to run it
+- [ ] Reviewed against `docs/review-guidelines.md` before opening: the reviewer agent's report is posted as the first comment, with how each finding was handled (or the maintainer is asked to run it and post it)
 
 ## Checks run
 
