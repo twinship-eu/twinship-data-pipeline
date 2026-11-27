@@ -69,8 +69,8 @@ The file does not state its start time, time step, port positions or direction c
 Hand-written RDF with the vessel's operational modes, which the spreadsheet does not contain yet:
 
 - 4 **engine modes** per genset (`FV-GN-1` and `FV-GN-2`, linked with `tws:hasEngineMode`), each with lower and upper power bounds, and `tws:twEngineModeCount` on the gensets.
-- 3 **draft modes** with reference drafts and draft ranges, and 3 **trim modes** (ranges still to come).
-- 4 **vessel speed bins** (speed over ground, `tws:hasSpeedReference tws:SOG`) with reference speeds and propeller speeds; bounds still to come.
+- 3 **draft modes** with reference drafts and draft ranges, and 2 **trim modes** with trim ranges.
+- 4 **vessel speed bins** (speed over ground, `tws:hasSpeedReference tws:SOG`) with speed ranges, reference speeds and propeller speeds.
 - `owl:AllDifferent` statements declaring the individuals in each group distinct.
 - Names such as *Manoeuvring in port*, *Design draft* or *Bow trim* in `skos:altLabel`; `rdfs:comment` holds explanations.
 
@@ -85,8 +85,8 @@ Hand-written RDF with the vessel's operational modes, which the spreadsheet does
 
 - The 15 % sea margin is included in the upper bounds, so the lower-bound variation is 0 kW. In port the vessel is on shore power with both gensets off. Mode 1 overlaps modes 2 and 3 on purpose: manoeuvring can need 3500 kW at 0 kn, so it is identified from the situation (in port, thrusters in use), not from load.
 - Draft modes have reference drafts of 6.5, 6.75 (design) and 7.3 m (`twDraftModeReferenceDraftInM`), with provisional boundaries at 6.625 and 7.025 m (`twDraftModeLowerBoundInM`, `twDraftModeUpperBoundInM`); the shallowest and deepest modes are open-ended.
-- Trim modes are still placeholders.
-- Engine speed bins don't apply: the propellers are driven by electric motors. Vessel speed bins are used instead, with reference speeds 6, 14, 15 and 18 kn (`twSpeedValueInKnots`) and propeller speeds 60, 85 and 92 rpm (`twSpeedBinPropellerSpeedInRevPerMin`); the 18 kn bin's 111–115 rpm range is in its comment. Their bounds are left out until the designers confirm them.
+- Trim modes: even keel at design draft is the default; bow trim applies only where a trim study shows it is more efficient. In `twTrimInM` (aft minus forward draft, positive by the stern), *Bow trim* covers −1.0 to −0.1 m and *Even keel* −0.1 m upwards, so stern trim counts as even keel. The designers gave no stern-trim mode.
+- Engine speed bins don't apply: the propellers are driven by electric motors. Vessel speed bins are used instead, with reference speeds 6, 14, 15 and 18 kn (`twSpeedValueInKnots`) and propeller speeds 60, 85 and 92 rpm (`twSpeedBinPropellerSpeedInRevPerMin`); the 18 kn bin's 111–115 rpm range is in its comment. Their bounds are 0–10, 10–14.5, 14.5–16.5 and 16.5–18.5 kn (lower bound inclusive, upper exclusive): the inner bounds lie halfway between the reference speeds, and 0 and 18.5 kn are the ends of the vessel's speed range given by the designers.
 
 `vessel_rdf_graph` adds the file to the futuristic vessel's graph, so it is validated with SHACL and stored in the `components` graph together with the components. The validator also reads the types and labels of the ontology's named individuals, so the file can refer to `tws:SOG` without repeating its type.
 
