@@ -9,9 +9,9 @@ Compare this repository's PR review setup with the standard below, and bring it 
 
 **The standard**
 
-- `docs/review-guidelines.md` has a *Procedure* section with the six points below, plus the repository's own checks (conventions, decision records, tests, changelog, confidentiality, writing).
-- `.claude/agents/pr-reviewer.md`: read-only (read tools only; Bash only for commands that read), `model: fable`. It is given the branch, the PR's description (the draft if not opened) and its number; it runs `git fetch origin` and compares with `origin/develop`, never a local `develop`; it reads a branch's files with `git show <branch>:<path>`; it names binary files that changed; it reports as *Must fix*, *Should fix*, *Questions*, *Checked*, titled `Review of #<number> (<title>)` or `Review of <branch>`; where a finding is about personal data, internal material or a secret it describes it and never quotes it.
-- `CONTRIBUTING.md` (*Review*) and `CLAUDE.md` (and `AGENTS.md` if present) say the same in one or two lines each and point to the guidelines.
+- `docs/review-guidelines.md` has a *Procedure* section with the six points below, plus the repository's own checks (for example conventions, decision records, tests, changelog, confidentiality, writing; only those the repository has).
+- `.claude/agents/pr-reviewer.md`: read-only (read tools only; Bash only for commands that read), `model: fable`. Its frontmatter `description` says to use it before a PR is opened, given the branch. It is given the branch, the PR's description (the draft if not opened) and its number; it runs `git fetch origin` and compares with `origin/develop`, never a local `develop`; it reads a branch's files with `git show <branch>:<path>`; it names binary files that changed; it reports as *Must fix*, *Should fix*, *Questions*, *Checked*, titled `Review of #<number> (<title>)` or `Review of <branch>`; where a finding is about personal data, internal material or a secret it describes it and never quotes it.
+- `CONTRIBUTING.md` (*Review*; the README's review section where there is no `CONTRIBUTING.md`) and `CLAUDE.md` (and `AGENTS.md` if present) say the same in one or two lines each and point to the guidelines. The PR template's review item asks for the review to be posted as the first comment.
 
 Procedure (the same text in every repository; only the platform's commands differ):
 
@@ -26,7 +26,7 @@ Procedure (the same text in every repository; only the platform's commands diffe
 
 1. **Compare, change nothing.** Read the files above, if they exist. Show a short table: file, what it says now, what the standard says. A missing agent or guidelines file counts. Keep the repository's own checks; only the procedure, the agent's instructions and the pointers change. If the argument is `check`, stop here.
 2. **Wait for my OK.**
-3. **Apply it** on a new branch `docs/pr-review-procedure` from `origin/develop` (never on a feature branch, `develop` or `main`), one commit. Don't push and don't open the PR.
+3. **Apply it** on a new branch `docs/pr-review-procedure` from `origin/develop` (never on a feature branch, `develop` or `main`; if a merged branch of that name is left from an earlier run, delete it first), one commit. Don't push and don't open the PR.
 4. **Report:** the files changed, anything left alone and why.
 
-Never mention a vault in the repository's files.
+Never refer to notes or documents outside the repository in its files.
