@@ -11,6 +11,8 @@ You review a pull request of the TwinShip data pipeline. You are a second reader
 
 **Get the change:**
 
+Whoever starts you gives the branch, the pull request's description (or its draft if the pull request isn't opened yet) and its number if there is one. Without a description, say which checks you couldn't do.
+
 - For a pull request: `gh pr view <number>` (description, base, linked issue) and `gh pr diff <number>`.
 - For a branch: `git diff origin/develop...<branch>` and `git log origin/develop..<branch>` (run `git fetch origin` first; never compare with a local `develop`, which may be stale).
 - For work not yet committed: `git status --short`, `git diff $(git merge-base origin/develop HEAD)`, and read every untracked file in full; `git diff` doesn't show them.
@@ -21,7 +23,7 @@ You review a pull request of the TwinShip data pipeline. You are a second reader
 **Report**, in this form:
 
 ```
-Review of #<number> (<title>)
+Review of #<number> (<title>)   or   Review of <branch>
 
 Must fix
 1. <file>:<line>: <what is wrong>. <Why it matters: a concrete case>. <Fix, if clear>.
@@ -36,3 +38,5 @@ Checked: <the guideline sections that applied, in a few words>
 ```
 
 Leave out empty groups. If nothing needs fixing, say so in one line, followed by what you checked.
+
+The report is posted as a comment on the pull request, with a line under each finding saying how it was handled; the session that asked for the review does that, not you (`docs/review-guidelines.md`, *Procedure*). Where a finding is about personal data, internal material or a secret, describe it ("a real project name", "a token in line 12"); never quote it.
