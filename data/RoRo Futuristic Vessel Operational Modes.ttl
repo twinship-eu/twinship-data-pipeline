@@ -24,10 +24,11 @@
 # - Engine speed bins do not apply to this diesel-electric vessel (the
 #   propellers are driven by electric motors); vessel speed bins in knots
 #   (speed over ground) are used instead. Four bins with the designers'
-#   reference speeds 6, 14, 15 and 18 knots and propeller speeds; the
-#   bounds lie halfway between the reference speeds (0-10, 10-14.5,
-#   14.5-16.5, 16.5-18.5 knots), proposed to the designers in November 2026
-#   without objection.
+#   reference speeds 6, 14, 15 and 18 knots and propeller speeds. The inner
+#   bounds lie halfway between the reference speeds (10, 14.5, 16.5 knots);
+#   the outer bounds 0 and 18.5 knots are the ends of the vessel's speed
+#   range given by the designers (batteries allow short boosts at full
+#   load). Proposed to the designers in November 2026 without objection.
 # Mode names are in skos:altLabel; rdfs:comment holds explanations.
 # Genset RPM bounds are intentionally omitted: the gensets run at constant
 # speed.
